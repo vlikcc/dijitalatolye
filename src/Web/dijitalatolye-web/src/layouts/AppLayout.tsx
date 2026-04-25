@@ -5,17 +5,33 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const { email, roles, logout } = useAuthStore();
   const isAdmin = roles.includes("Admin") || roles.includes("SuperAdmin");
-  const isEditor = roles.includes("Editor") || isAdmin;
-  const isTeacher = roles.includes("Teacher") || isEditor;
+  const isEditor = isAdmin || roles.includes("Editor");
+  const isTeacher = isEditor || roles.includes("Teacher");
+
   return (
     <div className="min-h-full flex flex-col">
       <header className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link to="/" className="font-bold text-brand-600">DijitalAtölye</Link>
           <nav className="flex items-center gap-4 text-sm">
-            {isTeacher && <NavLink to="/teacher/contents/new" className={({ isActive }) => isActive ? "text-brand-600" : "hover:text-brand-600"}>İçerik Yükle</NavLink>}
-            {isEditor && <NavLink to="/editor/queue" className={({ isActive }) => isActive ? "text-brand-600" : "hover:text-brand-600"}>Editör Kuyruğu</NavLink>}
-            {isAdmin && <NavLink to="/admin" className={({ isActive }) => isActive ? "text-brand-600" : "hover:text-brand-600"}>Admin</NavLink>}
+            {isTeacher && (
+              <NavLink to="/teacher/contents/new" className={({ isActive }) => isActive ? "text-brand-600" : "hover:text-brand-600"}>
+                İçerik Yükle
+              </NavLink>
+            )}
+            {isEditor && (
+              <NavLink to="/editor/queue" className={({ isActive }) => isActive ? "text-brand-600" : "hover:text-brand-600"}>
+                Editör Kuyruğu
+              </NavLink>
+            )}
+            {isAdmin && (
+              <NavLink to="/admin" className={({ isActive }) => isActive ? "text-brand-600 font-semibold" : "hover:text-brand-600"}>
+                Yönetim Paneli
+              </NavLink>
+            )}
+            <NavLink to="/notifications" className={({ isActive }) => isActive ? "text-brand-600" : "hover:text-brand-600"}>
+              Bildirimler
+            </NavLink>
             <span className="text-slate-500">{email}</span>
             <button
               onClick={() => { logout(); navigate("/login"); }}

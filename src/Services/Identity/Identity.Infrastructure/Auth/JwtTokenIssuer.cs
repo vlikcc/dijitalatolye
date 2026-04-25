@@ -46,7 +46,8 @@ public sealed class JwtTokenIssuer : ITokenIssuer
         });
         await _db.SaveChangesAsync(ct);
 
-        return new TokenPair(accessToken, refreshTokenRaw, accessExpiresAt, refreshExpiresAt);
+        var roleList = roles as IReadOnlyList<string> ?? roles.ToList();
+        return new TokenPair(accessToken, refreshTokenRaw, accessExpiresAt, refreshExpiresAt, roleList);
     }
 
     public async Task<TokenPair?> RefreshAsync(string refreshToken, string? ipAddress, CancellationToken ct)
@@ -86,7 +87,7 @@ public sealed class JwtTokenIssuer : ITokenIssuer
         var accessToken = CreateAccessToken(stored.User, roles, now, accessExpiresAt);
         await _db.SaveChangesAsync(ct);
 
-        return new TokenPair(accessToken, newRaw, accessExpiresAt, refreshExpiresAt);
+        return new TokenPair(accessToken, newRaw, accessExpiresAt, refreshExpiresAt, roles);
     }
 
     private string CreateAccessToken(ApplicationUser user, IEnumerable<string> roles, DateTime issuedAt, DateTime expiresAt)

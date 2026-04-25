@@ -15,6 +15,9 @@ import ContentDetailPage from "@/pages/ContentDetailPage";
 import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
 import AdminAuditPage from "@/pages/admin/AdminAuditPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
+import AdminContentsPage from "@/pages/admin/AdminContentsPage";
+import AdminCatalogPage from "@/pages/admin/AdminCatalogPage";
+import AdminAiConfigPage from "@/pages/admin/AdminAiConfigPage";
 import KvkkPage from "@/pages/KvkkPage";
 import { useAuthStore } from "@/state/auth";
 
@@ -38,8 +41,11 @@ export default function App() {
         <Route path="/editor/review/:id" element={<EditorReviewPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/admin" element={<AdminDashboardPage />} />
-        <Route path="/admin/audit" element={<AdminAuditPage />} />
+        <Route path="/admin/contents" element={<AdminContentsPage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
+        <Route path="/admin/catalog" element={<AdminCatalogPage />} />
+        <Route path="/admin/audit" element={<AdminAuditPage />} />
+        <Route path="/admin/ai" element={<AdminAiConfigPage />} />
         <Route path="/kvkk" element={<KvkkPage />} />
       </Route>
 

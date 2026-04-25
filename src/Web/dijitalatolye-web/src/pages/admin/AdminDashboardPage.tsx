@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '@/lib/api';
 
 interface DashboardStats {
@@ -68,8 +69,8 @@ export default function AdminDashboardPage() {
 
 function AdminQuickLink({ href, label }: { href: string; label: string }) {
   return (
-    <a href={href} className="block bg-white border rounded-lg p-5 hover:shadow">
+    <Link to={href} className="block bg-white border rounded-lg p-5 hover:shadow transition">
       <span className="font-medium">{label}</span>
-    </a>
+    </Link>
   );
 }

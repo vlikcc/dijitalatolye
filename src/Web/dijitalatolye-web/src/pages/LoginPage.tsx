@@ -16,15 +16,19 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.post<{ accessToken: string; refreshToken: string }>(
-        "/auth/login", { email, password }
-      );
+      const { data } = await api.post<{
+        accessToken: string;
+        refreshToken: string;
+        roles?: string[];
+      }>("/auth/login", { email, password });
       setTokens(data.accessToken, data.refreshToken);
-      const roles = rolesFromJwt(data.accessToken);
+
+      const roles = data.roles ?? rolesFromJwt(data.accessToken);
       setUser(email, roles);
-      if (roles.some(r => ["Admin", "SuperAdmin"].includes(r))) {
+
+      if (roles.some((r) => ["Admin", "SuperAdmin"].includes(r))) {
         navigate("/admin");
-      } else if (roles.includes("Editor")) {
+      } else if (roles.some((r) => ["Editor"].includes(r))) {
         navigate("/editor/queue");
       } else {
         navigate("/teacher/contents/new");
