@@ -1,0 +1,464 @@
+name: dijitalatolye
+
+# Tum sistemi (infrastructure + servisler + frontend) tek seferde ayaga kaldirir.
+# Calistirma (repo kokunden, .env zorunlu — `make env`):
+#   docker compose -f deploy/docker-compose/docker-compose.full.yml --env-file .env up -d --build
+# Gerekli .env: POSTGRES_USER, COMPOSE_DEV_SECRET (sifreler repoda yok)
+# Durdurma:
+#   docker compose -f deploy/docker-compose/docker-compose.full.yml down
+# Volume'lari da silmek icin: down -v
+
+# ----- Genel ortak parcalar -----
+x-common-env: &common-env
+  ASPNETCORE_ENVIRONMENT: Development
+  ASPNETCORE_URLS: http://+:8080
+  TZ: Europe/Istanbul
+  Jwt__Authority: http://identity:8080
+  Jwt__Audience: dijitalatolye-api
+  Jwt__RequireHttpsMetadata: "false"
+  RabbitMq__Host: rabbitmq
+  RabbitMq__Port: "5672"
+  RabbitMq__VirtualHost: /
+  RabbitMq__Username: ${POSTGRES_USER}
+  RabbitMq__Password: ${COMPOSE_DEV_SECRET}
+  Kestrel__Endpoints__Http__Url: http://+:8080
+  OTEL_EXPORTER_OTLP_ENDPOINT: ""
+  SENTRY_DSN: ""
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  # ============================================================
+  # Infrastructure
+  # ============================================================
+  postgres:
+    image: postgres:17-alpine
+    container_name: da-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${COMPOSE_DEV_SECRET}
+      POSTGRES_MULTIPLE_DATABASES: identity,user,catalog,content,review,notification,analytics,audit
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    <<: *restart
+
+  mongodb:
+    image: mongo:7
+    container_name: da-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${POSTGRES_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${COMPOSE_DEV_SECRET}
+      MONGO_INITDB_DATABASE: aimoderation
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    <<: *restart
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: da-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${POSTGRES_USER}
+      RABBITMQ_DEFAULT_PASS: ${COMPOSE_DEV_SECRET}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 60s
+    <<: *restart
+
+  redis:
+    image: redis:7-alpine
+    container_name: da-redis
+    environment:
+      REDIS_PASSWORD: ${COMPOSE_DEV_SECRET}
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${COMPOSE_DEV_SECRET}"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    <<: *restart
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    container_name: da-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    <<: *restart
+
+  minio:
+    image: minio/minio:latest
+    container_name: da-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${POSTGRES_USER}
+      MINIO_ROOT_PASSWORD: ${COMPOSE_DEV_SECRET}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    <<: *restart
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: da-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${POSTGRES_USER}
+      MINIO_ROOT_PASSWORD: ${COMPOSE_DEV_SECRET}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"
+        mc mb -p local/dijitalatolye-content || true
+        mc mb -p local/dijitalatolye-content-published || true
+        mc mb -p local/dijitalatolye-avatars || true
+        mc anonymous set download local/dijitalatolye-content-published || true
+        echo 'MinIO buckets ready.'
+
+  clamav:
+    image: clamav/clamav:stable
+    platform: linux/amd64
+    container_name: da-clamav
+    ports:
+      - "3310:3310"
+    volumes:
+      - clamav-data:/var/lib/clamav
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 5m
+    <<: *restart
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: da-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    <<: *restart
+
+  # ============================================================
+  # Application Services
+  # ============================================================
+  identity:
+    build:
+      context: ../..
+      dockerfile: src/Services/Identity/Identity.API/Dockerfile
+    image: dijitalatolye/identity:dev
+    container_name: da-identity
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    environment:
+      <<: *common-env
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=identity;Username=${POSTGRES_USER};Password=${COMPOSE_DEV_SECRET}
+      ConnectionStrings__Audit: Host=postgres;Port=5432;Database=audit;Username=${POSTGRES_USER};Password=${COMPOSE_DEV_SECRET}
+      JwtIssuer__Authority: http://identity:8080
+      JwtIssuer__Audience: dijitalatolye-api
+      JwtIssuer__SigningKey: ${JWT_SIGNING_KEY}
+      JwtIssuer__AccessTokenLifetime: "01:00:00"
+      JwtIssuer__RefreshTokenLifetime: "14.00:00:00"
+    expose: ["8080"]
+    ports:
+      - "5001:8080"
+    <<: *restart
+
+  user:
+    build:
+      context: ../..
+      dockerfile: src/Services/User/User.API/Dockerfile
+    image: dijitalatolye/user:dev
+    container_name: da-user
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      identity: { condition: service_started }
+    environment:
+      <<: *common-env
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=user;Username=${POSTGRES_USER};Password=${COMPOSE_DEV_SECRET}
+    expose: ["8080"]
+    ports:
+      - "5002:8080"
+    <<: *restart
+
+  catalog:
+    build:
+      context: ../..
+      dockerfile: src/Services/Catalog/Catalog.API/Dockerfile
+    image: dijitalatolye/catalog:dev
+    container_name: da-catalog
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    environment:
+      <<: *common-env
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=catalog;Username=${POSTGRES_USER};Password=${COMPOSE_DEV_SECRET}
+      ConnectionStrings__Redis: redis:6379,password=${COMPOSE_DEV_SECRET},abortConnect=false
+    expose: ["8080"]
+    ports:
+      - "5003:8080"
+    <<: *restart
+
+  storage:
+    build:
+      context: ../..
+      dockerfile: src/Services/Storage/Storage.API/Dockerfile
+    image: dijitalatolye/storage:dev
+    container_name: da-storage
+    depends_on:
+      minio: { condition: service_healthy }
+    environment:
+      <<: *common-env
+      Minio__Endpoint: minio:9000
+      Minio__AccessKey: ${POSTGRES_USER}
+      Minio__SecretKey: ${COMPOSE_DEV_SECRET}
+      Minio__UseSsl: "false"
+      Minio__PublicEndpoint: http://localhost:9000
+      ClamAv__Host: clamav
+      ClamAv__Port: "3310"
+    expose: ["8080"]
+    ports:
+      - "5004:8080"
+    <<: *restart
+
+  content:
+    build:
+      context: ../..
+      dockerfile: src/Services/Content/Content.API/Dockerfile
+    image: dijitalatolye/content:dev
+    container_name: da-content
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    environment:
+      <<: *common-env
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=content;Username=${POSTGRES_USER};Password=${COMPOSE_DEV_SECRET}
+    expose: ["8080"]
+    ports:
+      - "5005:8080"
+    <<: *restart
+
+  aimoderation:
+    build:
+      context: ../..
+      dockerfile: src/Services/AIModeration/AIModeration.API/Dockerfile
+    image: dijitalatolye/aimoderation:dev
+    container_name: da-aimoderation
+    depends_on:
+      mongodb: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      minio: { condition: service_healthy }
+    environment:
+      <<: *common-env
+      ConnectionStrings__Mongo: mongodb://${POSTGRES_USER}:${COMPOSE_DEV_SECRET}@mongodb:27017/aimoderation?authSource=admin
+      Mongo__Database: ai_moderation
+      Minio__Endpoint: minio:9000
+      Minio__AccessKey: ${POSTGRES_USER}
+      Minio__SecretKey: ${COMPOSE_DEV_SECRET}
+      Minio__UseSsl: "false"
+      Llm__DeepSeekApiKey: ${DEEPSEEK_API_KEY:-}
+      Llm__DeepSeekModel: deepseek-chat
+      Llm__DeepSeekEndpoint: https://api.deepseek.com/v1
+    expose: ["8080"]
+    ports:
+      - "5006:8080"
+    <<: *restart
+
+  review:
+    build:
+      context: ../..
+      dockerfile: src/Services/Review/Review.API/Dockerfile
+    image: dijitalatolye/review:dev
+    container_name: da-review
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    environment:
+      <<: *common-env
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=review;Username=${POSTGRES_USER};Password=${COMPOSE_DEV_SECRET}
+    expose: ["8080"]
+    ports:
+      - "5007:8080"
+    <<: *restart
+
+  notification:
+    build:
+      context: ../..
+      dockerfile: src/Services/Notification/Notification.API/Dockerfile
+    image: dijitalatolye/notification:dev
+    container_name: da-notification
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      mailhog: { condition: service_started }
+    environment:
+      <<: *common-env
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=notification;Username=${POSTGRES_USER};Password=${COMPOSE_DEV_SECRET}
+      Smtp__Host: mailhog
+      Smtp__Port: "1025"
+      Smtp__UseSsl: "false"
+      Smtp__Username: ""
+      Smtp__Password: ""
+      Smtp__FromAddress: no-reply@dijitalatolye.local
+      Smtp__FromName: DijitalAtolye
+    expose: ["8080"]
+    ports:
+      - "5008:8080"
+    <<: *restart
+
+  analytics:
+    build:
+      context: ../..
+      dockerfile: src/Services/Analytics/Analytics.API/Dockerfile
+    image: dijitalatolye/analytics:dev
+    container_name: da-analytics
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    environment:
+      <<: *common-env
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=analytics;Username=${POSTGRES_USER};Password=${COMPOSE_DEV_SECRET}
+    expose: ["8080"]
+    ports:
+      - "5109:8080"
+    <<: *restart
+
+  search:
+    build:
+      context: ../..
+      dockerfile: src/Services/Search/Search.API/Dockerfile
+    image: dijitalatolye/search:dev
+    container_name: da-search
+    depends_on:
+      elasticsearch: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    environment:
+      <<: *common-env
+      Elasticsearch__Uri: http://elasticsearch:9200
+    expose: ["8080"]
+    ports:
+      - "5110:8080"
+    <<: *restart
+
+  admin:
+    build:
+      context: ../..
+      dockerfile: src/Services/Admin/Admin.API/Dockerfile
+    image: dijitalatolye/admin:dev
+    container_name: da-admin
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      <<: *common-env
+      ConnectionStrings__Audit: Host=postgres;Port=5432;Database=audit;Username=${POSTGRES_USER};Password=${COMPOSE_DEV_SECRET}
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=audit;Username=${POSTGRES_USER};Password=${COMPOSE_DEV_SECRET}
+    expose: ["8080"]
+    ports:
+      - "5111:8080"
+    <<: *restart
+
+  gateway:
+    build:
+      context: ../..
+      dockerfile: src/ApiGateway/Dockerfile
+    image: dijitalatolye/gateway:dev
+    container_name: da-gateway
+    depends_on:
+      identity: { condition: service_started }
+      user: { condition: service_started }
+      catalog: { condition: service_started }
+      storage: { condition: service_started }
+      content: { condition: service_started }
+      review: { condition: service_started }
+      notification: { condition: service_started }
+      aimoderation: { condition: service_started }
+      analytics: { condition: service_started }
+      search: { condition: service_started }
+      admin: { condition: service_started }
+    environment:
+      <<: *common-env
+      Cors__Origins: http://localhost:5173,http://localhost:8080,http://web:8080
+      ReverseProxy__Clusters__identity__Destinations__primary__Address: http://identity:8080
+      ReverseProxy__Clusters__user__Destinations__primary__Address: http://user:8080
+      ReverseProxy__Clusters__catalog__Destinations__primary__Address: http://catalog:8080
+      ReverseProxy__Clusters__storage__Destinations__primary__Address: http://storage:8080
+      ReverseProxy__Clusters__content__Destinations__primary__Address: http://content:8080
+      ReverseProxy__Clusters__aimoderation__Destinations__primary__Address: http://aimoderation:8080
+      ReverseProxy__Clusters__review__Destinations__primary__Address: http://review:8080
+      ReverseProxy__Clusters__notification__Destinations__primary__Address: http://notification:8080
+      ReverseProxy__Clusters__analytics__Destinations__primary__Address: http://analytics:8080
+      ReverseProxy__Clusters__search__Destinations__primary__Address: http://search:8080
+      ReverseProxy__Clusters__admin__Destinations__primary__Address: http://admin:8080
+    expose: ["8080"]
+    ports:
+      - "5000:8080"
+    <<: *restart
+
+  web:
+    build:
+      context: ../../src/Web/dijitalatolye-web
+      dockerfile: Dockerfile
+    image: dijitalatolye/web:dev
+    container_name: da-web
+    depends_on:
+      gateway: { condition: service_started }
+    ports:
+      - "8080:8080"
+    <<: *restart
+
+volumes:
+  postgres-data:
+  mongo-data:
+  rabbitmq-data:
+  redis-data:
+  es-data:
+  minio-data:
+  clamav-data:

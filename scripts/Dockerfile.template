@@ -1,0 +1,56 @@
+# DijitalAtolye - .NET 10 servis Dockerfile sablonu
+# Bu sablon her servisin kendi Dockerfile'inda copy + customize edilir.
+# Multi-stage build: SDK ile derle, runtime ile kucuk image uret.
+
+ARG DOTNET_VERSION=10.0
+ARG SERVICE_PATH=src/Services/Identity/Identity.API
+ARG ASSEMBLY=Identity.API
+
+# === Build ===
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}-alpine AS build
+WORKDIR /src
+
+# Sln + props dosyalarini once kopyala (cache verimi)
+COPY DijitalAtolye.sln Directory.Build.props Directory.Packages.props NuGet.config ./
+COPY src/BuildingBlocks/ ./src/BuildingBlocks/
+COPY ${SERVICE_PATH} ./${SERVICE_PATH}
+
+# Eger servisin kendi alt projeleri varsa (Application/Domain/Infrastructure) bunlar da gerek
+COPY src/Services/ ./src/Services/
+
+RUN dotnet restore "${SERVICE_PATH}/${ASSEMBLY}.csproj"
+
+# Build
+RUN dotnet publish "${SERVICE_PATH}/${ASSEMBLY}.csproj" \
+    -c Release \
+    -o /app/publish \
+    --no-restore \
+    /p:UseAppHost=false
+
+# === Runtime ===
+FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION}-alpine AS runtime
+
+# Read-only filesystem icin gerekli klasorler
+RUN apk add --no-cache icu-libs tzdata curl && \
+    addgroup -S app && adduser -S -G app app && \
+    mkdir -p /app/data && chown -R app:app /app
+
+ENV ASPNETCORE_URLS=http://+:8080 \
+    DOTNET_RUNNING_IN_CONTAINER=true \
+    DOTNET_USE_POLLING_FILE_WATCHER=true \
+    DOTNET_GCDynamicAdaptationMode=1 \
+    TZ=Europe/Istanbul \
+    LC_ALL=tr_TR.UTF-8
+
+USER app
+WORKDIR /app
+EXPOSE 8080
+
+COPY --from=build --chown=app:app /app/publish/ ./
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD curl -fsS http://localhost:8080/health/live || exit 1
+
+ARG ASSEMBLY
+ENV APP_ASSEMBLY=${ASSEMBLY}.dll
+ENTRYPOINT ["sh", "-c", "exec dotnet ${APP_ASSEMBLY}"]

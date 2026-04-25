@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>DijitalAtolye.Identity.API</RootNamespace>
+    <AssemblyName>DijitalAtolye.Identity.API</AssemblyName>
+    <UserSecretsId>identity-api-dev-secrets</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Identity.Application\Identity.Application.csproj" />
+    <ProjectReference Include="..\Identity.Infrastructure\Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\WebHostExtensions\DijitalAtolye.BuildingBlocks.WebHostExtensions.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\EventBus\DijitalAtolye.BuildingBlocks.EventBus.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Authentication\DijitalAtolye.BuildingBlocks.Authentication.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Audit\DijitalAtolye.BuildingBlocks.Audit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
+    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,13 @@
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/.git
+**/.vscode
+**/.idea
+**/.env
+**/.env.local
+**/*.user
+.github
+docs
+tests

@@ -1,0 +1,11 @@
+apiVersion: v2
+name: dijitalatolye-service
+description: |
+  DijitalAtolye mikroservisi icin Helm chart sablonu.
+  Her servis kendi `values.yaml` dosyasinda image/replica/env override eder.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+maintainers:
+  - name: Veli Kececi
+    email: veli@dijitalatolye.tr

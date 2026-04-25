@@ -1,0 +1,132 @@
+# DijitalAtolye servisi varsayilan degerleri.
+# Kullanim: bu chart'i base olarak alip her servisin kendi values'unu override et.
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: ghcr.io/dijitalatolye/dijitalatolye-identity
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: ghcr-pull-secret
+
+replicaCount: 1
+
+revisionHistoryLimit: 5
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/path: "/metrics"
+  prometheus.io/port: "8080"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+  seccompProfile:
+    type: RuntimeDefault
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: false
+  className: traefik
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 75
+
+probes:
+  liveness:
+    path: /health/live
+    initialDelaySeconds: 15
+    periodSeconds: 20
+    timeoutSeconds: 3
+    failureThreshold: 3
+  readiness:
+    path: /health/ready
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  startup:
+    path: /health/live
+    periodSeconds: 5
+    failureThreshold: 30
+
+# Ortam degiskenleri (asagidaki sablon ile)
+env: []
+# - name: ASPNETCORE_ENVIRONMENT
+#   value: Production
+# - name: ConnectionStrings__Postgres
+#   valueFrom:
+#     secretKeyRef:
+#       name: dijitalatolye-secrets
+#       key: postgres-connection
+
+envFromSecrets: []
+# - name: dijitalatolye-secrets
+
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+  - name: aspnet-data
+    mountPath: /app/data
+
+volumes:
+  - name: tmp
+    emptyDir: {}
+  - name: aspnet-data
+    emptyDir: {}
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Pod disruption budget (HA icin)
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
+# Service monitor for Prometheus
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 10s
+  path: /metrics

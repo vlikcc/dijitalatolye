@@ -1,0 +1,17 @@
+all:
+  vars:
+    ansible_user: root
+    ansible_python_interpreter: /usr/bin/python3
+    k3s_version: v1.30.5+k3s1
+    k3s_token: "REPLACE_WITH_LONG_RANDOM_STRING"
+  children:
+    k3s_master:
+      hosts:
+        master1:
+          ansible_host: 1.2.3.4 # Hetzner CCX23 master
+    k3s_workers:
+      hosts:
+        worker1:
+          ansible_host: 1.2.3.5
+        worker2:
+          ansible_host: 1.2.3.6

@@ -1,0 +1,34 @@
+title = "DijitalAtolye gitleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "deepseek-api-key"
+description = "DeepSeek API key"
+regex = '''sk-[a-zA-Z0-9]{32,}'''
+keywords = ["deepseek", "sk-"]
+
+[[rules]]
+id = "gemini-api-key"
+description = "Google Gemini API key"
+regex = '''AIza[0-9A-Za-z\-_]{35}'''
+keywords = ["gemini", "google"]
+
+[[rules]]
+id = "anthropic-api-key"
+description = "Anthropic Claude API key"
+regex = '''sk-ant-[a-zA-Z0-9\-_]{40,}'''
+keywords = ["anthropic", "claude"]
+
+[allowlist]
+description = "Allowlisted files"
+paths = [
+  '''package-lock\.json''',
+  '''pnpm-lock\.yaml''',
+  '''yarn\.lock''',
+  '''\.gitleaks\.toml$''',
+  '''docs/adr/.*\.md$''',
+  '''.*\.example$''',
+  '''.*\.example\..*$'''
+]

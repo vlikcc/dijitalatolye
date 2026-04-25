@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      service:
+        description: "Belirli bir servisi build et (bos = hepsi)"
+        required: false
+        default: ""
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAMESPACE: ${{ github.repository_owner }}/dijitalatolye
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build-images:
+    name: Build & push ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - apigateway
+          - identity
+          - user
+          - catalog
+          - storage
+          - content
+          - aimoderation
+          - review
+          - notification
+          - search
+          - analytics
+          - web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}-${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Resolve dockerfile path
+        id: paths
+        run: |
+          case "${{ matrix.service }}" in
+            apigateway)    echo "context=." >> $GITHUB_OUTPUT; echo "file=src/ApiGateway/Dockerfile" >> $GITHUB_OUTPUT ;;
+            web)           echo "context=src/Web/dijitalatolye-web" >> $GITHUB_OUTPUT; echo "file=src/Web/dijitalatolye-web/Dockerfile" >> $GITHUB_OUTPUT ;;
+            *)             svc="${{ matrix.service }}"; PASCAL=$(echo "$svc" | sed 's/.*/\u&/' | sed 's/aimoderation/AIModeration/'); echo "context=." >> $GITHUB_OUTPUT; echo "file=src/Services/$PASCAL/$PASCAL.API/Dockerfile" >> $GITHUB_OUTPUT ;;
+          esac
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ steps.paths.outputs.context }}
+          file: ${{ steps.paths.outputs.file }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          provenance: false

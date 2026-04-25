@@ -1,0 +1,5 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Link, Outlet } from "react-router-dom";
+export default function PublicLayout() {
+    return (_jsxs("div", { className: "min-h-full flex flex-col", children: [_jsx("header", { className: "bg-white border-b", children: _jsxs("div", { className: "max-w-6xl mx-auto px-4 h-14 flex items-center justify-between", children: [_jsx(Link, { to: "/", className: "font-bold text-brand-600", children: "DijitalAt\u00F6lye" }), _jsxs("nav", { className: "flex items-center gap-4 text-sm", children: [_jsx(Link, { to: "/login", className: "hover:text-brand-600", children: "Giri\u015F" }), _jsx(Link, { to: "/register", className: "px-3 py-1.5 bg-brand-600 text-white rounded hover:bg-brand-700", children: "Kay\u0131t Ol" })] })] }) }), _jsx("main", { className: "flex-1", children: _jsx(Outlet, {}) }), _jsx("footer", { className: "bg-white border-t text-xs text-slate-500", children: _jsx("div", { className: "max-w-6xl mx-auto px-4 py-3", children: "\u00A9 DijitalAt\u00F6lye" }) })] }));
+}

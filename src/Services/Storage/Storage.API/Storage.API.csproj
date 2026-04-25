@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>DijitalAtolye.Storage.API</RootNamespace>
+    <AssemblyName>DijitalAtolye.Storage.API</AssemblyName>
+    <UserSecretsId>storage-api-dev-secrets</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\Common\DijitalAtolye.BuildingBlocks.Common.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\WebHostExtensions\DijitalAtolye.BuildingBlocks.WebHostExtensions.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Authentication\DijitalAtolye.BuildingBlocks.Authentication.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Minio" />
+    <PackageReference Include="nClam" />
+  </ItemGroup>
+</Project>

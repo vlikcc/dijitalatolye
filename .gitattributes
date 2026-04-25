@@ -1,0 +1,39 @@
+* text=auto eol=lf
+
+# .NET
+*.cs       text diff=csharp
+*.csproj   text merge=union
+*.sln      text eol=crlf merge=union
+*.json     text
+*.yml      text
+*.yaml     text
+
+# Web
+*.ts       text
+*.tsx      text
+*.js       text
+*.jsx      text
+*.html     text
+*.css      text
+*.scss     text
+*.md       text
+
+# Shell
+*.sh       text eol=lf
+Makefile   text eol=lf
+
+# Binary
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.ico      binary
+*.svg      text
+*.pdf      binary
+*.zip      binary
+*.gz       binary
+*.tar      binary
+*.woff     binary
+*.woff2    binary
+*.mp3      binary
+*.mp4      binary

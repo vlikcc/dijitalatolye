@@ -1,0 +1,5 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Link } from "react-router-dom";
+export default function HomePage() {
+    return (_jsxs("section", { className: "max-w-3xl mx-auto px-4 py-16 text-center", children: [_jsx("h1", { className: "text-4xl font-bold text-slate-900", children: "DijitalAt\u00F6lye" }), _jsx("p", { className: "mt-4 text-slate-600", children: "K-12 \u00F6\u011Fretmenleri ve \u00F6\u011Frencileri i\u00E7in dijital e\u011Fitim i\u00E7erik platformu. \u00D6\u011Fretmenler i\u00E7erik y\u00FCkler, AI \u00F6n incelemeden ge\u00E7er, edit\u00F6r onaylar, \u00F6\u011Frenci an\u0131nda oynayabilir." }), _jsxs("div", { className: "mt-8 flex items-center justify-center gap-3", children: [_jsx(Link, { to: "/register", className: "px-4 py-2 bg-brand-600 text-white rounded hover:bg-brand-700", children: "Hemen Kay\u0131t Ol" }), _jsx(Link, { to: "/login", className: "px-4 py-2 bg-white border rounded hover:bg-slate-50", children: "Giri\u015F Yap" })] })] }));
+}

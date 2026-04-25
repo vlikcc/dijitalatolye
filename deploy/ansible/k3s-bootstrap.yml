@@ -1,0 +1,224 @@
+---
+# K3s + base platform bootstrap
+# Usage: ansible-playbook -i inventory.yml k3s-bootstrap.yml
+#
+# Hedef: Hetzner Cloud (Ubuntu 22.04+) — master + 2 worker
+# Sonrası: argo-cd uygulamalarını deploy/argocd/ altından bootstrap eder.
+
+- name: Pre-flight base packages
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+    - name: Install base packages
+      apt:
+        name: [curl, wget, vim, jq, htop, ufw, ca-certificates, open-iscsi, nfs-common]
+        state: present
+    - name: Enable open-iscsi (Longhorn için)
+      systemd:
+        name: iscsid
+        enabled: yes
+        state: started
+    - name: UFW open required ports (SSH, K3s API, Flannel VXLAN, kubelet, ingress)
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+      loop: ["22", "6443", "8472", "10250", "80", "443"]
+    - name: Disable swap
+      command: swapoff -a
+      changed_when: false
+    - name: Remove swap from fstab
+      lineinfile:
+        path: /etc/fstab
+        regexp: '\sswap\s'
+        state: absent
+
+- name: Install K3s master
+  hosts: k3s_master
+  become: true
+  tasks:
+    - name: Install K3s server
+      shell: |
+        curl -sfL https://get.k3s.io | \
+          INSTALL_K3S_VERSION={{ k3s_version }} \
+          K3S_TOKEN={{ k3s_token }} \
+          sh -s - server \
+            --cluster-init \
+            --disable traefik \
+            --disable servicelb \
+            --write-kubeconfig-mode 644 \
+            --tls-san {{ ansible_host }}
+      args:
+        creates: /usr/local/bin/k3s
+    - name: Wait for kubeconfig
+      wait_for:
+        path: /etc/rancher/k3s/k3s.yaml
+    - name: Fetch kubeconfig to control machine
+      fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: ./kubeconfig.yaml
+        flat: yes
+    - name: Replace localhost in kubeconfig
+      delegate_to: localhost
+      become: false
+      replace:
+        path: ./kubeconfig.yaml
+        regexp: "127.0.0.1"
+        replace: "{{ ansible_host }}"
+
+- name: Install K3s workers
+  hosts: k3s_workers
+  become: true
+  vars:
+    master_ip: "{{ hostvars[groups['k3s_master'][0]].ansible_host }}"
+  tasks:
+    - name: Install K3s agent
+      shell: |
+        curl -sfL https://get.k3s.io | \
+          INSTALL_K3S_VERSION={{ k3s_version }} \
+          K3S_TOKEN={{ k3s_token }} \
+          K3S_URL=https://{{ master_ip }}:6443 \
+          sh -s - agent
+      args:
+        creates: /usr/local/bin/k3s
+
+- name: Bootstrap base platform components
+  hosts: k3s_master
+  become: true
+  tasks:
+    - name: Wait for nodes ready
+      command: kubectl get nodes
+      register: nodes
+      until: nodes.rc == 0
+      retries: 30
+      delay: 5
+      changed_when: false
+
+    - name: Install Helm on master (for bootstrap only)
+      shell: |
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      args:
+        creates: /usr/local/bin/helm
+
+    - name: Add Helm repos
+      shell: |
+        helm repo add jetstack https://charts.jetstack.io
+        helm repo add traefik https://traefik.github.io/charts
+        helm repo add longhorn https://charts.longhorn.io
+        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+        helm repo add grafana https://grafana.github.io/helm-charts
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm repo add argo https://argoproj.github.io/argo-helm
+        helm repo add minio https://charts.min.io/
+        helm repo add elastic https://helm.elastic.co
+        helm repo update
+      changed_when: false
+
+    - name: Install cert-manager
+      shell: |
+        helm upgrade --install cert-manager jetstack/cert-manager \
+          --namespace cert-manager --create-namespace \
+          --version v1.16.2 \
+          --set crds.enabled=true
+      changed_when: false
+
+    - name: Install Traefik
+      shell: |
+        helm upgrade --install traefik traefik/traefik \
+          --namespace traefik --create-namespace \
+          --version 33.2.1 \
+          --set service.type=LoadBalancer \
+          --set ingressRoute.dashboard.enabled=false
+      changed_when: false
+
+    - name: Install Longhorn
+      shell: |
+        helm upgrade --install longhorn longhorn/longhorn \
+          --namespace longhorn-system --create-namespace \
+          --version 1.7.2 \
+          --set defaultSettings.defaultReplicaCount=2
+      changed_when: false
+
+    - name: Install kube-prometheus-stack (Prometheus + Grafana + Alertmanager)
+      shell: |
+        helm upgrade --install kube-prometheus prometheus-community/kube-prometheus-stack \
+          --namespace observability --create-namespace \
+          --version 66.2.2 \
+          --set grafana.adminPassword="$$(openssl rand -base64 24 | tr -d '\n')" \
+          --set prometheus.prometheusSpec.retention=30d
+      changed_when: false
+
+    - name: Install Loki
+      shell: |
+        helm upgrade --install loki grafana/loki-stack \
+          --namespace observability \
+          --version 2.10.2 \
+          --set promtail.enabled=true \
+          --set grafana.enabled=false
+      changed_when: false
+
+    - name: Install Tempo
+      shell: |
+        helm upgrade --install tempo grafana/tempo \
+          --namespace observability \
+          --version 1.16.2
+      changed_when: false
+
+    - name: Install ArgoCD
+      shell: |
+        helm upgrade --install argocd argo/argo-cd \
+          --namespace argocd --create-namespace \
+          --version 7.7.7 \
+          --set server.service.type=ClusterIP \
+          --set configs.params."server\.insecure"=false
+      changed_when: false
+
+    - name: Install RabbitMQ
+      shell: |
+        helm upgrade --install rabbitmq bitnami/rabbitmq \
+          --namespace dijitalatolye --create-namespace \
+          --version 15.0.5 \
+          --set auth.username=dijitalatolye \
+          --set persistence.size=20Gi
+      changed_when: false
+
+    - name: Install Redis
+      shell: |
+        helm upgrade --install redis bitnami/redis \
+          --namespace dijitalatolye \
+          --version 20.6.1 \
+          --set architecture=standalone \
+          --set auth.password="$$(openssl rand -base64 24 | tr -d '\n')"
+      changed_when: false
+
+    - name: Install PostgreSQL (HA — Faz 4'te repmgr ile)
+      shell: |
+        helm upgrade --install postgresql bitnami/postgresql \
+          --namespace dijitalatolye \
+          --version 16.3.0 \
+          --set auth.username=dijitalatolye \
+          --set auth.database=postgres \
+          --set primary.persistence.size=50Gi
+      changed_when: false
+
+    - name: Install MinIO
+      shell: |
+        helm upgrade --install minio minio/minio \
+          --namespace dijitalatolye \
+          --version 5.4.0 \
+          --set rootUser=dijitalatolye \
+          --set persistence.size=200Gi \
+          --set replicas=2
+      changed_when: false
+
+    - name: Install Elasticsearch
+      shell: |
+        helm upgrade --install elasticsearch elastic/elasticsearch \
+          --namespace dijitalatolye \
+          --version 8.5.1 \
+          --set replicas=1 \
+          --set minimumMasterNodes=1
+      changed_when: false

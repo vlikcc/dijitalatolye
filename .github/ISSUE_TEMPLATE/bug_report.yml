@@ -1,0 +1,63 @@
+name: Bug Report
+description: Bir hatayı raporla
+title: "[bug]: "
+labels: ["type:bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Hata raporladığınız için teşekkürler. Lütfen aşağıdaki bilgileri eksiksiz doldurun.
+  - type: textarea
+    id: description
+    attributes:
+      label: Hata Açıklaması
+      description: Kısa ve net bir açıklama yazın.
+      placeholder: "İçerik yüklemeye çalıştığımda 500 hatası alıyorum..."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Yeniden Üretme Adımları
+      placeholder: |
+        1. /teacher/contents/new sayfasına git
+        2. ZIP yükle
+        3. Submit'e tıkla
+        4. Hata
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Beklenen Davranış
+    validations:
+      required: true
+  - type: dropdown
+    id: service
+    attributes:
+      label: Etkilenen Servis
+      multiple: true
+      options:
+        - Identity
+        - User
+        - Content
+        - Catalog
+        - AIModeration
+        - Review
+        - Notification
+        - Search
+        - Analytics
+        - Storage
+        - ApiGateway
+        - Web (Frontend)
+        - Bilmiyorum
+  - type: input
+    id: env
+    attributes:
+      label: Ortam
+      placeholder: "local / staging / production / browser version"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Loglar / Trace ID
+      render: shell

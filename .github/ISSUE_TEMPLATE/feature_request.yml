@@ -1,0 +1,40 @@
+name: Feature Request
+description: Yeni özellik öner
+title: "[feat]: "
+labels: ["type:feature", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Hangi problemi çözüyor?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Önerilen Çözüm
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatifler
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Öncelik
+      options:
+        - p0 - blocker
+        - p1 - high
+        - p2 - medium
+        - p3 - low
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Tahmini Efor
+      options:
+        - S (≤ 1 gün)
+        - M (1-3 gün)
+        - L (3-7 gün)
+        - XL (> 1 hafta)

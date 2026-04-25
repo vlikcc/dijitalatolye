@@ -1,0 +1,17 @@
+# Default owner for everything
+*                                   @vlikcc
+
+# Architecture and ADRs require core team review
+/docs/adr/                          @vlikcc
+/02-Sistem-Mimarisi.md              @vlikcc
+/01-PRD-DijitalAtolye.md            @vlikcc
+
+# Building blocks affect every service
+/src/BuildingBlocks/                @vlikcc
+
+# Deployment and infrastructure
+/deploy/                            @vlikcc
+/.github/                           @vlikcc
+
+# Frontend
+/src/Web/                           @vlikcc

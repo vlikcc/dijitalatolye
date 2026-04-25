@@ -1,0 +1,5 @@
+[
+  { "email": "loadtest1@meb.k12.tr", "password": "LoadTest123!" },
+  { "email": "loadtest2@meb.k12.tr", "password": "LoadTest123!" },
+  { "email": "loadtest3@meb.k12.tr", "password": "LoadTest123!" }
+]
