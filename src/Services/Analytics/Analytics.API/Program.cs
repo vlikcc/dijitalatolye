@@ -37,11 +37,11 @@ app.UseAuthorization();
 
 app.MapAnalyticsEndpoints();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AnalyticsDbContext>();
-    await db.Database.MigrateAsync().ConfigureAwait(false);
+    await db.EnsureSchemaAsync().ConfigureAwait(false);
 }
 
 await app.RunAsync().ConfigureAwait(false);

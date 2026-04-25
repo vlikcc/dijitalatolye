@@ -66,6 +66,18 @@ make web
 
 İlk çalıştırma için: [`docs/getting-started.md`](docs/getting-started.md)
 
+### Production Self-Host (Docker Compose)
+
+Tek sunucuda production konfigürasyonuyla çalıştırma — Caddy + otomatik TLS, kapalı veri portları, EF auto-migrate, log rotation, yedekleme:
+
+```bash
+make prod-env       # .env.prod uretir, secret'lari otomatik doldurur
+make prod-up        # build + up (Caddy 80/443 public)
+make prod-smoke     # https://<domain>/health/live testi
+```
+
+Detay: [`docs/runbooks/selfhost-prod.md`](docs/runbooks/selfhost-prod.md)
+
 ## Repo Yapısı
 
 ```

@@ -4,7 +4,8 @@ import { useAuthStore } from "@/state/auth";
 export default function AppLayout() {
   const navigate = useNavigate();
   const { email, roles, logout } = useAuthStore();
-  const isEditor = roles.includes("Editor") || roles.includes("Admin") || roles.includes("SuperAdmin");
+  const isAdmin = roles.includes("Admin") || roles.includes("SuperAdmin");
+  const isEditor = roles.includes("Editor") || isAdmin;
   const isTeacher = roles.includes("Teacher") || isEditor;
   return (
     <div className="min-h-full flex flex-col">
@@ -14,6 +15,7 @@ export default function AppLayout() {
           <nav className="flex items-center gap-4 text-sm">
             {isTeacher && <NavLink to="/teacher/contents/new" className={({ isActive }) => isActive ? "text-brand-600" : "hover:text-brand-600"}>İçerik Yükle</NavLink>}
             {isEditor && <NavLink to="/editor/queue" className={({ isActive }) => isActive ? "text-brand-600" : "hover:text-brand-600"}>Editör Kuyruğu</NavLink>}
+            {isAdmin && <NavLink to="/admin" className={({ isActive }) => isActive ? "text-brand-600" : "hover:text-brand-600"}>Admin</NavLink>}
             <span className="text-slate-500">{email}</span>
             <button
               onClick={() => { logout(); navigate("/login"); }}

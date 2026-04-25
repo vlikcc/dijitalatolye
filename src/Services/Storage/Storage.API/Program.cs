@@ -19,6 +19,7 @@ builder.Services.AddMinio(c => c
     .WithSSL(minioOpts.UseSsl)
     .Build());
 
+builder.Services.AddSingleton(minioOpts);
 builder.Services.AddScoped<IObjectStorage, MinioObjectStorage>();
 
 var clamHost = builder.Configuration["ClamAv:Host"] ?? "localhost";
@@ -38,10 +39,15 @@ app.UseAuthorization();
 app.MapStorageEndpoints();
 app.Run();
 
-internal sealed class MinioOptions
+public sealed class MinioOptions
 {
     public string Endpoint { get; init; } = "localhost:9000";
     public string AccessKey { get; init; } = string.Empty;
     public string SecretKey { get; init; } = string.Empty;
     public bool UseSsl { get; init; }
+    /// <summary>
+    /// Tarayicinin erisecegi URL (ornek: https://example.com/cdn).
+    /// Bos ise presigned URL'lerde Endpoint kullanilir (sadece ic ag senaryosu).
+    /// </summary>
+    public string PublicEndpoint { get; init; } = string.Empty;
 }

@@ -36,10 +36,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapReviewEndpoints();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
     using var scope = app.Services.CreateScope();
-    await scope.ServiceProvider.GetRequiredService<ReviewDbContext>().Database.MigrateAsync();
+    await scope.ServiceProvider.GetRequiredService<ReviewDbContext>().EnsureSchemaAsync();
 }
 
 app.Run();

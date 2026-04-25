@@ -191,3 +191,73 @@ helm-lint:  ## Helm chart'lari lint
 		echo ">>> Linting $$chart"; \
 		helm lint "$$chart"; \
 	done
+
+# === Production self-hosted (Docker Compose) ===
+
+PROD_COMPOSE := docker compose -f deploy/docker-compose/docker-compose.prod.yml --env-file .env.prod
+
+.PHONY: prod-env
+prod-env:  ## .env.prod yoksa .env.prod.example'dan kopyala ve secret'lari otomatik uret
+	@if [ ! -f .env.prod ]; then cp .env.prod.example .env.prod && chmod 600 .env.prod && echo ".env.prod olusturuldu (chmod 600)."; else echo ".env.prod mevcut."; fi
+	@for k in POSTGRES_PASSWORD MONGO_PASSWORD REDIS_PASSWORD RABBITMQ_PASSWORD MINIO_ROOT_PASSWORD; do \
+		grep -qE "^$$k=[A-Za-z0-9]+" .env.prod || (sed -i.bak "s|^$$k=.*|$$k=$$(openssl rand -hex 24)|" .env.prod && rm -f .env.prod.bak && echo "$$k uretildi."); \
+	done
+	@grep -qE "^JWT_SIGNING_KEY=[A-Za-z0-9]+" .env.prod || (sed -i.bak "s|^JWT_SIGNING_KEY=.*|JWT_SIGNING_KEY=$$(openssl rand -hex 48)|" .env.prod && rm -f .env.prod.bak && echo "JWT_SIGNING_KEY uretildi.")
+	@echo ""
+	@echo "Sonraki adim:"
+	@echo "  - .env.prod icine DEEPSEEK_API_KEY (ve istege bagli GEMINI/ANTHROPIC) yazin"
+	@echo "  - SMTP'yi gercek bir saglayiciya ayarlayin (lokalde mailhog profili kullanabilirsiniz)"
+	@echo "  - Daha sonra: make prod-up"
+
+.PHONY: prod-build
+prod-build: prod-env  ## Tum prod imajlarini yeniden build et
+	$(PROD_COMPOSE) build --pull
+
+.PHONY: prod-up
+prod-up: prod-env  ## Production stack'i ayaga kaldir (lokalde test icin de kullanilabilir)
+	$(PROD_COMPOSE) up -d --build
+	@echo ""
+	@echo "==> Production stack ayakta:"
+	@echo "  Public:           https://$$(grep -E '^PUBLIC_DOMAIN=' .env.prod | cut -d= -f2 | tr -d '\"' )/"
+	@echo "  (lokalde 'localhost' ise self-signed cert; tarayici uyarisini gecin)"
+	@echo "  Veri portlari sadece 127.0.0.1 uzerinde (debug/backup):"
+	@echo "    Postgres 5432, Mongo 27017, Redis 6379, RabbitMQ 5672/15672, ES 9200, MinIO 9000/9001"
+	@echo "  Loglar: make prod-logs"
+
+.PHONY: prod-up-mail
+prod-up-mail: prod-env  ## Production stack'i + lokal MailHog ile ayaga kaldir (SMTP testi)
+	$(PROD_COMPOSE) --profile mailhog up -d --build
+	@echo "MailHog UI: http://127.0.0.1:8025"
+
+.PHONY: prod-down
+prod-down:  ## Production stack'i durdur (volume korunur)
+	$(PROD_COMPOSE) down
+
+.PHONY: prod-nuke
+prod-nuke:  ## Production stack'i + volume'lari sil (DIKKAT — TUM VERI SILINIR)
+	@read -p "TUM VERI silinecek. Onayliyorsaniz 'evet' yazin: " ans; [ "$$ans" = "evet" ] || exit 1
+	$(PROD_COMPOSE) --profile mailhog down -v
+
+.PHONY: prod-ps
+prod-ps:  ## Production container'larini listele
+	$(PROD_COMPOSE) ps
+
+.PHONY: prod-logs
+prod-logs:  ## Production loglarini takip et
+	$(PROD_COMPOSE) logs -f --tail=100
+
+.PHONY: prod-rebuild
+prod-rebuild:  ## Belirli bir prod servisini yeniden build et (kullanim: make prod-rebuild SVC=identity)
+	$(PROD_COMPOSE) up -d --build $(SVC)
+
+.PHONY: prod-backup
+prod-backup:  ## Postgres + Mongo + MinIO yedek al (./backups/<ts>/)
+	./scripts/prod-backup.sh
+
+.PHONY: prod-smoke
+prod-smoke:  ## Public endpoint smoke test (gateway /health/live, web /)
+	@DOMAIN=$$(grep -E '^PUBLIC_DOMAIN=' .env.prod | cut -d= -f2 | tr -d '\"'); \
+	echo ">>> https://$$DOMAIN/health/live"; \
+	curl -ksS -o /dev/null -w "  HTTP %{http_code}\n" "https://$$DOMAIN/health/live"; \
+	echo ">>> https://$$DOMAIN/"; \
+	curl -ksS -o /dev/null -w "  HTTP %{http_code}\n" "https://$$DOMAIN/"

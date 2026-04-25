@@ -40,10 +40,10 @@ app.UseAuthorization();
 app.MapNotificationEndpoints();
 app.MapHub<NotificationsHub>("/hubs/notifications");
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
     using var scope = app.Services.CreateScope();
-    await scope.ServiceProvider.GetRequiredService<NotificationDbContext>().Database.MigrateAsync();
+    await scope.ServiceProvider.GetRequiredService<NotificationDbContext>().EnsureSchemaAsync();
 }
 
 app.Run();

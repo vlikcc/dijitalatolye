@@ -34,7 +34,7 @@ app.UseAuthorization();
 
 app.MapSearchEndpoints();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
     using var scope = app.Services.CreateScope();
     var indexer = scope.ServiceProvider.GetRequiredService<ISearchIndexer>();

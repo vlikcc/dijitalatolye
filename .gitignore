@@ -46,8 +46,10 @@ pnpm-debug.log*
 # Env
 .env
 .env.local
+.env.prod
 .env.*.local
 !.env.example
+!.env.prod.example
 *.pem
 *.key
 *.crt

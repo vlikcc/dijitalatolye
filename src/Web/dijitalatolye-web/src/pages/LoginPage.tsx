@@ -16,17 +16,35 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.post<{ accessToken: string; refreshToken: string; roles: string[] }>(
+      const { data } = await api.post<{ accessToken: string; refreshToken: string }>(
         "/auth/login", { email, password }
       );
       setTokens(data.accessToken, data.refreshToken);
-      setUser(email, data.roles ?? []);
-      const isEditor = (data.roles ?? []).some(r => ["Editor", "Admin", "SuperAdmin"].includes(r));
-      navigate(isEditor ? "/editor/queue" : "/teacher/contents/new");
+      const roles = rolesFromJwt(data.accessToken);
+      setUser(email, roles);
+      if (roles.some(r => ["Admin", "SuperAdmin"].includes(r))) {
+        navigate("/admin");
+      } else if (roles.includes("Editor")) {
+        navigate("/editor/queue");
+      } else {
+        navigate("/teacher/contents/new");
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Giriş başarısız.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  function rolesFromJwt(token: string): string[] {
+    try {
+      const payload = token.split(".")[1];
+      const padded = payload + "=".repeat((4 - (payload.length % 4)) % 4);
+      const json = JSON.parse(atob(padded.replace(/-/g, "+").replace(/_/g, "/")));
+      const claim = json.role ?? json.roles ?? [];
+      return Array.isArray(claim) ? claim : [claim];
+    } catch {
+      return [];
     }
   }
 

@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
@@ -22,10 +23,13 @@ public static class JwtAuthExtensions
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwt =>
             {
-                jwt.Authority = options.Authority;
                 jwt.Audience = options.Audience;
                 jwt.RequireHttpsMetadata = options.RequireHttpsMetadata;
-                jwt.TokenValidationParameters = new TokenValidationParameters
+                // Token'daki "role" / "name" / "sub" claim'leri olduklari gibi kalsin;
+                // aksi halde varsayilan harita ClaimTypes.Role'e cevirir ve RoleClaimType="role" ile catisir.
+                jwt.MapInboundClaims = false;
+
+                var validationParams = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidIssuer = options.Authority,
@@ -36,6 +40,21 @@ public static class JwtAuthExtensions
                     RoleClaimType = "role",
                     NameClaimType = "name",
                 };
+
+                // HS256 paylasilan anahtar (Jwt:SigningKey) varsa onu kullan; aksi halde
+                // OIDC keşfini (Authority) kullan (RS256/JWKS senaryolari icin).
+                if (!string.IsNullOrWhiteSpace(options.SigningKey))
+                {
+                    validationParams.ValidateIssuerSigningKey = true;
+                    validationParams.IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(options.SigningKey));
+                }
+                else
+                {
+                    jwt.Authority = options.Authority;
+                }
+
+                jwt.TokenValidationParameters = validationParams;
             });
 
         services.AddAuthorization(authz =>
@@ -59,4 +78,5 @@ public sealed class JwtOptions
     public string Authority { get; init; } = string.Empty;
     public string Audience { get; init; } = "dijitalatolye-api";
     public bool RequireHttpsMetadata { get; init; } = true;
+    public string SigningKey { get; init; } = string.Empty;
 }

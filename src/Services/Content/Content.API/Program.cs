@@ -36,10 +36,10 @@ app.UseAuthorization();
 app.MapContentEndpoints();
 app.MapEngagementEndpoints();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
     using var scope = app.Services.CreateScope();
-    await scope.ServiceProvider.GetRequiredService<ContentDbContext>().Database.MigrateAsync();
+    await scope.ServiceProvider.GetRequiredService<ContentDbContext>().EnsureSchemaAsync();
 }
 
 app.Run();

@@ -6,10 +6,17 @@ namespace DijitalAtolye.Storage.API.Storage;
 public sealed class MinioObjectStorage : IObjectStorage
 {
     private readonly IMinioClient _minio;
+    private readonly string _internalBaseUrl;
+    private readonly string? _publicBaseUrl;
 
-    public MinioObjectStorage(IMinioClient minio)
+    public MinioObjectStorage(IMinioClient minio, MinioOptions options)
     {
         _minio = minio;
+        var scheme = options.UseSsl ? "https" : "http";
+        _internalBaseUrl = $"{scheme}://{options.Endpoint}";
+        _publicBaseUrl = string.IsNullOrWhiteSpace(options.PublicEndpoint)
+            ? null
+            : options.PublicEndpoint.TrimEnd('/');
     }
 
     public async Task<string> CreatePresignedUploadUrlAsync(string bucket, string key, TimeSpan expiry, string? contentType = null, CancellationToken ct = default)
@@ -19,7 +26,7 @@ public sealed class MinioObjectStorage : IObjectStorage
             .WithBucket(bucket)
             .WithObject(key)
             .WithExpiry((int)expiry.TotalSeconds);
-        return await _minio.PresignedPutObjectAsync(args);
+        return RewriteToPublic(await _minio.PresignedPutObjectAsync(args));
     }
 
     public async Task<string> CreatePresignedDownloadUrlAsync(string bucket, string key, TimeSpan expiry, CancellationToken ct = default)
@@ -28,7 +35,15 @@ public sealed class MinioObjectStorage : IObjectStorage
             .WithBucket(bucket)
             .WithObject(key)
             .WithExpiry((int)expiry.TotalSeconds);
-        return await _minio.PresignedGetObjectAsync(args);
+        return RewriteToPublic(await _minio.PresignedGetObjectAsync(args));
+    }
+
+    private string RewriteToPublic(string url)
+    {
+        if (_publicBaseUrl is null) return url;
+        return url.StartsWith(_internalBaseUrl, StringComparison.OrdinalIgnoreCase)
+            ? string.Concat(_publicBaseUrl, url.AsSpan(_internalBaseUrl.Length))
+            : url;
     }
 
     public async Task<bool> ObjectExistsAsync(string bucket, string key, CancellationToken ct = default)

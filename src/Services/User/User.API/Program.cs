@@ -38,10 +38,10 @@ app.UseAuthorization();
 app.MapUserEndpoints();
 app.MapKvkkEndpoints();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
     using var scope = app.Services.CreateScope();
-    await scope.ServiceProvider.GetRequiredService<UserDbContext>().Database.MigrateAsync();
+    await scope.ServiceProvider.GetRequiredService<UserDbContext>().EnsureSchemaAsync();
 }
 
 app.Run();

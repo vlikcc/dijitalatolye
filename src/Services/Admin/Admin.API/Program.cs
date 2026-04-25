@@ -26,7 +26,7 @@ app.UseAuthorization();
 app.MapAuditEndpoints();
 app.MapAdminProxyEndpoints();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
     await app.Services.EnsureAuditSchemaAsync().ConfigureAwait(false);
 }
