@@ -4,25 +4,33 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Morpa-inspired purple
         brand: {
-          50: "#eef6ff",
-          100: "#d9eaff",
-          200: "#b6d4ff",
-          300: "#85b6ff",
-          400: "#5290ff",
-          500: "#1d6aff",
-          600: "#1453d8",
-          700: "#0e3fa8",
-          800: "#0b2f7d",
-          900: "#0a2462",
+          50: "#f6f1ff",
+          100: "#ebdfff",
+          200: "#d6bdff",
+          300: "#b88dff",
+          400: "#9a5cff",
+          500: "#7e36e6",
+          600: "#6822c4",
+          700: "#52189c",
+          800: "#3f1278",
+          900: "#2c0c54",
         },
+        // Morpa-style warm orange accent
         accent: {
-          500: "#ff7a45",
-          600: "#e85d27",
+          50: "#fff5ec",
+          100: "#ffe4cc",
+          200: "#ffc599",
+          300: "#ffa566",
+          400: "#ff8a3d",
+          500: "#f58220",
+          600: "#d96d12",
+          700: "#b3550c",
         },
       },
       backgroundImage: {
-        "grid-slate": "linear-gradient(to right, rgba(15,23,42,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(15,23,42,0.06) 1px, transparent 1px)",
+        "grid-slate": "linear-gradient(to right, rgba(82,24,156,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(82,24,156,0.06) 1px, transparent 1px)",
       },
       keyframes: {
         "float-slow": {

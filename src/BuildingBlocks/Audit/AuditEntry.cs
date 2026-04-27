@@ -23,6 +23,8 @@ public static class AuditActions
     public const string Logout = "user.logout";
     public const string Register = "user.register";
     public const string PasswordChanged = "user.password_changed";
+    public const string PasswordResetRequested = "user.password_reset_requested";
+    public const string PasswordReset = "user.password_reset";
     public const string RoleChanged = "user.role_changed";
     public const string ContentCreated = "content.created";
     public const string ContentSubmitted = "content.submitted";

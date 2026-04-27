@@ -10,11 +10,14 @@ public sealed class ReviewItem
     public required Guid AuthorUserId { get; init; }
     public required Guid AIReportId { get; init; }
     public required ModerationDecision AIDecision { get; init; }
-    public required int AIScore { get; init; }
+    public int AIScore { get; init; }
     public required string Title { get; init; }
 
     public ReviewStatus Status { get; set; } = ReviewStatus.Queued;
     public Guid? AssignedEditorId { get; set; }
+    public DijitalAtolye.BuildingBlocks.EventBus.Contracts.Review.EditorDecision? Decision { get; set; }
+    public string? Comment { get; set; }
+
     public DateTime EnqueuedAtUtc { get; init; } = DateTime.UtcNow;
     public DateTime? AssignedAtUtc { get; set; }
     public DateTime? DecidedAtUtc { get; set; }

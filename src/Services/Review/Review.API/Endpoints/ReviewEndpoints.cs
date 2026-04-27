@@ -67,6 +67,8 @@ public static class ReviewEndpoints
             }
             item.Status = ReviewStatus.Decided;
             item.AssignedEditorId ??= current.UserId;
+            item.Decision = body.Decision;
+            item.Comment = body.Comment;
             item.DecidedAtUtc = DateTime.UtcNow;
 
             await outbox.WriteAsync(new EditorDecisionMadeV1
@@ -80,6 +82,43 @@ public static class ReviewEndpoints
 
             await db.SaveChangesAsync(ct);
             return Results.Ok(item);
+        });
+
+        grp.MapGet("/dashboard", async (ICurrentUser current, ReviewDbContext db, CancellationToken ct) =>
+        {
+            if (current.UserId is null) return Results.Unauthorized();
+            var now = DateTime.UtcNow;
+            var weekStart = now.AddDays(-7);
+            var todayStart = now.Date;
+
+            var pending = await db.ReviewItems.CountAsync(r => r.Status == ReviewStatus.Queued, ct);
+            
+            var history = await db.ReviewItems.AsNoTracking()
+                .Where(r => r.Status == ReviewStatus.Decided && r.AssignedEditorId == current.UserId)
+                .ToListAsync(ct);
+
+            var reviewedToday = history.Count(r => r.DecidedAtUtc >= todayStart);
+            var approvedWeek = history.Count(r => r.DecidedAtUtc >= weekStart && r.Decision == DijitalAtolye.BuildingBlocks.EventBus.Contracts.Review.EditorDecision.Approved);
+            var rejectedWeek = history.Count(r => r.DecidedAtUtc >= weekStart && r.Decision == DijitalAtolye.BuildingBlocks.EventBus.Contracts.Review.EditorDecision.Rejected);
+
+            return Results.Ok(new
+            {
+                pendingQueue = pending,
+                reviewedToday = reviewedToday,
+                approvedThisWeek = approvedWeek,
+                rejectedThisWeek = rejectedWeek
+            });
+        });
+
+        grp.MapGet("/history", async (ICurrentUser current, ReviewDbContext db, CancellationToken ct) =>
+        {
+            if (current.UserId is null) return Results.Unauthorized();
+            var items = await db.ReviewItems.AsNoTracking()
+                .Where(r => r.Status == ReviewStatus.Decided && r.AssignedEditorId == current.UserId)
+                .OrderByDescending(r => r.DecidedAtUtc)
+                .Take(50)
+                .ToListAsync(ct);
+            return Results.Ok(items);
         });
 
         return routes;

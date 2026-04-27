@@ -1,4 +1,5 @@
 using DijitalAtolye.BuildingBlocks.Outbox;
+using DijitalAtolye.Identity.Application.Auth.Services;
 using DijitalAtolye.Identity.Application.Auth.Tokens;
 using DijitalAtolye.Identity.Domain.Entities;
 using DijitalAtolye.Identity.Infrastructure.Auth;
@@ -42,6 +43,7 @@ public static class DependencyInjection
 
         services.Configure<JwtIssuerOptions>(configuration.GetSection("JwtIssuer"));
         services.AddScoped<ITokenIssuer, JwtTokenIssuer>();
+        services.AddScoped<IPasswordResetNotifier, LoggingPasswordResetNotifier>();
         services.AddScoped<IOutboxWriter, EfCoreOutboxWriter<IdentityDbContext>>();
         services.AddHostedService<OutboxDispatcher<IdentityDbContext>>();
 

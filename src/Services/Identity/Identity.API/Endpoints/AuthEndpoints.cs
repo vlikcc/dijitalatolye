@@ -55,6 +55,42 @@ public static class AuthEndpoints
           .ProducesProblem(StatusCodes.Status401Unauthorized)
           .WithName("Login");
 
+        auth.MapPost("/forgot-password", async (
+            [FromBody] ForgotPasswordCommand command,
+            [FromServices] IMediator mediator,
+            [FromServices] IAuditLogger audit,
+            CancellationToken ct) =>
+        {
+            await mediator.Send(command, ct);
+            await audit.LogAsync(
+                AuditActions.PasswordResetRequested,
+                entityType: "User",
+                payload: new { command.Email },
+                severity: "Info",
+                ct: ct);
+            // Bilgi sızdırmamak için her durumda 200 dön.
+            return Results.Ok();
+        }).Produces(StatusCodes.Status200OK)
+          .WithName("ForgotPassword");
+
+        auth.MapPost("/reset-password", async (
+            [FromBody] ResetPasswordCommand command,
+            [FromServices] IMediator mediator,
+            [FromServices] IAuditLogger audit,
+            CancellationToken ct) =>
+        {
+            var result = await mediator.Send(command, ct);
+            await audit.LogAsync(
+                AuditActions.PasswordReset,
+                entityType: "User",
+                payload: new { command.Email, success = result.IsSuccess },
+                severity: result.IsSuccess ? "Info" : "Warning",
+                ct: ct);
+            return result.ToHttpResult();
+        }).Produces(StatusCodes.Status200OK)
+          .ProducesProblem(StatusCodes.Status400BadRequest)
+          .WithName("ResetPassword");
+
         auth.MapPost("/refresh", async (
             [FromBody] RefreshRequest body,
             HttpContext http,

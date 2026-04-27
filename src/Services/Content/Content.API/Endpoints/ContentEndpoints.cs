@@ -41,6 +41,7 @@ public static class ContentEndpoints
             [FromBody] AddVersionRequest body,
             ICurrentUser current,
             ContentDbContext db,
+            IOutboxWriter outbox,
             CancellationToken ct) =>
         {
             if (current.UserId is null) return Results.Unauthorized();
@@ -66,6 +67,15 @@ public static class ContentEndpoints
             db.Versions.Add(version);
             content.CurrentVersionId = version.Id;
             content.UpdatedAtUtc = DateTime.UtcNow;
+
+            await outbox.WriteAsync(new DijitalAtolye.BuildingBlocks.EventBus.Contracts.Storage.FileUploadedV1
+            {
+                ContentId = content.Id,
+                VersionId = version.Id,
+                Bucket = version.StorageBucket,
+                Key = version.StorageKey
+            }, ct: ct);
+
             await db.SaveChangesAsync(ct);
             return Results.Created($"/contents/{id}/versions/{version.Id}", version);
         }).RequireAuthorization(Policies.TeacherOrAbove);
@@ -109,7 +119,7 @@ public static class ContentEndpoints
             return Results.Accepted($"/contents/{id}", new { content.Id, content.State });
         }).RequireAuthorization(Policies.TeacherOrAbove);
 
-        contents.MapGet("/", async (
+        contents.MapGet("/mine", async (
             ICurrentUser current,
             ContentDbContext db,
             CancellationToken ct) =>
@@ -121,6 +131,30 @@ public static class ContentEndpoints
                 .Take(50)
                 .ToListAsync(ct);
             return Results.Json(items);
+        });
+
+        contents.MapGet("/all", async (
+            int? pageSize,
+            ICurrentUser current,
+            ContentDbContext db,
+            CancellationToken ct) =>
+        {
+            if (current.UserId is null || !current.Roles.Contains("Admin") && !current.Roles.Contains("SuperAdmin"))
+                return Results.Forbid();
+
+            var items = await db.Contents.AsNoTracking()
+                .OrderByDescending(c => c.CreatedAtUtc)
+                .Take(pageSize ?? 50)
+                .Select(c => new {
+                    c.Id,
+                    c.Title,
+                    State = c.State.ToString(),
+                    AuthorEmail = c.AuthorUserId.ToString(), // Simplification since user email isn't in Content DB
+                    c.CreatedAtUtc
+                })
+                .ToListAsync(ct);
+                
+            return Results.Ok(new { items });
         });
 
         contents.MapGet("/{id:guid}", async (Guid id, ContentDbContext db, CancellationToken ct) =>

@@ -16,6 +16,7 @@ x-common-env: &common-env
   Jwt__Authority: http://identity:8080
   Jwt__Audience: dijitalatolye-api
   Jwt__RequireHttpsMetadata: "false"
+  Jwt__SigningKey: ${JWT_SIGNING_KEY}
   RabbitMq__Host: rabbitmq
   RabbitMq__Port: "5672"
   RabbitMq__VirtualHost: /

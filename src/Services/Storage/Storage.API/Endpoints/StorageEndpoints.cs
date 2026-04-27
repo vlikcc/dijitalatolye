@@ -57,10 +57,56 @@ public static class StorageEndpoints
         return routes;
     }
 
-    private static string Sanitize(string fileName)
+    private static readonly Dictionary<char, string> TurkishMap = new()
     {
+        ['ı'] = "i", ['İ'] = "I",
+        ['ş'] = "s", ['Ş'] = "S",
+        ['ğ'] = "g", ['Ğ'] = "G",
+        ['ü'] = "u", ['Ü'] = "U",
+        ['ö'] = "o", ['Ö'] = "O",
+        ['ç'] = "c", ['Ç'] = "C",
+    };
+
+    /// <summary>
+    /// Object key olarak kullanılacak şekilde dosya adını ASCII'ye çevirir.
+    /// Türkçe karakter NFD/NFC ayrımı (ör. macOS'ta <c>ü</c> = <c>u + U+0308</c>) S3 presigned imzalarında
+    /// host-vs-key encoding ile uyumsuzluk yaratabildiği için tüm non-ASCII karakterler temizlenir.
+    /// </summary>
+    private static string Sanitize(string? fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName)) return "file";
+
+        var normalized = fileName.Normalize(System.Text.NormalizationForm.FormC);
         var invalid = Path.GetInvalidFileNameChars();
-        var clean = new string(fileName.Where(c => !invalid.Contains(c) && c != '/' && c != '\\').ToArray());
+        var sb = new System.Text.StringBuilder(normalized.Length);
+        foreach (var ch in normalized)
+        {
+            if (invalid.Contains(ch) || ch == '/' || ch == '\\')
+            {
+                continue;
+            }
+            if (TurkishMap.TryGetValue(ch, out var mapped))
+            {
+                sb.Append(mapped);
+                continue;
+            }
+            if (ch <= 0x7F)
+            {
+                sb.Append(ch);
+                continue;
+            }
+            // Birleştirme imleri (combining marks) ve diğer non-ASCII'leri at.
+            if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(ch) is
+                System.Globalization.UnicodeCategory.NonSpacingMark or
+                System.Globalization.UnicodeCategory.SpacingCombiningMark or
+                System.Globalization.UnicodeCategory.EnclosingMark)
+            {
+                continue;
+            }
+            sb.Append('_');
+        }
+
+        var clean = sb.ToString().Trim('.', ' ', '_');
         return clean.Length == 0 ? "file" : clean;
     }
 }

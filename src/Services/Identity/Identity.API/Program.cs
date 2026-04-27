@@ -31,8 +31,9 @@ builder.Services.AddDijitalAtolyeEventBus(
     serviceName: "identity",
     configureBus: null);
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUserAccessor>();
-builder.Services.AddAuthorization();
+builder.Services.AddDijitalAtolyeJwtAuth(builder.Configuration);
 builder.Services.AddDijitalAtolyeAudit(builder.Configuration, serviceName: "identity");
 
 builder.Services
@@ -47,6 +48,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapAuthEndpoints();
+app.MapAdminUserEndpoints();
 
 if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {

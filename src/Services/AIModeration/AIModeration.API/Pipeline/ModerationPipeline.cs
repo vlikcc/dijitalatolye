@@ -53,7 +53,7 @@ public sealed class ModerationPipeline
 
         // 4) LLM analiz (Türkçe pedagojik + güvenlik)
         var systemPrompt = BuildSystemPrompt();
-        var userPrompt = BuildUserPrompt(submitted, staticReport, entryHtml);
+        var userPrompt = BuildUserPrompt(submitted, staticReport, entryHtml, jsFiles);
         LlmResponse llmResponse;
         try
         {
@@ -150,7 +150,7 @@ public sealed class ModerationPipeline
         };
     }
 
-    private static string BuildUserPrompt(ContentSubmittedV1 s, StaticAnalysisReport sr, string entryHtml)
+    private static string BuildUserPrompt(ContentSubmittedV1 s, StaticAnalysisReport sr, string entryHtml, IReadOnlyDictionary<string, string> jsFiles)
     {
         var sb = new StringBuilder();
         sb.Append("İçerik başlık: ").AppendLine(s.Title);
@@ -165,6 +165,18 @@ public sealed class ModerationPipeline
         sb.AppendLine();
         sb.AppendLine("Entry HTML (ilk 4000 karakter):");
         sb.AppendLine(entryHtml.Length > 4000 ? entryHtml[..4000] : entryHtml);
+        sb.AppendLine();
+        
+        if (jsFiles.Any())
+        {
+            sb.AppendLine("Örnek JS Kodları (ilk 2 dosya, her biri max 2000 karakter):");
+            foreach (var js in jsFiles.Take(2))
+            {
+                sb.AppendLine($"--- {js.Key} ---");
+                sb.AppendLine(js.Value.Length > 2000 ? js.Value[..2000] : js.Value);
+            }
+        }
+
         return sb.ToString();
     }
 

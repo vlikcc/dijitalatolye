@@ -7,7 +7,21 @@ html, body, #root {
 }
 
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  background: #f7f8fb;
-  color: #0f172a;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background: #faf7ff;
+  color: #1a1033;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: #d6bdff;
+  color: #2c0c54;
+}
+
+/* Focus ring tuned for purple brand */
+*:focus-visible {
+  outline: 2px solid #9a5cff;
+  outline-offset: 2px;
+  border-radius: 4px;
 }

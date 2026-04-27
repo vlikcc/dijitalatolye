@@ -16,7 +16,7 @@ export default function AdminContentsPage() {
 
   useEffect(() => {
     api
-      .get<{ items: ContentItem[] }>("/contents", { params: { pageSize: 50 } })
+      .get<{ items: ContentItem[] }>("/contents/all", { params: { pageSize: 50 } })
       .then(({ data }) => setItems(data.items ?? []))
       .catch(() => setItems([]))
       .finally(() => setLoading(false));

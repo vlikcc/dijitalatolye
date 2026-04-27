@@ -39,7 +39,8 @@ public static class UserEndpoints
             var profile = await db.Profiles.FirstOrDefaultAsync(p => p.UserId == current.UserId, ct);
             if (profile is null)
             {
-                return Results.NotFound();
+                profile = new UserProfile { UserId = current.UserId.Value, Email = current.Email ?? "" };
+                db.Profiles.Add(profile);
             }
             profile.DisplayName = body.DisplayName ?? profile.DisplayName;
             profile.FullName = body.FullName;

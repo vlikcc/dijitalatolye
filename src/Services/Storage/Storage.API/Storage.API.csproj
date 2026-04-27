@@ -9,6 +9,7 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\Common\DijitalAtolye.BuildingBlocks.Common.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\WebHostExtensions\DijitalAtolye.BuildingBlocks.WebHostExtensions.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Authentication\DijitalAtolye.BuildingBlocks.Authentication.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\EventBus\DijitalAtolye.BuildingBlocks.EventBus.csproj" />
   </ItemGroup>
 
   <ItemGroup>
