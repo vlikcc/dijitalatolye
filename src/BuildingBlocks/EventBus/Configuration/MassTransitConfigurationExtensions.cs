@@ -23,7 +23,10 @@ public static class MassTransitConfigurationExtensions
 
         services.AddMassTransit(busConfigurator =>
         {
-            busConfigurator.SetKebabCaseEndpointNameFormatter();
+            // Servis adıyla prefix'lenen kebab-case endpoint formatter (broadcast pub/sub için).
+            // Aksi halde tüm servisler aynı consumer-class adından üretilen tek kuyruğu paylaşır
+            // (competing consumer), event sadece tek aboneye gider.
+            busConfigurator.SetEndpointNameFormatter(new ServicePrefixedKebabCaseFormatter(serviceName));
 
             if (consumerAssemblies.Length > 0)
             {
@@ -68,6 +71,28 @@ public sealed class RabbitMqOptions
     public string VirtualHost { get; init; } = "/";
     public string Username { get; init; } = "guest";
     public string Password { get; init; } = "guest";
+}
+
+internal sealed class ServicePrefixedKebabCaseFormatter : IEndpointNameFormatter
+{
+    private readonly string _prefix;
+    private readonly KebabCaseEndpointNameFormatter _inner = new(includeNamespace: false);
+
+    public ServicePrefixedKebabCaseFormatter(string serviceName)
+    {
+        _prefix = string.IsNullOrWhiteSpace(serviceName) ? string.Empty : serviceName.ToLowerInvariant() + "-";
+    }
+
+    public string Separator => _inner.Separator;
+    public string TemporaryEndpoint(string tag) => _prefix + _inner.TemporaryEndpoint(tag);
+    public string Consumer<T>() where T : class, IConsumer => _prefix + _inner.Consumer<T>();
+    public string Message<T>() where T : class => _prefix + _inner.Message<T>();
+    public string Saga<T>() where T : class, ISaga => _prefix + _inner.Saga<T>();
+    public string ExecuteActivity<T, TArguments>() where T : class, IExecuteActivity<TArguments> where TArguments : class
+        => _prefix + _inner.ExecuteActivity<T, TArguments>();
+    public string CompensateActivity<T, TLog>() where T : class, ICompensateActivity<TLog> where TLog : class
+        => _prefix + _inner.CompensateActivity<T, TLog>();
+    public string SanitizeName(string name) => _inner.SanitizeName(name);
 }
 
 internal sealed class KebabCaseEntityNameFormatter : IEntityNameFormatter

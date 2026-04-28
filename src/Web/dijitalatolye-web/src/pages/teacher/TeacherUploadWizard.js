@@ -9,6 +9,9 @@ const initialMeta = {
     gradeLevel: 4,
     outcomeCodes: [],
     tags: [],
+    targetAge: undefined,
+    durationMinutes: undefined,
+    difficulty: 'Medium',
 };
 export default function TeacherUploadWizard() {
     const nav = useNavigate();
@@ -41,11 +44,12 @@ export default function TeacherUploadWizard() {
         setError(null);
         setUploadProgress(0);
         try {
+            const isZip = file.name.toLowerCase().endsWith('.zip');
+            const contentType = isZip ? 'application/zip' : 'text/html';
             const { data: presigned } = await api.post('/storage/uploads/presigned', {
-                contentId,
+                fileName: file.name,
+                contentType,
                 purpose: 'content',
-                contentType: 'application/zip',
-                sizeBytes: file.size,
             });
             const xhr = new XMLHttpRequest();
             const done = new Promise((resolve, reject) => {
@@ -56,16 +60,17 @@ export default function TeacherUploadWizard() {
                 xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`HTTP ${xhr.status}`)));
                 xhr.onerror = () => reject(new Error('Network error'));
             });
-            xhr.open('PUT', presigned.uploadUrl);
-            xhr.setRequestHeader('Content-Type', 'application/zip');
+            xhr.open('PUT', presigned.url);
+            xhr.setRequestHeader('Content-Type', contentType);
             xhr.send(file);
             await done;
             await api.post(`/contents/${contentId}/versions`, {
-                storageBucket: presigned.bucket,
-                storageKey: presigned.objectKey,
-                manifestEntry: 'index.html',
+                bucket: presigned.bucket,
+                key: presigned.key,
+                manifestEntry: null,
+                manifestJson: null,
                 fileSizeBytes: file.size,
-                sha256: '',
+                sha256: null,
                 changeLog: 'wizard upload',
             });
             setStep(3);
@@ -106,21 +111,17 @@ function Stepper({ current }) {
             const idx = (i + 1);
             const active = idx === current;
             const done = idx < current;
-            return (_jsxs("li", { className: `flex items-center ${i < labels.length - 1 ? 'w-full' : ''}`, children: [_jsx("span", { className: `flex items-center justify-center w-8 h-8 rounded-full mr-2 text-xs ${active
-                            ? 'bg-blue-600 text-white'
-                            : done
-                                ? 'bg-green-500 text-white'
-                                : 'bg-gray-200 text-gray-700'}`, children: idx }), _jsx("span", { className: active ? 'text-blue-600' : '', children: l }), i < labels.length - 1 && _jsx("span", { className: "flex-1 mx-3 h-px bg-gray-200" })] }, l));
+            return (_jsxs("li", { className: `flex items-center ${i < labels.length - 1 ? 'w-full' : ''}`, children: [_jsx("span", { className: `flex items-center justify-center w-8 h-8 rounded-full mr-2 text-xs ${active ? 'bg-blue-600 text-white' : done ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}`, children: idx }), _jsx("span", { className: active ? 'text-blue-600' : '', children: l }), i < labels.length - 1 && _jsx("span", { className: "flex-1 mx-3 h-px bg-gray-200" })] }, l));
         }) }));
 }
 function MetadataStep({ meta, onChange, onNext, busy, }) {
-    return (_jsxs("div", { className: "space-y-4", children: [_jsx(Field, { label: "Ba\u015Fl\u0131k", children: _jsx("input", { className: "input", value: meta.title, onChange: (e) => onChange({ ...meta, title: e.target.value }), required: true }) }), _jsx(Field, { label: "A\u00E7\u0131klama", children: _jsx("textarea", { className: "input", rows: 3, value: meta.description, onChange: (e) => onChange({ ...meta, description: e.target.value }) }) }), _jsxs("div", { className: "grid grid-cols-2 gap-4", children: [_jsx(Field, { label: "Ders", children: _jsx("select", { className: "input", value: meta.subject, onChange: (e) => onChange({ ...meta, subject: e.target.value }), children: ['Matematik', 'Türkçe', 'Fen', 'Sosyal Bilgiler', 'İngilizce'].map((s) => (_jsx("option", { children: s }, s))) }) }), _jsx(Field, { label: "S\u0131n\u0131f", children: _jsx("input", { type: "number", min: 1, max: 12, className: "input", value: meta.gradeLevel, onChange: (e) => onChange({ ...meta, gradeLevel: Number(e.target.value) }) }) })] }), _jsx(Field, { label: "Kazan\u0131m kodlar\u0131 (virg\u00FClle)", children: _jsx("input", { className: "input", value: meta.outcomeCodes.join(','), onChange: (e) => onChange({ ...meta, outcomeCodes: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) }) }) }), _jsx(Field, { label: "Etiketler (virg\u00FClle)", children: _jsx("input", { className: "input", value: meta.tags.join(','), onChange: (e) => onChange({ ...meta, tags: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) }) }) }), _jsx("div", { className: "flex justify-end", children: _jsx("button", { onClick: onNext, disabled: busy || !meta.title, className: "btn-primary", children: busy ? 'Kaydediliyor…' : 'İleri' }) })] }));
+    return (_jsxs("div", { className: "space-y-4", children: [_jsx(Field, { label: "Ba\u015Fl\u0131k", children: _jsx("input", { className: "input", value: meta.title, onChange: (e) => onChange({ ...meta, title: e.target.value }), required: true }) }), _jsx(Field, { label: "A\u00E7\u0131klama", children: _jsx("textarea", { className: "input", rows: 3, value: meta.description, onChange: (e) => onChange({ ...meta, description: e.target.value }) }) }), _jsxs("div", { className: "grid grid-cols-2 gap-4", children: [_jsx(Field, { label: "Ders", children: _jsx("select", { className: "input", value: meta.subject, onChange: (e) => onChange({ ...meta, subject: e.target.value }), children: ['Matematik', 'Türkçe', 'Fen', 'Sosyal Bilgiler', 'İngilizce'].map((s) => (_jsx("option", { children: s }, s))) }) }), _jsx(Field, { label: "S\u0131n\u0131f", children: _jsx("input", { type: "number", min: 1, max: 12, className: "input", value: meta.gradeLevel, onChange: (e) => onChange({ ...meta, gradeLevel: Number(e.target.value) }) }) })] }), _jsxs("div", { className: "grid grid-cols-3 gap-4", children: [_jsx(Field, { label: "Hedef ya\u015F", children: _jsx("input", { type: "number", min: 5, max: 20, className: "input", value: meta.targetAge ?? '', onChange: (e) => onChange({ ...meta, targetAge: e.target.value ? Number(e.target.value) : undefined }) }) }), _jsx(Field, { label: "S\u00FCre (dk)", children: _jsx("input", { type: "number", min: 1, max: 120, className: "input", value: meta.durationMinutes ?? '', onChange: (e) => onChange({ ...meta, durationMinutes: e.target.value ? Number(e.target.value) : undefined }) }) }), _jsx(Field, { label: "Zorluk", children: _jsxs("select", { className: "input", value: meta.difficulty ?? 'Medium', onChange: (e) => onChange({ ...meta, difficulty: e.target.value }), children: [_jsx("option", { value: "Easy", children: "Kolay" }), _jsx("option", { value: "Medium", children: "Orta" }), _jsx("option", { value: "Hard", children: "Zor" })] }) })] }), _jsx(Field, { label: "Kazan\u0131m kodlar\u0131 (virg\u00FClle)", children: _jsx("input", { className: "input", value: meta.outcomeCodes.join(','), onChange: (e) => onChange({ ...meta, outcomeCodes: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) }) }) }), _jsx(Field, { label: "Etiketler (virg\u00FClle)", children: _jsx("input", { className: "input", value: meta.tags.join(','), onChange: (e) => onChange({ ...meta, tags: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) }) }) }), _jsx("div", { className: "flex justify-end", children: _jsx("button", { onClick: onNext, disabled: busy || !meta.title, className: "btn-primary", children: busy ? 'Kaydediliyor…' : 'İleri' }) })] }));
 }
 function UploadStep({ file, onFile, progress, busy, onNext, onBack, }) {
-    return (_jsxs("div", { className: "space-y-4", children: [_jsx(Field, { label: "ZIP dosyas\u0131 (HTML5 oyun paketi, manifest.json + index.html i\u00E7ermeli)", children: _jsx("input", { type: "file", accept: ".zip,application/zip", onChange: (e) => onFile(e.target.files?.[0] ?? null) }) }), file && _jsxs("p", { className: "text-sm text-gray-600", children: [file.name, " \u2014 ", (file.size / 1024 / 1024).toFixed(2), " MB"] }), progress > 0 && (_jsx("div", { className: "w-full bg-gray-200 rounded h-2", children: _jsx("div", { className: "bg-blue-600 h-2 rounded", style: { width: `${progress}%` } }) })), _jsxs("div", { className: "flex justify-between", children: [_jsx("button", { onClick: onBack, className: "btn-secondary", children: "Geri" }), _jsx("button", { onClick: onNext, disabled: busy || !file, className: "btn-primary", children: busy ? 'Yükleniyor…' : 'Yükle ve İleri' })] })] }));
+    return (_jsxs("div", { className: "space-y-4", children: [_jsx(Field, { label: "ZIP veya tek HTML dosyas\u0131 (manifest.json k\u00F6k dizinde olmal\u0131)", children: _jsx("input", { type: "file", accept: ".zip,.html,.htm,application/zip,text/html", onChange: (e) => onFile(e.target.files?.[0] ?? null) }) }), _jsxs("div", { className: "text-xs text-slate-600", children: ["ZIP y\u00FCklerken k\u00F6k dizinde ", _jsx("code", { children: "manifest.json" }), " bulunmal\u0131 (", _jsx("code", { children: "entry" }), ", ", _jsx("code", { children: "title" }), ", ", _jsx("code", { children: "version" }), " alanlar\u0131 zorunlu). Maksimum 50 MB."] }), file && _jsxs("p", { className: "text-sm text-gray-600", children: [file.name, " \u2014 ", (file.size / 1024 / 1024).toFixed(2), " MB"] }), progress > 0 && (_jsx("div", { className: "w-full bg-gray-200 rounded h-2", children: _jsx("div", { className: "bg-blue-600 h-2 rounded", style: { width: `${progress}%` } }) })), _jsxs("div", { className: "flex justify-between", children: [_jsx("button", { onClick: onBack, className: "btn-secondary", children: "Geri" }), _jsx("button", { onClick: onNext, disabled: busy || !file, className: "btn-primary", children: busy ? 'Yükleniyor…' : 'Yükle ve İleri' })] })] }));
 }
 function ReviewStep({ meta, file, busy, onSubmit, onBack, }) {
-    return (_jsxs("div", { className: "space-y-4", children: [_jsx("h2", { className: "text-lg font-semibold", children: "\u00D6nizleme" }), _jsxs("dl", { className: "grid grid-cols-3 gap-2 text-sm", children: [_jsx(Term, { label: "Ba\u015Fl\u0131k", value: meta.title }), _jsx(Term, { label: "Ders", value: meta.subject }), _jsx(Term, { label: "S\u0131n\u0131f", value: String(meta.gradeLevel) }), _jsx(Term, { label: "Kazan\u0131mlar", value: meta.outcomeCodes.join(', ') }), _jsx(Term, { label: "Etiketler", value: meta.tags.join(', ') }), _jsx(Term, { label: "Dosya", value: file?.name ?? '-' })] }), _jsxs("div", { className: "flex justify-between", children: [_jsx("button", { onClick: onBack, className: "btn-secondary", children: "Geri" }), _jsx("button", { onClick: onSubmit, disabled: busy, className: "btn-primary", children: busy ? 'Gönderiliyor…' : 'AI Moderasyona Gönder' })] })] }));
+    return (_jsxs("div", { className: "space-y-4", children: [_jsx("h2", { className: "text-lg font-semibold", children: "\u00D6nizleme" }), _jsxs("dl", { className: "grid grid-cols-3 gap-2 text-sm", children: [_jsx(Term, { label: "Ba\u015Fl\u0131k", value: meta.title }), _jsx(Term, { label: "Ders", value: meta.subject }), _jsx(Term, { label: "S\u0131n\u0131f", value: String(meta.gradeLevel) }), _jsx(Term, { label: "Hedef ya\u015F", value: meta.targetAge ? String(meta.targetAge) : '-' }), _jsx(Term, { label: "S\u00FCre (dk)", value: meta.durationMinutes ? String(meta.durationMinutes) : '-' }), _jsx(Term, { label: "Zorluk", value: meta.difficulty ?? '-' }), _jsx(Term, { label: "Kazan\u0131mlar", value: meta.outcomeCodes.join(', ') }), _jsx(Term, { label: "Etiketler", value: meta.tags.join(', ') }), _jsx(Term, { label: "Dosya", value: file?.name ?? '-' })] }), _jsxs("div", { className: "flex justify-between", children: [_jsx("button", { onClick: onBack, className: "btn-secondary", children: "Geri" }), _jsx("button", { onClick: onSubmit, disabled: busy, className: "btn-primary", children: busy ? 'Gönderiliyor…' : 'AI Moderasyona Gönder' })] })] }));
 }
 function DoneStep({ onMine, onNew }) {
     return (_jsxs("div", { className: "text-center space-y-4 py-8", children: [_jsx("div", { className: "text-5xl", children: "\u2713" }), _jsx("p", { className: "text-lg", children: "\u0130\u00E7erik AI moderasyon kuyru\u011Funa g\u00F6nderildi. Sonu\u00E7 i\u00E7in bildirimleri takip edin." }), _jsxs("div", { className: "flex justify-center gap-3", children: [_jsx("button", { className: "btn-secondary", onClick: onMine, children: "\u0130\u00E7eriklerim" }), _jsx("button", { className: "btn-primary", onClick: onNew, children: "Yeni Y\u00FCkleme" })] })] }));
@@ -134,7 +135,7 @@ function Term({ label, value }) {
 function extractError(e) {
     if (e && typeof e === 'object' && 'response' in e) {
         const r = e.response;
-        return r?.data?.detail ?? r?.data?.title ?? 'Bilinmeyen hata';
+        return r?.data?.error ?? r?.data?.detail ?? r?.data?.title ?? 'Bilinmeyen hata';
     }
     if (e instanceof Error)
         return e.message;

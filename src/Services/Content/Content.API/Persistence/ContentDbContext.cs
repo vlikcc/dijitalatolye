@@ -28,6 +28,11 @@ public sealed class ContentDbContext : DbContext
             b.Property(c => c.Slug).HasMaxLength(220);
             b.HasIndex(c => c.Slug).IsUnique().HasFilter(@"""Slug"" IS NOT NULL");
             b.Property(c => c.Subject).HasMaxLength(60);
+            b.Property(c => c.Difficulty).HasMaxLength(10);
+            b.Property(c => c.CoverImageBucket).HasMaxLength(120);
+            b.Property(c => c.CoverImageKey).HasMaxLength(500);
+            b.Property(c => c.PublishedBucket).HasMaxLength(120);
+            b.Property(c => c.PublishedKey).HasMaxLength(500);
             b.Property(c => c.State).HasConversion<string>().HasMaxLength(40);
             b.Property(c => c.OutcomeCodes).HasColumnType("text[]");
             b.Property(c => c.Tags).HasColumnType("text[]");

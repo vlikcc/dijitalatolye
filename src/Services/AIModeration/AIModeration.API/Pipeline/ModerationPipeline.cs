@@ -120,6 +120,11 @@ public sealed class ModerationPipeline
 
     private static (string EntryHtml, IReadOnlyDictionary<string, string> JsFiles) ExtractEntry(byte[] zipBytes, string entryName)
     {
+        // Tek HTML upload fallback: ZIP imzası ("PK\x03\x04") yoksa içeriği doğrudan HTML kabul et.
+        if (zipBytes.Length < 4 || !(zipBytes[0] == 0x50 && zipBytes[1] == 0x4B && zipBytes[2] == 0x03 && zipBytes[3] == 0x04))
+        {
+            return (Encoding.UTF8.GetString(zipBytes), new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+        }
         using var ms = new MemoryStream(zipBytes);
         using var zip = new ZipArchive(ms, ZipArchiveMode.Read);
         var entryHtml = string.Empty;

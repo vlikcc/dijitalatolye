@@ -22,5 +22,6 @@
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="MediatR" />
+    <PackageReference Include="Minio" />
   </ItemGroup>
 </Project>

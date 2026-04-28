@@ -2,10 +2,13 @@ using DijitalAtolye.BuildingBlocks.EventBus.Contracts.Content;
 using DijitalAtolye.BuildingBlocks.EventBus.Contracts.Moderation;
 using DijitalAtolye.BuildingBlocks.EventBus.Contracts.Review;
 using DijitalAtolye.BuildingBlocks.Outbox;
+using DijitalAtolye.Content.API.Bundles;
 using DijitalAtolye.Content.API.Domain;
 using DijitalAtolye.Content.API.Persistence;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Minio;
+using Minio.DataModel.Args;
 
 namespace DijitalAtolye.Content.API.Consumers;
 
@@ -63,19 +66,29 @@ public sealed class EditorDecisionMadeConsumer : IConsumer<EditorDecisionMadeV1>
 {
     private readonly ContentDbContext _db;
     private readonly IOutboxWriter _outbox;
+    private readonly BundleExtractor _extractor;
+    private readonly IConfiguration _config;
     private readonly ILogger<EditorDecisionMadeConsumer> _logger;
 
-    public EditorDecisionMadeConsumer(ContentDbContext db, IOutboxWriter outbox, ILogger<EditorDecisionMadeConsumer> logger)
+    public EditorDecisionMadeConsumer(
+        ContentDbContext db,
+        IOutboxWriter outbox,
+        BundleExtractor extractor,
+        IConfiguration config,
+        ILogger<EditorDecisionMadeConsumer> logger)
     {
         _db = db;
         _outbox = outbox;
+        _extractor = extractor;
+        _config = config;
         _logger = logger;
     }
 
     public async Task Consume(ConsumeContext<EditorDecisionMadeV1> context)
     {
         var msg = context.Message;
-        var content = await _db.Contents.FirstOrDefaultAsync(c => c.Id == msg.ContentId, context.CancellationToken);
+        var content = await _db.Contents.Include(c => c.Versions)
+            .FirstOrDefaultAsync(c => c.Id == msg.ContentId, context.CancellationToken);
         if (content is null)
         {
             _logger.LogWarning("Content {ContentId} not found for EditorDecision", msg.ContentId);
@@ -91,6 +104,7 @@ public sealed class EditorDecisionMadeConsumer : IConsumer<EditorDecisionMadeV1>
                     if (content.CanTransitionTo(ContentState.Published))
                     {
                         content.Slug ??= GenerateSlug(content.Title);
+                        await PublishCopyAsync(content, context.CancellationToken);
                         content.TransitionTo(ContentState.Published);
                         await _outbox.WriteAsync(new ContentPublishedV1
                         {
@@ -121,6 +135,36 @@ public sealed class EditorDecisionMadeConsumer : IConsumer<EditorDecisionMadeV1>
         }
 
         await _db.SaveChangesAsync(context.CancellationToken);
+    }
+
+    private async Task PublishCopyAsync(Domain.Content content, CancellationToken ct)
+    {
+        if (content.CurrentVersionId is null) return;
+        var version = content.Versions.FirstOrDefault(v => v.Id == content.CurrentVersionId);
+        if (version is null) return;
+
+        var publishedBucket = _config["Minio:BucketPublished"] ?? "dijitalatolye-content-published";
+        var publishedPrefix = $"{content.Id:N}/{version.Id:N}";
+
+        try
+        {
+            var result = await _extractor.ExtractToPublishedAsync(
+                version.StorageBucket,
+                version.StorageKey,
+                version.ManifestEntry,
+                publishedBucket,
+                publishedPrefix,
+                ct);
+
+            content.PublishedBucket = publishedBucket;
+            content.PublishedKey = result.EntryKey;
+            _logger.LogInformation("Bundle yayına extract edildi: {Files} dosya, entry={Entry}", result.FileCount, result.EntryKey);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Yayın extract başarısız: {Bucket}/{Prefix}", publishedBucket, publishedPrefix);
+            // Yayını engellememek adına orijinal bucket'taki anahtara fallback play endpoint'inde uygulanır.
+        }
     }
 
     private static string GenerateSlug(string title)

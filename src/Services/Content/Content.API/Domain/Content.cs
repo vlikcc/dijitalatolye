@@ -24,11 +24,24 @@ public sealed class Content
 
     public Guid? CurrentVersionId { get; set; }
 
+    public int? TargetAge { get; set; }
+
+    public int? DurationMinutes { get; set; }
+
+    /// <summary>"Easy" | "Medium" | "Hard"</summary>
+    public string? Difficulty { get; set; }
+
+    public string? CoverImageBucket { get; set; }
+    public string? CoverImageKey { get; set; }
+
     public DateTime CreatedAtUtc { get; init; } = DateTime.UtcNow;
 
     public DateTime? PublishedAtUtc { get; set; }
 
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    public string? PublishedBucket { get; set; }
+    public string? PublishedKey { get; set; }
 
     public ICollection<ContentVersion> Versions { get; init; } = [];
 

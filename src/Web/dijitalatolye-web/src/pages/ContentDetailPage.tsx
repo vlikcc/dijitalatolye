@@ -6,13 +6,14 @@ interface ContentDetail {
   id: string;
   title: string;
   description?: string;
-  slug: string;
+  slug?: string | null;
   subject?: string;
   gradeLevel?: number;
   tags?: string[];
   authorName?: string;
   views?: number;
   likes?: number;
+  state?: string;
 }
 
 interface Comment {
@@ -25,13 +26,19 @@ interface Comment {
 export default function ContentDetailPage() {
   const { slug } = useParams();
   const [content, setContent] = useState<ContentDetail | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
-    api.get<ContentDetail>(`/search/contents/${slug}`).then(({ data }) => setContent(data));
+    const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+    const url = isGuid ? `/contents/${slug}` : `/search/contents/${slug}`;
+    setNotFound(false);
+    api.get<ContentDetail>(url)
+      .then(({ data }) => setContent(data))
+      .catch(() => setNotFound(true));
   }, [slug]);
 
   useEffect(() => {
@@ -68,6 +75,7 @@ export default function ContentDetailPage() {
     else void navigator.clipboard.writeText(url);
   }
 
+  if (notFound) return <p className="p-6 text-rose-700">İçerik bulunamadı.</p>;
   if (!content) return <p className="p-6">Yükleniyor…</p>;
 
   return (
@@ -93,11 +101,25 @@ export default function ContentDetailPage() {
 
       {content.description && <p className="mt-4 text-gray-700">{content.description}</p>}
 
-      <div className="mt-6 flex gap-3">
-        <Link to={`/play/${content.slug}`} className="btn-primary">Oyna</Link>
+      <div className="mt-6 flex gap-3 items-center">
+        {content.slug ? (
+          <Link to={`/play/${content.slug}`} className="btn-primary">Oyna</Link>
+        ) : (
+          <span
+            className="btn-primary opacity-50 cursor-not-allowed"
+            title="İçerik henüz yayınlanmadığı için oynatılamıyor"
+          >
+            Oyna
+          </span>
+        )}
         <button onClick={like} className="btn-secondary">♥ {content.likes ?? 0}</button>
         <button onClick={favorite} className="btn-secondary">★ Favori</button>
         <button onClick={share} className="btn-secondary">Paylaş</button>
+        {!content.slug && (
+          <span className="text-xs text-amber-700">
+            Bu içerik henüz yayında değil; yayına alındığında oynatılabilir olacak.
+          </span>
+        )}
       </div>
 
       <h2 className="text-xl font-semibold mt-10 mb-3">Yorumlar</h2>

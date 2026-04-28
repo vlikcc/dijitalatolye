@@ -16,6 +16,7 @@ public sealed class OutboxDispatcher<TDbContext> : BackgroundService where TDbCo
 {
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
     private const int BatchSize = 100;
+    private static readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
 
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<OutboxDispatcher<TDbContext>> _logger;
@@ -66,7 +67,7 @@ public sealed class OutboxDispatcher<TDbContext> : BackgroundService where TDbCo
         {
             try
             {
-                var type = Type.GetType(message.EventType);
+                var type = ResolveType(message.EventType);
                 if (type is null)
                 {
                     message.Error = $"Type not found: {message.EventType}";
@@ -74,7 +75,7 @@ public sealed class OutboxDispatcher<TDbContext> : BackgroundService where TDbCo
                     continue;
                 }
 
-                var payload = JsonSerializer.Deserialize(message.Payload, type)
+                var payload = JsonSerializer.Deserialize(message.Payload, type, _serializerOptions)
                     ?? throw new InvalidOperationException("Deserialized payload is null.");
 
                 await publishEndpoint.Publish(payload, type, ct);
@@ -92,5 +93,25 @@ public sealed class OutboxDispatcher<TDbContext> : BackgroundService where TDbCo
 
         await dbContext.SaveChangesAsync(ct);
         _logger.LogDebug("Dispatched {Count} outbox messages", pending.Count(m => m.ProcessedAt != null));
+    }
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Type?> _typeCache = new();
+    private static Type? ResolveType(string fullName)
+    {
+        return _typeCache.GetOrAdd(fullName, key =>
+        {
+            var direct = Type.GetType(key);
+            if (direct is not null) return direct;
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                try
+                {
+                    var t = asm.GetType(key, throwOnError: false, ignoreCase: false);
+                    if (t is not null) return t;
+                }
+                catch { /* dynamic asm vs */ }
+            }
+            return null;
+        });
     }
 }

@@ -11,6 +11,9 @@ interface ContentMeta {
   gradeLevel: number;
   outcomeCodes: string[];
   tags: string[];
+  targetAge?: number;
+  durationMinutes?: number;
+  difficulty?: 'Easy' | 'Medium' | 'Hard';
 }
 
 const initialMeta: ContentMeta = {
@@ -20,6 +23,9 @@ const initialMeta: ContentMeta = {
   gradeLevel: 4,
   outcomeCodes: [],
   tags: [],
+  targetAge: undefined,
+  durationMinutes: undefined,
+  difficulty: 'Medium',
 };
 
 export default function TeacherUploadWizard() {
@@ -52,11 +58,13 @@ export default function TeacherUploadWizard() {
     setError(null);
     setUploadProgress(0);
     try {
+      const isZip = file.name.toLowerCase().endsWith('.zip');
+      const contentType = isZip ? 'application/zip' : 'text/html';
+
       const { data: presigned } = await api.post('/storage/uploads/presigned', {
-        contentId,
+        fileName: file.name,
+        contentType,
         purpose: 'content',
-        contentType: 'application/zip',
-        sizeBytes: file.size,
       });
 
       const xhr = new XMLHttpRequest();
@@ -67,17 +75,18 @@ export default function TeacherUploadWizard() {
         xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`HTTP ${xhr.status}`)));
         xhr.onerror = () => reject(new Error('Network error'));
       });
-      xhr.open('PUT', presigned.uploadUrl);
-      xhr.setRequestHeader('Content-Type', 'application/zip');
+      xhr.open('PUT', presigned.url);
+      xhr.setRequestHeader('Content-Type', contentType);
       xhr.send(file);
       await done;
 
       await api.post(`/contents/${contentId}/versions`, {
-        storageBucket: presigned.bucket,
-        storageKey: presigned.objectKey,
-        manifestEntry: 'index.html',
+        bucket: presigned.bucket,
+        key: presigned.key,
+        manifestEntry: null,
+        manifestJson: null,
         fileSizeBytes: file.size,
-        sha256: '',
+        sha256: null,
         changeLog: 'wizard upload',
       });
 
@@ -111,12 +120,7 @@ export default function TeacherUploadWizard() {
 
       <div className="mt-6 bg-white border rounded-lg p-6">
         {step === 1 && (
-          <MetadataStep
-            meta={meta}
-            onChange={setMeta}
-            onNext={createContent}
-            busy={busy}
-          />
+          <MetadataStep meta={meta} onChange={setMeta} onNext={createContent} busy={busy} />
         )}
         {step === 2 && (
           <UploadStep
@@ -129,13 +133,7 @@ export default function TeacherUploadWizard() {
           />
         )}
         {step === 3 && (
-          <ReviewStep
-            meta={meta}
-            file={file}
-            busy={busy}
-            onSubmit={submitForReview}
-            onBack={() => setStep(2)}
-          />
+          <ReviewStep meta={meta} file={file} busy={busy} onSubmit={submitForReview} onBack={() => setStep(2)} />
         )}
         {step === 4 && (
           <DoneStep
@@ -166,11 +164,7 @@ function Stepper({ current }: { current: Step }) {
           <li key={l} className={`flex items-center ${i < labels.length - 1 ? 'w-full' : ''}`}>
             <span
               className={`flex items-center justify-center w-8 h-8 rounded-full mr-2 text-xs ${
-                active
-                  ? 'bg-blue-600 text-white'
-                  : done
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-200 text-gray-700'
+                active ? 'bg-blue-600 text-white' : done ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
               }`}
             >
               {idx}
@@ -198,28 +192,14 @@ function MetadataStep({
   return (
     <div className="space-y-4">
       <Field label="Başlık">
-        <input
-          className="input"
-          value={meta.title}
-          onChange={(e) => onChange({ ...meta, title: e.target.value })}
-          required
-        />
+        <input className="input" value={meta.title} onChange={(e) => onChange({ ...meta, title: e.target.value })} required />
       </Field>
       <Field label="Açıklama">
-        <textarea
-          className="input"
-          rows={3}
-          value={meta.description}
-          onChange={(e) => onChange({ ...meta, description: e.target.value })}
-        />
+        <textarea className="input" rows={3} value={meta.description} onChange={(e) => onChange({ ...meta, description: e.target.value })} />
       </Field>
       <div className="grid grid-cols-2 gap-4">
         <Field label="Ders">
-          <select
-            className="input"
-            value={meta.subject}
-            onChange={(e) => onChange({ ...meta, subject: e.target.value })}
-          >
+          <select className="input" value={meta.subject} onChange={(e) => onChange({ ...meta, subject: e.target.value })}>
             {['Matematik', 'Türkçe', 'Fen', 'Sosyal Bilgiler', 'İngilizce'].map((s) => (
               <option key={s}>{s}</option>
             ))}
@@ -227,31 +207,50 @@ function MetadataStep({
         </Field>
         <Field label="Sınıf">
           <input
-            type="number"
-            min={1}
-            max={12}
-            className="input"
+            type="number" min={1} max={12} className="input"
             value={meta.gradeLevel}
             onChange={(e) => onChange({ ...meta, gradeLevel: Number(e.target.value) })}
           />
+        </Field>
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        <Field label="Hedef yaş">
+          <input
+            type="number" min={5} max={20} className="input"
+            value={meta.targetAge ?? ''}
+            onChange={(e) => onChange({ ...meta, targetAge: e.target.value ? Number(e.target.value) : undefined })}
+          />
+        </Field>
+        <Field label="Süre (dk)">
+          <input
+            type="number" min={1} max={120} className="input"
+            value={meta.durationMinutes ?? ''}
+            onChange={(e) => onChange({ ...meta, durationMinutes: e.target.value ? Number(e.target.value) : undefined })}
+          />
+        </Field>
+        <Field label="Zorluk">
+          <select className="input"
+            value={meta.difficulty ?? 'Medium'}
+            onChange={(e) => onChange({ ...meta, difficulty: e.target.value as ContentMeta['difficulty'] })}
+          >
+            <option value="Easy">Kolay</option>
+            <option value="Medium">Orta</option>
+            <option value="Hard">Zor</option>
+          </select>
         </Field>
       </div>
       <Field label="Kazanım kodları (virgülle)">
         <input
           className="input"
           value={meta.outcomeCodes.join(',')}
-          onChange={(e) =>
-            onChange({ ...meta, outcomeCodes: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })
-          }
+          onChange={(e) => onChange({ ...meta, outcomeCodes: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
         />
       </Field>
       <Field label="Etiketler (virgülle)">
         <input
           className="input"
           value={meta.tags.join(',')}
-          onChange={(e) =>
-            onChange({ ...meta, tags: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })
-          }
+          onChange={(e) => onChange({ ...meta, tags: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
         />
       </Field>
       <div className="flex justify-end">
@@ -264,12 +263,7 @@ function MetadataStep({
 }
 
 function UploadStep({
-  file,
-  onFile,
-  progress,
-  busy,
-  onNext,
-  onBack,
+  file, onFile, progress, busy, onNext, onBack,
 }: {
   file: File | null;
   onFile: (f: File | null) => void;
@@ -280,13 +274,16 @@ function UploadStep({
 }) {
   return (
     <div className="space-y-4">
-      <Field label="ZIP dosyası (HTML5 oyun paketi, manifest.json + index.html içermeli)">
+      <Field label="ZIP veya tek HTML dosyası (manifest.json kök dizinde olmalı)">
         <input
           type="file"
-          accept=".zip,application/zip"
+          accept=".zip,.html,.htm,application/zip,text/html"
           onChange={(e) => onFile(e.target.files?.[0] ?? null)}
         />
       </Field>
+      <div className="text-xs text-slate-600">
+        ZIP yüklerken kök dizinde <code>manifest.json</code> bulunmalı (<code>entry</code>, <code>title</code>, <code>version</code> alanları zorunlu). Maksimum 50 MB.
+      </div>
       {file && <p className="text-sm text-gray-600">{file.name} — {(file.size / 1024 / 1024).toFixed(2)} MB</p>}
       {progress > 0 && (
         <div className="w-full bg-gray-200 rounded h-2">
@@ -304,11 +301,7 @@ function UploadStep({
 }
 
 function ReviewStep({
-  meta,
-  file,
-  busy,
-  onSubmit,
-  onBack,
+  meta, file, busy, onSubmit, onBack,
 }: {
   meta: ContentMeta;
   file: File | null;
@@ -323,6 +316,9 @@ function ReviewStep({
         <Term label="Başlık" value={meta.title} />
         <Term label="Ders" value={meta.subject} />
         <Term label="Sınıf" value={String(meta.gradeLevel)} />
+        <Term label="Hedef yaş" value={meta.targetAge ? String(meta.targetAge) : '-'} />
+        <Term label="Süre (dk)" value={meta.durationMinutes ? String(meta.durationMinutes) : '-'} />
+        <Term label="Zorluk" value={meta.difficulty ?? '-'} />
         <Term label="Kazanımlar" value={meta.outcomeCodes.join(', ')} />
         <Term label="Etiketler" value={meta.tags.join(', ')} />
         <Term label="Dosya" value={file?.name ?? '-'} />
@@ -370,8 +366,8 @@ function Term({ label, value }: { label: string; value: string }) {
 
 function extractError(e: unknown): string {
   if (e && typeof e === 'object' && 'response' in e) {
-    const r = (e as { response?: { data?: { detail?: string; title?: string } } }).response;
-    return r?.data?.detail ?? r?.data?.title ?? 'Bilinmeyen hata';
+    const r = (e as { response?: { data?: { detail?: string; title?: string; error?: string } } }).response;
+    return r?.data?.error ?? r?.data?.detail ?? r?.data?.title ?? 'Bilinmeyen hata';
   }
   if (e instanceof Error) return e.message;
   return 'Bilinmeyen hata';

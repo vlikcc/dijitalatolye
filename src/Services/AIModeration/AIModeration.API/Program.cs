@@ -9,9 +9,15 @@ using DijitalAtolye.BuildingBlocks.EventBus.Configuration;
 using DijitalAtolye.BuildingBlocks.WebHostExtensions;
 using Microsoft.Extensions.Http.Resilience;
 using Minio;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Mongo Guid'leri Standard formatta (UUID v4) saklamak için global serializer kaydı
+try { BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard)); } catch { }
 
 builder.AddDijitalAtolyeServiceDefaults("aimoderation");
 

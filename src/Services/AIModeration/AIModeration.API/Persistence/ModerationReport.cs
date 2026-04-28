@@ -8,6 +8,7 @@ namespace DijitalAtolye.AIModeration.API.Persistence;
 public sealed class ModerationReport
 {
     [BsonId]
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; init; } = Guid.NewGuid();
 
     [BsonRepresentation(BsonType.String)]
@@ -15,6 +16,16 @@ public sealed class ModerationReport
 
     [BsonRepresentation(BsonType.String)]
     public Guid VersionId { get; init; }
+
+    static ModerationReport()
+    {
+        // Drive serializer registration via static ctor; Mongo'da Guid.GuidRepresentation Unspecified default'unu Standard'a çek.
+        try
+        {
+            MongoDB.Bson.Serialization.BsonSerializer.TryRegisterSerializer(new MongoDB.Bson.Serialization.Serializers.GuidSerializer(MongoDB.Bson.GuidRepresentation.Standard));
+        }
+        catch { /* zaten kayıtlı */ }
+    }
 
     public DateTime AnalyzedAtUtc { get; init; } = DateTime.UtcNow;
 

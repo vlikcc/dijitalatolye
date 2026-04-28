@@ -1,18 +1,33 @@
-import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { Plus, FileText, Clock, CheckCircle2, XCircle, Loader2, AlertTriangle } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus, FileText, Clock, CheckCircle2, XCircle, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 import { api } from "@/lib/api";
+
+type ContentStatus =
+  | "Draft"
+  | "Submitted"
+  | "AIReviewing"
+  | "AIReviewed"
+  | "EditorReviewing"
+  | "Approved"
+  | "Rejected"
+  | "RevisionRequested"
+  | "AutoRejected"
+  | "Published"
+  | "Unpublished";
 
 interface ContentItem {
   id: string;
   title: string;
-  status: "Draft" | "Submitted" | "AiReviewing" | "EditorReview" | "Approved" | "Rejected" | "Published";
+  status: ContentStatus;
   updatedAt: string;
   grade?: string;
   subject?: string;
 }
 
 export default function TeacherMyContentsPage() {
+  const nav = useNavigate();
+  const qc = useQueryClient();
   const { data, isLoading, isError } = useQuery({
     queryKey: ["teacher-contents"],
     queryFn: async () => {
@@ -20,6 +35,16 @@ export default function TeacherMyContentsPage() {
       return data;
     },
   });
+
+  async function revise(id: string) {
+    try {
+      await api.post(`/contents/${id}/revise`);
+      await qc.invalidateQueries({ queryKey: ["teacher-contents"] });
+      nav("/teacher/contents/wizard");
+    } catch {
+      // Backend zaten 409 döndürüyor; UI'da sessizce yutuyoruz, en kötü liste güncel kalır.
+    }
+  }
 
   return (
     <div>
@@ -77,9 +102,20 @@ export default function TeacherMyContentsPage() {
                   <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
                   <td className="px-4 py-3 text-slate-600">{formatDate(c.updatedAt)}</td>
                   <td className="px-4 py-3 text-right">
-                    <Link to={`/contents/${c.id}`} className="text-brand-700 font-medium hover:text-brand-800">
-                      Detay →
-                    </Link>
+                    <div className="inline-flex items-center gap-3">
+                      {c.status === "RevisionRequested" && (
+                        <button
+                          onClick={() => revise(c.id)}
+                          className="inline-flex items-center gap-1 text-amber-700 font-medium hover:text-amber-800"
+                          title="İçeriği Draft durumuna alıp revize et"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" /> Revize et
+                        </button>
+                      )}
+                      <Link to={`/contents/${c.id}`} className="text-brand-700 font-medium hover:text-brand-800">
+                        Detay →
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -108,16 +144,21 @@ function EmptyState() {
 }
 
 function StatusBadge({ status }: { status: ContentItem["status"] }) {
-  const map: Record<ContentItem["status"], { label: string; cls: string; icon: React.ComponentType<{ className?: string }> }> = {
+  const map: Record<ContentStatus, { label: string; cls: string; icon: React.ComponentType<{ className?: string }> }> = {
     Draft: { label: "Taslak", cls: "bg-slate-100 text-slate-700", icon: FileText },
     Submitted: { label: "Gönderildi", cls: "bg-brand-50 text-brand-700", icon: Clock },
-    AiReviewing: { label: "AI inceliyor", cls: "bg-violet-50 text-violet-700", icon: Loader2 },
-    EditorReview: { label: "Editörde", cls: "bg-amber-50 text-amber-700", icon: Clock },
+    AIReviewing: { label: "AI inceliyor", cls: "bg-violet-50 text-violet-700", icon: Loader2 },
+    AIReviewed: { label: "AI tamamlandı", cls: "bg-violet-50 text-violet-700", icon: CheckCircle2 },
+    EditorReviewing: { label: "Editörde", cls: "bg-amber-50 text-amber-700", icon: Clock },
     Approved: { label: "Onaylandı", cls: "bg-emerald-50 text-emerald-700", icon: CheckCircle2 },
     Published: { label: "Yayında", cls: "bg-emerald-50 text-emerald-700", icon: CheckCircle2 },
     Rejected: { label: "Reddedildi", cls: "bg-rose-50 text-rose-700", icon: XCircle },
+    RevisionRequested: { label: "Revizyon istendi", cls: "bg-amber-50 text-amber-700", icon: AlertTriangle },
+    AutoRejected: { label: "Otomatik reddedildi", cls: "bg-rose-50 text-rose-700", icon: XCircle },
+    Unpublished: { label: "Yayından kaldırıldı", cls: "bg-slate-100 text-slate-700", icon: FileText },
   };
-  const m = map[status];
+  const fallback = { label: String(status ?? "Bilinmiyor"), cls: "bg-slate-100 text-slate-700", icon: FileText };
+  const m = map[status] ?? fallback;
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${m.cls}`}>
       <m.icon className="w-3.5 h-3.5" /> {m.label}

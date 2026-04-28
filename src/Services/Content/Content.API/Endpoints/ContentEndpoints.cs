@@ -1,6 +1,7 @@
 using DijitalAtolye.BuildingBlocks.Authentication;
 using DijitalAtolye.BuildingBlocks.EventBus.Contracts.Content;
 using DijitalAtolye.BuildingBlocks.Outbox;
+using DijitalAtolye.Content.API.Bundles;
 using DijitalAtolye.Content.API.Domain;
 using DijitalAtolye.Content.API.Persistence;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,11 @@ public static class ContentEndpoints
                 GradeLevel = body.GradeLevel,
                 OutcomeCodes = body.OutcomeCodes.ToList(),
                 Tags = body.Tags.ToList(),
+                TargetAge = body.TargetAge,
+                DurationMinutes = body.DurationMinutes,
+                Difficulty = NormalizeDifficulty(body.Difficulty),
+                CoverImageBucket = body.CoverImageBucket,
+                CoverImageKey = body.CoverImageKey,
             };
             db.Contents.Add(content);
             await db.SaveChangesAsync(ct);
@@ -42,6 +48,7 @@ public static class ContentEndpoints
             ICurrentUser current,
             ContentDbContext db,
             IOutboxWriter outbox,
+            BundleValidator validator,
             CancellationToken ct) =>
         {
             if (current.UserId is null) return Results.Unauthorized();
@@ -50,6 +57,16 @@ public static class ContentEndpoints
             if (content is null) return Results.NotFound();
             if (content.AuthorUserId != current.UserId) return Results.Forbid();
 
+            BundleValidationResult validation;
+            try
+            {
+                validation = await validator.ValidateAsync(body.Bucket, body.Key, body.ManifestEntry, ct);
+            }
+            catch (BundleValidationException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+
             var nextNum = content.Versions.Count == 0 ? 1 : content.Versions.Max(v => v.VersionNumber) + 1;
             var version = new ContentVersion
             {
@@ -57,10 +74,10 @@ public static class ContentEndpoints
                 VersionNumber = nextNum,
                 StorageBucket = body.Bucket,
                 StorageKey = body.Key,
-                ManifestEntry = body.ManifestEntry ?? "index.html",
-                ManifestJson = body.ManifestJson,
-                FileSizeBytes = body.FileSizeBytes,
-                Sha256 = body.Sha256,
+                ManifestEntry = validation.ManifestEntry,
+                ManifestJson = validation.ManifestJson,
+                FileSizeBytes = validation.SizeBytes,
+                Sha256 = validation.Sha256,
                 CreatedByUserId = current.UserId.Value,
                 ChangeLog = body.ChangeLog,
             };
@@ -129,8 +146,21 @@ public static class ContentEndpoints
                 .Where(c => c.AuthorUserId == current.UserId)
                 .OrderByDescending(c => c.UpdatedAtUtc)
                 .Take(50)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.Title,
+                    State = c.State.ToString(),
+                    Status = c.State.ToString(),
+                    Subject = c.Subject,
+                    Grade = c.GradeLevel.ToString(),
+                    GradeLevel = c.GradeLevel,
+                    UpdatedAt = c.UpdatedAtUtc,
+                    UpdatedAtUtc = c.UpdatedAtUtc,
+                    CreatedAtUtc = c.CreatedAtUtc,
+                })
                 .ToListAsync(ct);
-            return Results.Json(items);
+            return Results.Ok(items);
         });
 
         contents.MapGet("/all", async (
@@ -157,6 +187,55 @@ public static class ContentEndpoints
             return Results.Ok(new { items });
         });
 
+        contents.MapPost("/{id:guid}/revise", async (
+            Guid id,
+            ICurrentUser current,
+            ContentDbContext db,
+            CancellationToken ct) =>
+        {
+            if (current.UserId is null) return Results.Unauthorized();
+            var content = await db.Contents.FirstOrDefaultAsync(c => c.Id == id, ct);
+            if (content is null) return Results.NotFound();
+            if (content.AuthorUserId != current.UserId) return Results.Forbid();
+            if (!content.CanTransitionTo(ContentState.Draft))
+                return Results.Conflict($"Mevcut durumdan revize edilemez: {content.State}");
+
+            content.TransitionTo(ContentState.Draft);
+            await db.SaveChangesAsync(ct);
+            return Results.Ok(new { content.Id, content.State });
+        }).RequireAuthorization(Policies.TeacherOrAbove);
+
+        contents.MapPut("/{id:guid}/metadata", async (
+            Guid id,
+            [FromBody] UpdateMetadataRequest body,
+            ICurrentUser current,
+            ContentDbContext db,
+            CancellationToken ct) =>
+        {
+            if (current.UserId is null) return Results.Unauthorized();
+            var content = await db.Contents.FirstOrDefaultAsync(c => c.Id == id, ct);
+            if (content is null) return Results.NotFound();
+            if (content.AuthorUserId != current.UserId) return Results.Forbid();
+            if (content.State is not (ContentState.Draft or ContentState.RevisionRequested))
+                return Results.Conflict("Sadece Draft veya RevisionRequested durumda metadata güncellenebilir.");
+
+            content.Title = body.Title ?? content.Title;
+            content.Description = body.Description ?? content.Description;
+            content.Subject = body.Subject ?? content.Subject;
+            content.GradeLevel = body.GradeLevel ?? content.GradeLevel;
+            if (body.OutcomeCodes is not null) content.OutcomeCodes = body.OutcomeCodes.ToList();
+            if (body.Tags is not null) content.Tags = body.Tags.ToList();
+            content.TargetAge = body.TargetAge ?? content.TargetAge;
+            content.DurationMinutes = body.DurationMinutes ?? content.DurationMinutes;
+            content.Difficulty = NormalizeDifficulty(body.Difficulty) ?? content.Difficulty;
+            if (body.CoverImageBucket is not null) content.CoverImageBucket = body.CoverImageBucket;
+            if (body.CoverImageKey is not null) content.CoverImageKey = body.CoverImageKey;
+            content.UpdatedAtUtc = DateTime.UtcNow;
+
+            await db.SaveChangesAsync(ct);
+            return Results.NoContent();
+        }).RequireAuthorization(Policies.TeacherOrAbove);
+
         contents.MapGet("/{id:guid}", async (Guid id, ContentDbContext db, CancellationToken ct) =>
         {
             var content = await db.Contents.AsNoTracking()
@@ -167,6 +246,18 @@ public static class ContentEndpoints
 
         return routes;
     }
+
+    private static string? NormalizeDifficulty(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        return value.Trim().ToLowerInvariant() switch
+        {
+            "easy" or "kolay" => "Easy",
+            "medium" or "orta" => "Medium",
+            "hard" or "zor" => "Hard",
+            _ => null,
+        };
+    }
 }
 
 public sealed record CreateContentRequest(
@@ -175,7 +266,25 @@ public sealed record CreateContentRequest(
     string Subject,
     int? GradeLevel,
     string[] OutcomeCodes,
-    string[] Tags);
+    string[] Tags,
+    int? TargetAge = null,
+    int? DurationMinutes = null,
+    string? Difficulty = null,
+    string? CoverImageBucket = null,
+    string? CoverImageKey = null);
+
+public sealed record UpdateMetadataRequest(
+    string? Title,
+    string? Description,
+    string? Subject,
+    int? GradeLevel,
+    string[]? OutcomeCodes,
+    string[]? Tags,
+    int? TargetAge,
+    int? DurationMinutes,
+    string? Difficulty,
+    string? CoverImageBucket,
+    string? CoverImageKey);
 
 public sealed record AddVersionRequest(
     string Bucket,

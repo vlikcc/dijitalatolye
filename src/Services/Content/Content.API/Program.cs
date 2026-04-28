@@ -7,6 +7,7 @@ using DijitalAtolye.Content.API.Consumers;
 using DijitalAtolye.Content.API.Endpoints;
 using DijitalAtolye.Content.API.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Minio;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,12 +30,49 @@ builder.Services.AddDijitalAtolyeEventBus(
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("Postgres")!, tags: ["ready"]);
 
+var minioOpts = builder.Configuration.GetSection("Minio").Get<DijitalAtolye.Content.API.Endpoints.ContentMinioOptions>()
+    ?? new DijitalAtolye.Content.API.Endpoints.ContentMinioOptions();
+builder.Services.AddSingleton(minioOpts);
+
+builder.Services.AddSingleton<IMinioClient>(_ => new MinioClient()
+    .WithEndpoint(minioOpts.Endpoint)
+    .WithCredentials(minioOpts.AccessKey, minioOpts.SecretKey)
+    .WithSSL(minioOpts.UseSsl)
+    .Build());
+builder.Services.AddScoped<DijitalAtolye.Content.API.Bundles.BundleValidator>();
+builder.Services.AddScoped<DijitalAtolye.Content.API.Bundles.BundleExtractor>();
+
+builder.Services.AddSingleton<DijitalAtolye.Content.API.Endpoints.PlayPresignClient>(_ =>
+{
+    var publicUri = !string.IsNullOrWhiteSpace(minioOpts.PublicEndpoint)
+        && Uri.TryCreate(minioOpts.PublicEndpoint, UriKind.Absolute, out var u) ? u : null;
+    string endpoint;
+    bool useSsl;
+    if (publicUri is null)
+    {
+        endpoint = minioOpts.Endpoint;
+        useSsl = minioOpts.UseSsl;
+    }
+    else
+    {
+        endpoint = publicUri.IsDefaultPort ? publicUri.Host : $"{publicUri.Host}:{publicUri.Port}";
+        useSsl = publicUri.Scheme == Uri.UriSchemeHttps;
+    }
+    var client = new MinioClient()
+        .WithEndpoint(endpoint)
+        .WithCredentials(minioOpts.AccessKey, minioOpts.SecretKey)
+        .WithSSL(useSsl)
+        .Build();
+    return new DijitalAtolye.Content.API.Endpoints.PlayPresignClient(client);
+});
+
 var app = builder.Build();
 app.UseDijitalAtolyeServiceDefaults();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapContentEndpoints();
 app.MapEngagementEndpoints();
+app.MapPlayEndpoints();
 
 if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
