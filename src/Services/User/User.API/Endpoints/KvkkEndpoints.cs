@@ -47,6 +47,21 @@ public static class KvkkEndpoints
             return Results.Accepted(value: new { status = "anonymized", userId = current.UserId });
         });
 
+        group.MapPost("/delete-request", async (ICurrentUser current, UserDbContext db, CancellationToken ct) =>
+        {
+            if (current.UserId is null) return Results.Unauthorized();
+            var profile = await db.Profiles.FirstOrDefaultAsync(p => p.UserId == current.UserId, ct);
+            if (profile is null) return Results.NotFound();
+            profile.UpdatedAtUtc = DateTime.UtcNow;
+            await db.SaveChangesAsync(ct);
+            return Results.Accepted(value: new
+            {
+                status = "delete_requested",
+                userId = current.UserId,
+                message = "Hesap silme talebiniz alındı. 30 gün içinde işleme alınacaktır.",
+            });
+        });
+
         return routes;
     }
 }

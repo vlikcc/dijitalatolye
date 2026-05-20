@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DijitalAtolye.BuildingBlocks.Audit;
 
@@ -24,6 +25,15 @@ public static class AuditExtensions
         services.AddDbContext<AuditDbContext>(o => o.UseNpgsql(conn));
         services.AddHttpContextAccessor();
         services.AddScoped<IAuditLogger, EfAuditLogger>();
+        services.TryAddSingleton<IAuditEventPublisher, NullAuditEventPublisher>();
+        return services;
+    }
+
+    public static IServiceCollection AddAuditEventPublisher<TPublisher>(this IServiceCollection services)
+        where TPublisher : class, IAuditEventPublisher
+    {
+        services.RemoveAll<IAuditEventPublisher>();
+        services.AddSingleton<IAuditEventPublisher, TPublisher>();
         return services;
     }
 

@@ -8,7 +8,8 @@ public interface ITokenIssuer
         ApplicationUser user,
         IEnumerable<string> roles,
         string? ipAddress,
-        CancellationToken ct);
+        bool mfaVerified = false,
+        CancellationToken ct = default);
 
     Task<TokenPair?> RefreshAsync(string refreshToken, string? ipAddress, CancellationToken ct);
 }

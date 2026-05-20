@@ -80,6 +80,15 @@ export default function KvkkPage() {
             {busy === 'anonymize' ? 'Isleniyor...' : 'Anonimlestir'}
           </button>
         </div>
+        <div className="border rounded-lg p-5 bg-white">
+          <h2 className="font-semibold text-lg mb-1">Hesap Silme Talebi</h2>
+          <p className="text-sm text-gray-600 mb-3">
+            Hesabınızın tamamen silinmesini talep edebilirsiniz.
+          </p>
+          <a href="/account/delete" className="px-4 py-2 bg-red-600 text-white rounded inline-block">
+            Hesap silme talebi
+          </a>
+        </div>
       </section>
 
       {message && (

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /teacher/
+Disallow: /editor/
+Disallow: /api/
+
+Sitemap: https://dijitalatolye.example/sitemap.xml

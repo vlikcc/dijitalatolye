@@ -80,6 +80,7 @@ public static class AdminUserEndpoints
                 Roles: rs.ToArray(),
                 IsVerified: u.EmailConfirmed,
                 MebVerified: u.MebEmailVerified,
+                TwoFactorEnabled: u.TwoFactorEnabled,
                 CreatedAt: u.CreatedAtUtc));
         }
         return Results.Json(rows);
@@ -190,6 +191,7 @@ public sealed record UserRowDto(
     string[] Roles,
     bool IsVerified,
     bool MebVerified,
+    bool TwoFactorEnabled,
     DateTime CreatedAt);
 
 public sealed record RoleChangeRequest(string Role);

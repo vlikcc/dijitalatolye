@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import {
   ArrowRight,
   ShieldCheck,
@@ -113,6 +114,13 @@ const stats: { value: string; label: string }[] = [
 export default function HomePage() {
   return (
     <div className="bg-white">
+      <Helmet>
+        <title>DijitalAtölye — MEB uyumlu dijital eğitim platformu</title>
+        <meta name="description" content="AI destekli ön inceleme ve editör onaylı dijital eğitim içerikleri. Öğretmenler yükler, öğrenciler keşfeder." />
+        <meta property="og:title" content="DijitalAtölye" />
+        <meta property="og:description" content="MEB müfredatına uygun dijital eğitim içerikleri platformu" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       {/* HERO */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-brand-50 via-white to-white" aria-hidden />

@@ -37,6 +37,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapUserEndpoints();
 app.MapKvkkEndpoints();
+app.MapCollectionEndpoints();
+app.MapNotificationPreferenceEndpoints();
+app.MapUserStatsEndpoints();
 
 if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {

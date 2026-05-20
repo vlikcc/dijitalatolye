@@ -10,6 +10,7 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\WebHostExtensions\DijitalAtolye.BuildingBlocks.WebHostExtensions.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Authentication\DijitalAtolye.BuildingBlocks.Authentication.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Audit\DijitalAtolye.BuildingBlocks.Audit.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\EventBus\DijitalAtolye.BuildingBlocks.EventBus.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,5 +18,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
+    <PackageReference Include="Elastic.Clients.Elasticsearch" />
+    <PackageReference Include="MassTransit" />
+    <PackageReference Include="MassTransit.RabbitMQ" />
   </ItemGroup>
 </Project>

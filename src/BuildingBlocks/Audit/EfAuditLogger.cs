@@ -11,6 +11,7 @@ public sealed class EfAuditLogger : IAuditLogger
     private readonly ICurrentUser _currentUser;
     private readonly IHttpContextAccessor _http;
     private readonly ILogger<EfAuditLogger> _logger;
+    private readonly IAuditEventPublisher _publisher;
     private readonly string _serviceName;
 
     public EfAuditLogger(
@@ -18,12 +19,14 @@ public sealed class EfAuditLogger : IAuditLogger
         ICurrentUser currentUser,
         IHttpContextAccessor http,
         ILogger<EfAuditLogger> logger,
-        AuditServiceContext serviceContext)
+        AuditServiceContext serviceContext,
+        IAuditEventPublisher? publisher = null)
     {
         _db = db;
         _currentUser = currentUser;
         _http = http;
         _logger = logger;
+        _publisher = publisher ?? new NullAuditEventPublisher();
         _serviceName = serviceContext.ServiceName;
     }
 
@@ -36,6 +39,7 @@ public sealed class EfAuditLogger : IAuditLogger
             EnrichFromContext(entry);
             _db.AuditEntries.Add(entry);
             await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+            await _publisher.PublishAsync(entry, ct).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

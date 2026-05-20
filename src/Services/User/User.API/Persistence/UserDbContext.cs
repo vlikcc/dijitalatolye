@@ -9,6 +9,9 @@ public sealed class UserDbContext : DbContext
     public UserDbContext(DbContextOptions<UserDbContext> options) : base(options) { }
 
     public DbSet<UserProfile> Profiles => Set<UserProfile>();
+    public DbSet<UserCollection> Collections => Set<UserCollection>();
+    public DbSet<CollectionItem> CollectionItems => Set<CollectionItem>();
+    public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
@@ -31,6 +34,29 @@ public sealed class UserDbContext : DbContext
             b.Property(p => p.City).HasMaxLength(80);
             b.Property(p => p.PrimaryRole).HasMaxLength(40).IsRequired();
             b.Property(p => p.TeacherVerification).HasConversion<string>().HasMaxLength(40);
+        });
+
+        modelBuilder.Entity<UserCollection>(b =>
+        {
+            b.ToTable("Collections");
+            b.HasKey(c => c.Id);
+            b.Property(c => c.Name).HasMaxLength(120).IsRequired();
+            b.Property(c => c.Description).HasMaxLength(500);
+            b.HasIndex(c => c.UserId);
+            b.HasMany(c => c.Items).WithOne().HasForeignKey(i => i.CollectionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CollectionItem>(b =>
+        {
+            b.ToTable("CollectionItems");
+            b.HasKey(i => i.Id);
+            b.HasIndex(i => new { i.CollectionId, i.ContentId }).IsUnique();
+        });
+
+        modelBuilder.Entity<NotificationPreference>(b =>
+        {
+            b.ToTable("NotificationPreferences");
+            b.HasKey(p => p.UserId);
         });
 
         modelBuilder.ApplyConfiguration(new OutboxMessageEntityConfiguration());

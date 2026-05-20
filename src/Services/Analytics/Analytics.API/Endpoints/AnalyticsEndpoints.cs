@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using DijitalAtolye.Analytics.API.Domain;
 using DijitalAtolye.Analytics.API.Persistence;
+using DijitalAtolye.BuildingBlocks.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -55,6 +56,18 @@ public static class AnalyticsEndpoints
                 });
             return Results.Ok(new { totals, daily = stats });
         }).RequireAuthorization();
+
+        group.MapGet("/admin/stats", async (AnalyticsDbContext db, CancellationToken ct) =>
+        {
+            var totalPlays = await db.Events.CountAsync(e => e.Type == AnalyticsEventType.Play, ct);
+            var last30 = DateTime.UtcNow.AddDays(-30);
+            var activeUsers = await db.Events
+                .Where(e => e.OccurredAt >= last30 && e.UserId != null)
+                .Select(e => e.UserId)
+                .Distinct()
+                .CountAsync(ct);
+            return Results.Ok(new { totalPlays, activeUsersLast30Days = activeUsers });
+        }).RequireAuthorization(Policies.AdminOnly);
 
         return app;
     }

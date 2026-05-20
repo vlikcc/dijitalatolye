@@ -18,6 +18,7 @@ builder.Services.AddDbContext<NotificationDbContext>(opt =>
         ?? throw new InvalidOperationException("Postgres connection string missing.")));
 
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.AddSingleton<IHtmlTemplateRenderer, FileHtmlTemplateRenderer>();
 builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
 
 builder.Services.AddSignalR();

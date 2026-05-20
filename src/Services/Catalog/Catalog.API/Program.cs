@@ -2,6 +2,7 @@ using DijitalAtolye.BuildingBlocks.Authentication;
 using DijitalAtolye.BuildingBlocks.Common;
 using DijitalAtolye.BuildingBlocks.WebHostExtensions;
 using DijitalAtolye.Catalog.API.Endpoints;
+using DijitalAtolye.Catalog.API.Import;
 using DijitalAtolye.Catalog.API.Persistence;
 using DijitalAtolye.Catalog.API.Seed;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ builder.Services.AddStackExchangeRedisCache(opts =>
 });
 
 builder.Services.AddScoped<ICurrentUser, CurrentUserAccessor>();
+builder.Services.AddScoped<MebCatalogImporter>();
 builder.Services.AddDijitalAtolyeJwtAuth(builder.Configuration);
 
 builder.Services.AddHealthChecks()

@@ -101,8 +101,54 @@ public static class EngagementEndpoints
             return Results.Ok(items);
         });
 
+        g.MapPost("/{id:guid}/rating", async (
+            Guid id,
+            [FromBody] RateContentRequest req,
+            ContentDbContext db,
+            ICurrentUser cu,
+            CancellationToken ct) =>
+        {
+            if (cu.UserId is null) return Results.Unauthorized();
+            if (req.Score is < 1 or > 5) return Results.BadRequest("Score must be 1-5");
+            var rating = await db.Ratings.FirstOrDefaultAsync(r => r.ContentId == id && r.UserId == cu.UserId, ct);
+            if (rating is null)
+            {
+                rating = new ContentRating { ContentId = id, UserId = cu.UserId.Value, Score = req.Score };
+                db.Ratings.Add(rating);
+            }
+            else
+            {
+                rating.Score = req.Score;
+                rating.UpdatedAt = DateTime.UtcNow;
+            }
+            await db.SaveChangesAsync(ct);
+            return Results.Ok(new { rating.Score });
+        });
+
+        g.MapGet("/{id:guid}/rating", async (Guid id, ContentDbContext db, ICurrentUser cu, CancellationToken ct) =>
+        {
+            var mine = cu.UserId is null
+                ? null
+                : await db.Ratings.AsNoTracking()
+                    .Where(r => r.ContentId == id && r.UserId == cu.UserId)
+                    .Select(r => (int?)r.Score)
+                    .FirstOrDefaultAsync(ct);
+            var summary = await db.Ratings.AsNoTracking()
+                .Where(r => r.ContentId == id)
+                .GroupBy(_ => 1)
+                .Select(g => new { average = g.Average(r => r.Score), count = g.Count() })
+                .FirstOrDefaultAsync(ct);
+            return Results.Ok(new
+            {
+                userScore = mine,
+                average = summary?.average ?? 0,
+                count = summary?.count ?? 0,
+            });
+        }).AllowAnonymous();
+
         return app;
     }
 
     public sealed record AddCommentRequest(string Body);
+    public sealed record RateContentRequest(int Score);
 }

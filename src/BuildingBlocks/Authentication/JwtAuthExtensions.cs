@@ -67,6 +67,12 @@ public static class JwtAuthExtensions
 
             authz.AddPolicy(Policies.AdminOnly, p => p.RequireRole(
                 Roles.Admin, Roles.SuperAdmin));
+
+            authz.AddPolicy(Policies.RequireTwoFactorForAdmin, p =>
+            {
+                p.RequireRole(Roles.Admin, Roles.SuperAdmin);
+                p.RequireClaim("mfa", "true");
+            });
         });
 
         return services;

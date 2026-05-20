@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -51,6 +52,12 @@ public static class HostBuilderExtensions
             });
         });
         builder.Services.AddHealthChecks();
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+            options.KnownIPNetworks.Clear();
+            options.KnownProxies.Clear();
+        });
 
         return builder;
     }
@@ -64,10 +71,13 @@ public static class HostBuilderExtensions
             app.MapOpenApi();
         }
 
+        app.UseForwardedHeaders();
         app.UseExceptionHandler();
         app.UseStatusCodePages();
 
         app.UseDijitalAtolyeSecurityHeaders();
+
+        app.MapPrometheusScrapingEndpoint("/metrics");
 
         app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
         {
@@ -130,6 +140,7 @@ public static class HostBuilderExtensions
                 m.AddHttpClientInstrumentation();
                 m.AddRuntimeInstrumentation();
                 m.AddMeter("DijitalAtolye.*");
+                m.AddPrometheusExporter();
                 if (!string.IsNullOrWhiteSpace(otlpEndpoint))
                 {
                     m.AddOtlpExporter(opt => opt.Endpoint = new Uri(otlpEndpoint));

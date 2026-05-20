@@ -21,4 +21,8 @@
     <PackageReference Include="MailKit" />
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Email\Templates\*.html" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

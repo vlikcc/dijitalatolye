@@ -9,6 +9,7 @@ using DijitalAtolye.Identity.Application;
 using DijitalAtolye.Identity.Infrastructure;
 using DijitalAtolye.Identity.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,24 +27,48 @@ builder.Services
     .AddIdentityApplication()
     .AddIdentityInfrastructure(builder.Configuration);
 
-builder.Services.AddDijitalAtolyeEventBus(
-    builder.Configuration,
-    serviceName: "identity",
-    configureBus: null);
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddDijitalAtolyeEventBus(
+        builder.Configuration,
+        serviceName: "identity",
+        configureBus: null);
+}
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUserAccessor>();
 builder.Services.AddDijitalAtolyeJwtAuth(builder.Configuration);
+builder.Services.AddIdentityGoogleAuth(builder.Configuration);
 builder.Services.AddDijitalAtolyeAudit(builder.Configuration, serviceName: "identity");
 
-builder.Services
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("login", http =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: http.Connection.RemoteIpAddress?.ToString() ?? "anon",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true,
+            }));
+});
+
+var healthChecks = builder.Services
     .AddHealthChecks()
-    .AddNpgSql(builder.Configuration.GetConnectionString("Postgres")!, name: "postgres", tags: ["ready"])
-    .AddRabbitMQ(name: "rabbitmq", tags: ["ready"]);
+    .AddNpgSql(builder.Configuration.GetConnectionString("Postgres")!, name: "postgres", tags: ["ready"]);
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    healthChecks.AddRabbitMQ(name: "rabbitmq", tags: ["ready"]);
+}
 
 var app = builder.Build();
 
 app.UseDijitalAtolyeServiceDefaults();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

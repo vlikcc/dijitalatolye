@@ -73,6 +73,7 @@ app.UseAuthorization();
 app.MapContentEndpoints();
 app.MapEngagementEndpoints();
 app.MapPlayEndpoints();
+app.MapContentStatsEndpoints();
 
 if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {

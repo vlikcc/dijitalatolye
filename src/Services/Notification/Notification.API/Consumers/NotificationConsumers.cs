@@ -14,12 +14,22 @@ public abstract class BaseNotificationConsumer
 {
     protected readonly NotificationDbContext Db;
     protected readonly IEmailSender Email;
+    protected readonly IHtmlTemplateRenderer Templates;
     protected readonly IHubContext<NotificationsHub> Hub;
     protected readonly ILogger Logger;
 
-    protected BaseNotificationConsumer(NotificationDbContext db, IEmailSender email, IHubContext<NotificationsHub> hub, ILogger logger)
+    protected BaseNotificationConsumer(
+        NotificationDbContext db,
+        IEmailSender email,
+        IHtmlTemplateRenderer templates,
+        IHubContext<NotificationsHub> hub,
+        ILogger logger)
     {
-        Db = db; Email = email; Hub = hub; Logger = logger;
+        Db = db;
+        Email = email;
+        Templates = templates;
+        Hub = hub;
+        Logger = logger;
     }
 
     protected async Task EmitAsync(Guid userId, string type, string title, string body, string? link, CancellationToken ct)
@@ -54,24 +64,77 @@ public abstract class BaseNotificationConsumer
 
 public sealed class UserRegisteredConsumer : BaseNotificationConsumer, IConsumer<UserRegisteredV1>
 {
-    public UserRegisteredConsumer(NotificationDbContext db, IEmailSender email, IHubContext<NotificationsHub> hub, ILogger<UserRegisteredConsumer> logger)
-        : base(db, email, hub, logger) { }
+    private readonly IConfiguration _configuration;
+
+    public UserRegisteredConsumer(
+        NotificationDbContext db,
+        IEmailSender email,
+        IHtmlTemplateRenderer templates,
+        IHubContext<NotificationsHub> hub,
+        ILogger<UserRegisteredConsumer> logger,
+        IConfiguration configuration)
+        : base(db, email, templates, hub, logger)
+    {
+        _configuration = configuration;
+    }
 
     public async Task Consume(ConsumeContext<UserRegisteredV1> context)
     {
         var msg = context.Message;
         await EmitAsync(msg.UserId, "UserRegistered", "Hoş geldiniz!",
             $"DijitalAtölye'ye kaydınız tamamlandı, {msg.DisplayName}.", "/", context.CancellationToken);
-        await SendEmailSafeAsync(msg.Email, "DijitalAtölye'ye Hoş Geldiniz", "user-registered",
-            $"<p>Merhaba {msg.DisplayName},</p><p>DijitalAtölye'ye kaydınız başarıyla oluşturuldu.</p>",
+        var html = await Templates.RenderAsync("UserRegistered", new Dictionary<string, string>
+        {
+            ["DisplayName"] = msg.DisplayName,
+            ["AppUrl"] = _configuration["App:Url"] ?? "http://localhost:5173",
+        }, context.CancellationToken);
+        await SendEmailSafeAsync(msg.Email, "DijitalAtölye'ye Hoş Geldiniz", "user-registered", html, context.CancellationToken);
+    }
+}
+
+public sealed class EmailVerificationRequestedConsumer : BaseNotificationConsumer, IConsumer<EmailVerificationRequestedV1>
+{
+    private readonly IConfiguration _configuration;
+
+    public EmailVerificationRequestedConsumer(
+        NotificationDbContext db,
+        IEmailSender email,
+        IHtmlTemplateRenderer templates,
+        IHubContext<NotificationsHub> hub,
+        ILogger<EmailVerificationRequestedConsumer> logger,
+        IConfiguration configuration)
+        : base(db, email, templates, hub, logger)
+    {
+        _configuration = configuration;
+    }
+
+    public async Task Consume(ConsumeContext<EmailVerificationRequestedV1> context)
+    {
+        var msg = context.Message;
+        var urlBase = _configuration["EmailVerification:UrlBase"]
+            ?? "http://localhost:5173/verify-email";
+        var encodedToken = Uri.EscapeDataString(msg.Token);
+        var encodedEmail = Uri.EscapeDataString(msg.Email);
+        var verifyUrl = $"{urlBase}?email={encodedEmail}&token={encodedToken}";
+
+        var html = await Templates.RenderAsync("EmailVerification", new Dictionary<string, string>
+        {
+            ["VerifyUrl"] = verifyUrl,
+        }, context.CancellationToken);
+
+        await SendEmailSafeAsync(
+            msg.Email,
+            "E-posta adresinizi doğrulayın",
+            "email-verification",
+            html,
             context.CancellationToken);
     }
 }
 
 public sealed class ContentSubmittedConsumer : BaseNotificationConsumer, IConsumer<ContentSubmittedV1>
 {
-    public ContentSubmittedConsumer(NotificationDbContext db, IEmailSender email, IHubContext<NotificationsHub> hub, ILogger<ContentSubmittedConsumer> logger)
-        : base(db, email, hub, logger) { }
+    public ContentSubmittedConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<ContentSubmittedConsumer> logger)
+        : base(db, email, templates, hub, logger) { }
 
     public async Task Consume(ConsumeContext<ContentSubmittedV1> context)
     {
@@ -84,8 +147,8 @@ public sealed class ContentSubmittedConsumer : BaseNotificationConsumer, IConsum
 
 public sealed class EditorDecisionConsumer : BaseNotificationConsumer, IConsumer<EditorDecisionMadeV1>
 {
-    public EditorDecisionConsumer(NotificationDbContext db, IEmailSender email, IHubContext<NotificationsHub> hub, ILogger<EditorDecisionConsumer> logger)
-        : base(db, email, hub, logger) { }
+    public EditorDecisionConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<EditorDecisionConsumer> logger)
+        : base(db, email, templates, hub, logger) { }
 
     public async Task Consume(ConsumeContext<EditorDecisionMadeV1> context)
     {
@@ -108,8 +171,8 @@ public sealed class EditorDecisionConsumer : BaseNotificationConsumer, IConsumer
 
 public sealed class ContentPublishedConsumer : BaseNotificationConsumer, IConsumer<ContentPublishedV1>
 {
-    public ContentPublishedConsumer(NotificationDbContext db, IEmailSender email, IHubContext<NotificationsHub> hub, ILogger<ContentPublishedConsumer> logger)
-        : base(db, email, hub, logger) { }
+    public ContentPublishedConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<ContentPublishedConsumer> logger)
+        : base(db, email, templates, hub, logger) { }
 
     public async Task Consume(ConsumeContext<ContentPublishedV1> context)
     {

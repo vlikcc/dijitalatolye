@@ -13,6 +13,7 @@ import TeacherUploadWizard from "@/pages/teacher/TeacherUploadWizard";
 import TeacherDashboardPage from "@/pages/teacher/TeacherDashboardPage";
 import TeacherMyContentsPage from "@/pages/teacher/TeacherMyContentsPage";
 import TeacherProfilePage from "@/pages/teacher/TeacherProfilePage";
+import CollectionsPage from "@/pages/teacher/CollectionsPage";
 import EditorQueuePage from "@/pages/editor/EditorQueuePage";
 import EditorReviewPage from "@/pages/editor/EditorReviewPage";
 import EditorDashboardPage from "@/pages/editor/EditorDashboardPage";
@@ -20,6 +21,7 @@ import EditorHistoryPage from "@/pages/editor/EditorHistoryPage";
 import PlayPage from "@/pages/PlayPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import DiscoverPage from "@/pages/DiscoverPage";
+import CategoryPage from "@/pages/CategoryPage";
 import ContentDetailPage from "@/pages/ContentDetailPage";
 import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
 import AdminAuditPage from "@/pages/admin/AdminAuditPage";
@@ -29,6 +31,7 @@ import AdminCatalogPage from "@/pages/admin/AdminCatalogPage";
 import AdminAiConfigPage from "@/pages/admin/AdminAiConfigPage";
 import AdminReportsPage from "@/pages/admin/AdminReportsPage";
 import KvkkPage from "@/pages/KvkkPage";
+import AccountDeletePage from "@/pages/AccountDeletePage";
 import { useAuthStore } from "@/state/auth";
 
 export default function App() {
@@ -43,6 +46,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/discover" element={<DiscoverPage />} />
+        <Route path="/category/:subject" element={<CategoryPage />} />
         <Route path="/contents/:slug" element={<ContentDetailPage />} />
         <Route path="/play/:slug" element={<PlayPage />} />
         <Route path="/kvkk" element={<KvkkPage />} />
@@ -55,6 +59,7 @@ export default function App() {
         <Route path="/teacher/contents/new" element={<TeacherUploadPage />} />
         <Route path="/teacher/contents/wizard" element={<TeacherUploadWizard />} />
         <Route path="/teacher/profile" element={<TeacherProfilePage />} />
+        <Route path="/teacher/collections" element={<CollectionsPage />} />
         <Route path="/editor" element={<EditorDashboardPage />} />
         <Route path="/editor/queue" element={<EditorQueuePage />} />
         <Route path="/editor/review/:id" element={<EditorReviewPage />} />
@@ -67,6 +72,7 @@ export default function App() {
         <Route path="/admin/audit" element={<AdminAuditPage />} />
         <Route path="/admin/ai" element={<AdminAiConfigPage />} />
         <Route path="/admin/reports" element={<AdminReportsPage />} />
+        <Route path="/account/delete" element={<AccountDeletePage />} />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />

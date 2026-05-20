@@ -4,6 +4,7 @@ using DijitalAtolye.Identity.Application.Auth.Tokens;
 using DijitalAtolye.Identity.Domain.Entities;
 using DijitalAtolye.Identity.Infrastructure.Auth;
 using DijitalAtolye.Identity.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +22,6 @@ public static class DependencyInjection
             opt.UseNpgsql(configuration.GetConnectionString("Postgres")
                 ?? throw new InvalidOperationException("Postgres connection string missing")));
 
-        services.AddAuthentication();
         services.AddDataProtection();
 
         services.AddIdentityCore<ApplicationUser>(opt =>
@@ -35,17 +35,46 @@ public static class DependencyInjection
                 opt.Lockout.MaxFailedAccessAttempts = 5;
                 opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 opt.SignIn.RequireConfirmedEmail = false; // V1: e-posta dogrulama tetiklenir ama login engellenmez
+                opt.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
             })
             .AddRoles<ApplicationRole>()
             .AddSignInManager()
             .AddEntityFrameworkStores<IdentityDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddTokenProvider<AuthenticatorTokenProvider<ApplicationUser>>(
+                TokenOptions.DefaultAuthenticatorProvider);
 
         services.Configure<JwtIssuerOptions>(configuration.GetSection("JwtIssuer"));
         services.AddScoped<ITokenIssuer, JwtTokenIssuer>();
         services.AddScoped<IPasswordResetNotifier, LoggingPasswordResetNotifier>();
         services.AddScoped<IOutboxWriter, EfCoreOutboxWriter<IdentityDbContext>>();
         services.AddHostedService<OutboxDispatcher<IdentityDbContext>>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Google OAuth handler'ını mevcut authentication pipeline'a ekler.
+    /// ClientId/Secret yoksa social login devre dışı kalır.
+    /// </summary>
+    public static IServiceCollection AddIdentityGoogleAuth(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var clientId = configuration["OAuth:Google:ClientId"];
+        var clientSecret = configuration["OAuth:Google:ClientSecret"];
+        if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
+        {
+            return services;
+        }
+
+        services.AddAuthentication()
+            .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+            {
+                options.ClientId = clientId;
+                options.ClientSecret = clientSecret;
+                options.CallbackPath = "/auth/google/callback";
+            });
 
         return services;
     }

@@ -1,7 +1,15 @@
-import { useState } from "react";
-import { User, Mail, ShieldCheck, Save, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { User, Mail, ShieldCheck, Save, Loader2, Download } from "lucide-react";
 import { useAuthStore } from "@/state/auth";
 import { api } from "@/lib/api";
+
+interface NotificationPrefs {
+  emailEnabled: boolean;
+  inAppEnabled: boolean;
+  contentUpdates: boolean;
+  marketingEmails: boolean;
+}
 
 export default function TeacherProfilePage() {
   const { email, roles } = useAuthStore();
@@ -10,6 +18,26 @@ export default function TeacherProfilePage() {
   const [bio, setBio] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [prefs, setPrefs] = useState<NotificationPrefs>({
+    emailEnabled: true,
+    inAppEnabled: true,
+    contentUpdates: true,
+    marketingEmails: false,
+  });
+
+  useEffect(() => {
+    api.get<{ displayName?: string; schoolName?: string; bio?: string }>("/users/me")
+      .then(({ data }) => {
+        if (data.displayName) setDisplayName(data.displayName);
+        if (data.schoolName) setSchool(data.schoolName);
+        if (data.bio) setBio(data.bio ?? "");
+      })
+      .catch(() => {});
+    api.get<NotificationPrefs>("/users/me/notification-preferences")
+      .then(({ data }) => setPrefs(data))
+      .catch(() => {});
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,6 +49,28 @@ export default function TeacherProfilePage() {
     } finally {
       setSaving(false);
       setTimeout(() => setSaved(false), 2400);
+    }
+  }
+
+  async function savePrefs() {
+    await api.put("/users/me/notification-preferences", prefs);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2400);
+  }
+
+  async function exportData() {
+    setExporting(true);
+    try {
+      const { data } = await api.get("/users/me/kvkk/export");
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `dijitalatolye-veri-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -47,7 +97,7 @@ export default function TeacherProfilePage() {
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="rounded-2xl bg-white border border-slate-200 p-6 space-y-4">
+      <form onSubmit={onSubmit} className="rounded-2xl bg-white border border-slate-200 p-6 space-y-4 mb-6">
         <h2 className="font-semibold text-slate-900 inline-flex items-center gap-2">
           <User className="w-4 h-4 text-brand-600" /> Öğretmen Bilgileri
         </h2>
@@ -71,6 +121,36 @@ export default function TeacherProfilePage() {
           </button>
         </div>
       </form>
+
+      <section className="rounded-2xl bg-white border border-slate-200 p-6 space-y-3 mb-6">
+        <h2 className="font-semibold text-slate-900">Bildirim Tercihleri</h2>
+        {(["emailEnabled", "inAppEnabled", "contentUpdates", "marketingEmails"] as const).map((key) => (
+          <label key={key} className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={prefs[key]}
+              onChange={(e) => setPrefs({ ...prefs, [key]: e.target.checked })}
+            />
+            {key === "emailEnabled" && "E-posta bildirimleri"}
+            {key === "inAppEnabled" && "Uygulama içi bildirimler"}
+            {key === "contentUpdates" && "İçerik güncellemeleri"}
+            {key === "marketingEmails" && "Pazarlama e-postaları"}
+          </label>
+        ))}
+        <button type="button" onClick={savePrefs} className="btn-secondary text-sm">Tercihleri kaydet</button>
+      </section>
+
+      <section className="rounded-2xl bg-white border border-slate-200 p-6">
+        <h2 className="font-semibold text-slate-900 mb-2">Verileriniz (KVKK)</h2>
+        <p className="text-sm text-slate-600 mb-3">Profil verilerinizi JSON olarak indirebilir veya hesap silme talebinde bulunabilirsiniz.</p>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={exportData} disabled={exporting} className="btn-secondary inline-flex items-center gap-1">
+            <Download className="w-4 h-4" /> {exporting ? "Hazırlanıyor…" : "Verilerimi indir"}
+          </button>
+          <Link to="/account/delete" className="btn-secondary text-red-700 border-red-200">Hesap silme talebi</Link>
+          <Link to="/kvkk" className="btn-secondary">KVKK sayfası</Link>
+        </div>
+      </section>
     </div>
   );
 }

@@ -26,13 +26,14 @@ public sealed class JwtTokenIssuer : ITokenIssuer
         ApplicationUser user,
         IEnumerable<string> roles,
         string? ipAddress,
-        CancellationToken ct)
+        bool mfaVerified = false,
+        CancellationToken ct = default)
     {
         var now = DateTime.UtcNow;
         var accessExpiresAt = now.Add(_options.AccessTokenLifetime);
         var refreshExpiresAt = now.Add(_options.RefreshTokenLifetime);
 
-        var accessToken = CreateAccessToken(user, roles, now, accessExpiresAt);
+        var accessToken = CreateAccessToken(user, roles, now, accessExpiresAt, mfaVerified);
         var refreshTokenRaw = GenerateRefreshTokenRaw();
         var refreshTokenHash = HashRefreshToken(refreshTokenRaw);
 
@@ -84,13 +85,18 @@ public sealed class JwtTokenIssuer : ITokenIssuer
             .Join(_db.Roles, ur => ur.RoleId, r => r.Id, (_, r) => r.Name!)
             .ToListAsync(ct);
 
-        var accessToken = CreateAccessToken(stored.User, roles, now, accessExpiresAt);
+        var accessToken = CreateAccessToken(stored.User, roles, now, accessExpiresAt, mfaVerified: false);
         await _db.SaveChangesAsync(ct);
 
         return new TokenPair(accessToken, newRaw, accessExpiresAt, refreshExpiresAt, roles);
     }
 
-    private string CreateAccessToken(ApplicationUser user, IEnumerable<string> roles, DateTime issuedAt, DateTime expiresAt)
+    private string CreateAccessToken(
+        ApplicationUser user,
+        IEnumerable<string> roles,
+        DateTime issuedAt,
+        DateTime expiresAt,
+        bool mfaVerified)
     {
         var claims = new List<Claim>
         {
@@ -100,6 +106,10 @@ public sealed class JwtTokenIssuer : ITokenIssuer
             new("name", user.DisplayName),
         };
         claims.AddRange(roles.Select(r => new Claim("role", r)));
+        if (mfaVerified)
+        {
+            claims.Add(new Claim("mfa", "true"));
+        }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SigningKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

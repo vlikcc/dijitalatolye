@@ -39,6 +39,7 @@ jobs:
           - notification
           - search
           - analytics
+          - admin
           - web
     steps:
       - uses: actions/checkout@v4

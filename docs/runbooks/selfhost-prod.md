@@ -100,6 +100,23 @@ tar -xzf backups/<ts>/minio.tar.gz -C /tmp/minio-restore
 docker compose ... run --rm minio-init mc cp -r /tmp/minio-restore/<bucket> local/<bucket>
 ```
 
+## Gözlemlenebilirlik (opsiyonel profil)
+
+Prometheus, Grafana ve OTLP collector:
+
+```bash
+docker compose -f deploy/docker-compose/docker-compose.prod.yml \
+  -f deploy/docker-compose/docker-compose.observability.yml \
+  --env-file .env.prod --profile observability up -d
+```
+
+`.env.prod` içinde:
+- `SENTRY_DSN` — hata izleme (önerilir)
+- `OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317` — trace/metric export
+- `GRAFANA_ADMIN_PASSWORD` — Grafana UI (http://127.0.0.1:3000)
+
+Servisler `/metrics` endpoint'i üzerinden Prometheus ile scrape edilir.
+
 ## Yaygın Operasyonlar
 
 ```bash

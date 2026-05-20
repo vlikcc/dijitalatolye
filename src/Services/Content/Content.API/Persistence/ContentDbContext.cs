@@ -13,6 +13,7 @@ public sealed class ContentDbContext : DbContext
     public DbSet<ContentLike> Likes => Set<ContentLike>();
     public DbSet<ContentFavorite> Favorites => Set<ContentFavorite>();
     public DbSet<ContentComment> Comments => Set<ContentComment>();
+    public DbSet<ContentRating> Ratings => Set<ContentRating>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -71,6 +72,12 @@ public sealed class ContentDbContext : DbContext
             b.HasKey(x => x.Id);
             b.Property(x => x.Body).HasMaxLength(2000).IsRequired();
             b.HasIndex(x => x.ContentId);
+        });
+        modelBuilder.Entity<ContentRating>(b =>
+        {
+            b.ToTable("ContentRatings");
+            b.HasKey(x => x.Id);
+            b.HasIndex(x => new { x.ContentId, x.UserId }).IsUnique();
         });
 
         modelBuilder.ApplyConfiguration(new OutboxMessageEntityConfiguration());

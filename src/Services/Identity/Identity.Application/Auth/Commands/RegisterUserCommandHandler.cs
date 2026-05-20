@@ -59,6 +59,14 @@ public sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserCom
             PrimaryRole = command.Role,
         }, ct: ct);
 
+        var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        await _outbox.WriteAsync(new EmailVerificationRequestedV1
+        {
+            UserId = user.Id,
+            Email = user.Email!,
+            Token = verificationToken,
+        }, ct: ct);
+
         return new RegisterUserResult(user.Id, user.Email!);
     }
 }

@@ -36,6 +36,15 @@ api.interceptors.response.use(
 
 export default api;
 
+export function getApiErrorMessage(error: unknown): string {
+  const responseData = (error as { response?: { data?: { detail?: string } } })?.response?.data;
+  if (responseData?.detail) return responseData.detail;
+  if (axios.isAxiosError(error)) {
+    if (error.message) return error.message;
+  }
+  return "Beklenmeyen bir hata oluştu.";
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   const refresh = useAuthStore.getState().refreshToken;
   if (!refresh) return null;

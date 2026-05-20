@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import api from '@/lib/api';
+import ShareButtons from '@/components/content/ShareButtons';
+import QrCodeModal from '@/components/content/QrCodeModal';
+import EmbedSnippetModal from '@/components/content/EmbedSnippetModal';
 
 interface ContentDetail {
   id: string;
@@ -23,6 +27,12 @@ interface Comment {
   createdAt: string;
 }
 
+interface RatingSummary {
+  userScore?: number | null;
+  average: number;
+  count: number;
+}
+
 export default function ContentDetailPage() {
   const { slug } = useParams();
   const [content, setContent] = useState<ContentDetail | null>(null);
@@ -30,6 +40,9 @@ export default function ContentDetailPage() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [busy, setBusy] = useState(false);
+  const [rating, setRating] = useState<RatingSummary | null>(null);
+  const [qrOpen, setQrOpen] = useState(false);
+  const [embedOpen, setEmbedOpen] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -44,6 +57,7 @@ export default function ContentDetailPage() {
   useEffect(() => {
     if (!content) return;
     api.get<Comment[]>(`/contents/${content.id}/comments`).then(({ data }) => setComments(data));
+    api.get<RatingSummary>(`/contents/${content.id}/rating`).then(({ data }) => setRating(data)).catch(() => {});
   }, [content]);
 
   async function like() {
@@ -55,6 +69,13 @@ export default function ContentDetailPage() {
   async function favorite() {
     if (!content) return;
     await api.post(`/contents/${content.id}/favorite`);
+  }
+
+  async function rate(score: number) {
+    if (!content) return;
+    await api.post(`/contents/${content.id}/rating`, { score });
+    const { data } = await api.get<RatingSummary>(`/contents/${content.id}/rating`);
+    setRating(data);
   }
 
   async function submitComment() {
@@ -69,23 +90,21 @@ export default function ContentDetailPage() {
     }
   }
 
-  function share() {
-    const url = window.location.href;
-    if (navigator.share) void navigator.share({ title: content?.title, url });
-    else void navigator.clipboard.writeText(url);
-  }
-
   if (notFound) return <p className="p-6 text-rose-700">İçerik bulunamadı.</p>;
   if (!content) return <p className="p-6">Yükleniyor…</p>;
 
+  const pageUrl = window.location.href;
+
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <head>
+      <Helmet>
         <title>{content.title} | DijitalAtölye</title>
         <meta name="description" content={content.description ?? content.title} />
         <meta property="og:title" content={content.title} />
         <meta property="og:description" content={content.description ?? ''} />
-      </head>
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={pageUrl} />
+      </Helmet>
 
       <div className="text-sm text-gray-500">
         {content.subject} {content.gradeLevel ? `· ${content.gradeLevel}. sınıf` : ''}
@@ -101,26 +120,56 @@ export default function ContentDetailPage() {
 
       {content.description && <p className="mt-4 text-gray-700">{content.description}</p>}
 
-      <div className="mt-6 flex gap-3 items-center">
+      {rating && (
+        <div className="mt-4 flex items-center gap-2 text-sm">
+          <span className="text-amber-500 font-medium">
+            {rating.average.toFixed(1)} ★ ({rating.count})
+          </span>
+          <span className="text-gray-400">|</span>
+          {[1, 2, 3, 4, 5].map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => rate(s)}
+              className={`text-lg ${rating.userScore === s ? 'text-amber-500' : 'text-gray-300 hover:text-amber-400'}`}
+              aria-label={`${s} yıldız`}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-6 flex flex-wrap gap-3 items-center">
         {content.slug ? (
           <Link to={`/play/${content.slug}`} className="btn-primary">Oyna</Link>
         ) : (
-          <span
-            className="btn-primary opacity-50 cursor-not-allowed"
-            title="İçerik henüz yayınlanmadığı için oynatılamıyor"
-          >
+          <span className="btn-primary opacity-50 cursor-not-allowed" title="İçerik henüz yayınlanmadığı için oynatılamıyor">
             Oyna
           </span>
         )}
-        <button onClick={like} className="btn-secondary">♥ {content.likes ?? 0}</button>
-        <button onClick={favorite} className="btn-secondary">★ Favori</button>
-        <button onClick={share} className="btn-secondary">Paylaş</button>
-        {!content.slug && (
-          <span className="text-xs text-amber-700">
-            Bu içerik henüz yayında değil; yayına alındığında oynatılabilir olacak.
-          </span>
-        )}
+        <button type="button" onClick={like} className="btn-secondary">♥ {content.likes ?? 0}</button>
+        <button type="button" onClick={favorite} className="btn-secondary">★ Favori</button>
       </div>
+
+      {content.slug && (
+        <div className="mt-4">
+          <ShareButtons
+            title={content.title}
+            url={pageUrl}
+            onQr={() => setQrOpen(true)}
+            onEmbed={() => setEmbedOpen(true)}
+          />
+          <QrCodeModal open={qrOpen} onClose={() => setQrOpen(false)} url={pageUrl} title={content.title} />
+          <EmbedSnippetModal open={embedOpen} onClose={() => setEmbedOpen(false)} slug={content.slug} />
+        </div>
+      )}
+
+      {!content.slug && (
+        <p className="mt-3 text-xs text-amber-700">
+          Bu içerik henüz yayında değil; yayına alındığında oynatılabilir olacak.
+        </p>
+      )}
 
       <h2 className="text-xl font-semibold mt-10 mb-3">Yorumlar</h2>
       <div className="bg-white border rounded-lg p-4">
@@ -132,7 +181,7 @@ export default function ContentDetailPage() {
           onChange={(e) => setNewComment(e.target.value)}
         />
         <div className="text-right mt-2">
-          <button onClick={submitComment} disabled={busy || !newComment.trim()} className="btn-primary">
+          <button type="button" onClick={submitComment} disabled={busy || !newComment.trim()} className="btn-primary">
             Gönder
           </button>
         </div>

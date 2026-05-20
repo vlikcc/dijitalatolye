@@ -1,5 +1,6 @@
 using DijitalAtolye.BuildingBlocks.Authentication;
 using DijitalAtolye.Catalog.API.Domain;
+using DijitalAtolye.Catalog.API.Import;
 using DijitalAtolye.Catalog.API.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -100,6 +101,58 @@ public static class CatalogEndpoints
                 query = query.Where(t => EF.Functions.ILike(t.DisplayName, $"%{search}%"));
             return await query.OrderByDescending(t => t.UsageCount).Take(100).ToListAsync(ct);
         });
+
+        catalog.MapGet("/subjects/{id:guid}/outcomes", async (
+            Guid id,
+            [FromQuery] int? gradeId,
+            CatalogDbContext db,
+            CancellationToken ct) =>
+        {
+            var subject = await db.Subjects.AsNoTracking().FirstOrDefaultAsync(s => s.Id == id, ct);
+            if (subject is null) return Results.NotFound();
+
+            var unitsQuery = db.Units.AsNoTracking().Where(u => u.SubjectId == id);
+            if (gradeId is not null) unitsQuery = unitsQuery.Where(u => u.GradeId == gradeId);
+            var units = await unitsQuery.OrderBy(u => u.GradeId).ThenBy(u => u.Order).ToListAsync(ct);
+            var unitIds = units.Select(u => u.Id).ToArray();
+            var outcomes = await db.Outcomes.AsNoTracking()
+                .Where(o => unitIds.Contains(o.UnitId))
+                .OrderBy(o => o.Code)
+                .ToListAsync(ct);
+
+            var grades = await db.Grades.AsNoTracking()
+                .Where(g => units.Select(u => u.GradeId).Distinct().Contains(g.Id))
+                .OrderBy(g => g.Id)
+                .ToListAsync(ct);
+
+            return Results.Ok(new
+            {
+                subject,
+                grades = grades.Select(g => new
+                {
+                    grade = g,
+                    units = units.Where(u => u.GradeId == g.Id).Select(u => new
+                    {
+                        u.Id,
+                        u.Name,
+                        u.Order,
+                        outcomes = outcomes.Where(o => o.UnitId == u.Id),
+                    }),
+                }),
+            });
+        });
+
+        catalog.MapPost("/admin/import-meb-json", async (
+            [FromBody] MebImportRow[] rows,
+            MebCatalogImporter importer,
+            IDistributedCache cache,
+            CancellationToken ct) =>
+        {
+            if (rows.Length == 0) return Results.BadRequest("Empty payload");
+            var result = await importer.ImportAsync(rows, ct);
+            await cache.RemoveAsync(OutcomeTreeCacheKey, ct);
+            return Results.Ok(result);
+        }).RequireAuthorization(Policies.AdminOnly);
 
         catalog.MapPost("/tags", async (
             [FromBody] CreateTagRequest body,

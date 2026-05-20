@@ -1,6 +1,54 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import api from '@/lib/api';
+
+interface AiConfig {
+  primaryProvider: string;
+  fallbackProvider?: string | null;
+  model: string;
+  maxTokens: number;
+  promptVersion: string;
+  staticAnalysisEnabled: boolean;
+  llmEnabled: boolean;
+  dailyCostLimitUsd: number;
+}
 
 export default function AdminAiConfigPage() {
+  const [config, setConfig] = useState<AiConfig | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    api.get<AiConfig>('/admin/ai-config')
+      .then(({ data }) => setConfig(data))
+      .catch(() => setConfig({
+        primaryProvider: 'DeepSeek',
+        model: 'deepseek-chat',
+        maxTokens: 2048,
+        promptVersion: 'v2',
+        staticAnalysisEnabled: true,
+        llmEnabled: true,
+        dailyCostLimitUsd: 50,
+      }));
+  }, []);
+
+  async function save() {
+    if (!config) return;
+    setSaving(true);
+    setMessage(null);
+    try {
+      const { data } = await api.put<AiConfig>('/admin/ai-config', config);
+      setConfig(data);
+      setMessage('Kaydedildi.');
+    } catch {
+      setMessage('Kaydetme başarısız.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (!config) return <p>Yükleniyor…</p>;
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -8,51 +56,38 @@ export default function AdminAiConfigPage() {
         <Link to="/admin" className="text-sm text-brand-600 hover:underline">← Panele dön</Link>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <section className="bg-white border rounded-lg p-5">
-          <h2 className="font-semibold mb-3">Aktif LLM Sağlayıcı</h2>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-slate-600">Birincil</span>
-              <span className="font-medium">DeepSeek Chat</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">Fallback</span>
-              <span className="font-medium text-slate-400">Yapılandırılmadı</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">Max Token</span>
-              <span className="font-medium">2048</span>
-            </div>
-          </div>
-        </section>
+      <div className="bg-white border rounded-lg p-5 space-y-4 max-w-xl">
+        <Field label="Birincil sağlayıcı" value={config.primaryProvider} onChange={(v) => setConfig({ ...config, primaryProvider: v })} />
+        <Field label="Fallback sağlayıcı" value={config.fallbackProvider ?? ''} onChange={(v) => setConfig({ ...config, fallbackProvider: v || null })} />
+        <Field label="Model" value={config.model} onChange={(v) => setConfig({ ...config, model: v })} />
+        <Field label="Max token" value={String(config.maxTokens)} onChange={(v) => setConfig({ ...config, maxTokens: Number(v) || 2048 })} />
+        <Field label="Prompt versiyonu" value={config.promptVersion} onChange={(v) => setConfig({ ...config, promptVersion: v })} />
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={config.staticAnalysisEnabled} onChange={(e) => setConfig({ ...config, staticAnalysisEnabled: e.target.checked })} />
+          Statik analiz aktif
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={config.llmEnabled} onChange={(e) => setConfig({ ...config, llmEnabled: e.target.checked })} />
+          LLM değerlendirme aktif
+        </label>
+        <Field label="Günlük maliyet limiti (USD)" value={String(config.dailyCostLimitUsd)} onChange={(v) => setConfig({ ...config, dailyCostLimitUsd: Number(v) || 0 })} />
 
-        <section className="bg-white border rounded-lg p-5">
-          <h2 className="font-semibold mb-3">Moderasyon Pipeline</h2>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-slate-600">Statik Analiz</span>
-              <span className="font-medium text-emerald-600">Aktif</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">LLM Değerlendirme</span>
-              <span className="font-medium text-emerald-600">Aktif</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">Screenshot Analizi</span>
-              <span className="font-medium text-amber-600">V1.1 Planlandı</span>
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-white border rounded-lg p-5 md:col-span-2">
-          <h2 className="font-semibold mb-3">Prompt Şablonları</h2>
-          <p className="text-sm text-slate-500">
-            AI moderasyon prompt şablonları <code className="bg-slate-100 px-1 rounded">PromptTemplates.cs</code> içinde
-            versiyon kontrolüyle yönetilmektedir. Yeni prompt versiyonu eklemek için backend'de güncelleme yapılmalıdır.
-          </p>
-        </section>
+        <div className="flex items-center gap-3 pt-2">
+          <button type="button" onClick={save} disabled={saving} className="btn-primary">
+            {saving ? 'Kaydediliyor…' : 'Kaydet'}
+          </button>
+          {message && <span className="text-sm text-emerald-700">{message}</span>}
+        </div>
       </div>
     </div>
+  );
+}
+
+function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <label className="block text-sm">
+      <span className="font-medium text-slate-700">{label}</span>
+      <input className="input mt-1 w-full" value={value} onChange={(e) => onChange(e.target.value)} />
+    </label>
   );
 }
