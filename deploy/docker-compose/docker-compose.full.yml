@@ -313,8 +313,9 @@ services:
       Minio__SecretKey: ${COMPOSE_DEV_SECRET}
       Minio__UseSsl: "false"
       Llm__DeepSeekApiKey: ${DEEPSEEK_API_KEY:-}
-      Llm__DeepSeekModel: deepseek-chat
-      Llm__DeepSeekEndpoint: https://api.deepseek.com/v1
+      Llm__DeepSeekModel: ${DEEPSEEK_MODEL:-deepseek-chat}
+      Llm__DeepSeekEndpoint: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}/v1
+      Llm__DeepSeekMaxTokens: ${DEEPSEEK_MAX_TOKENS:-2048}
     expose: ["8080"]
     ports:
       - "5006:8080"

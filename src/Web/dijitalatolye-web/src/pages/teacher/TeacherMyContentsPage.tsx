@@ -103,7 +103,7 @@ export default function TeacherMyContentsPage() {
                   <td className="px-4 py-3 text-slate-600">{formatDate(c.updatedAt)}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="inline-flex items-center gap-3">
-                      {c.status === "RevisionRequested" && (
+                      {(c.status === "RevisionRequested" || c.status === "AutoRejected") && (
                         <button
                           onClick={() => revise(c.id)}
                           className="inline-flex items-center gap-1 text-amber-700 font-medium hover:text-amber-800"

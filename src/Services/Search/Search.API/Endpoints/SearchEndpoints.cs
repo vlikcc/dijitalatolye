@@ -48,23 +48,43 @@ public static class SearchEndpoints
                     .Add("tags", agg => agg.Terms(t => t.Field(f => f.Tags).Size(30))))
                 .Sort(so => so.Field(f => f.Popularity, fs => fs.Order(Elastic.Clients.Elasticsearch.SortOrder.Desc))), ct);
 
+            if (!resp.IsValidResponse)
+            {
+                return Results.Problem(
+                    detail: resp.DebugInformation,
+                    statusCode: StatusCodes.Status503ServiceUnavailable,
+                    title: "Arama servisi geçici olarak kullanılamıyor");
+            }
+
             return Results.Ok(new
             {
                 total = resp.Total,
                 page,
                 pageSize,
-                items = resp.Documents,
+                items = resp.Documents ?? [],
                 facets = ExtractFacets(resp.Aggregations),
             });
         });
 
         g.MapGet("/contents/{slug}", async (string slug, ElasticsearchClient client, CancellationToken ct) =>
         {
+            // Otomatik oluşturulan indekslerde slug genelde text+keyword alt alanıdır; tam eşleşme için .keyword gerekir.
             var resp = await client.SearchAsync<ContentSearchDocument>(s => s
                 .Index(ElasticSearchIndexer.IndexName)
                 .Size(1)
-                .Query(q => q.Term(t => t.Field(f => f.Slug).Value(slug))), ct);
-            var doc = resp.Documents.FirstOrDefault();
+                .Query(q => q.Bool(b => b.Should(
+                    sh => sh.Term(t => t.Field(new Field("slug.keyword")).Value(slug)),
+                    sh => sh.Term(t => t.Field(f => f.Slug).Value(slug))))), ct);
+
+            if (!resp.IsValidResponse)
+            {
+                return Results.Problem(
+                    detail: resp.DebugInformation,
+                    statusCode: StatusCodes.Status503ServiceUnavailable,
+                    title: "Arama servisi geçici olarak kullanılamıyor");
+            }
+
+            var doc = resp.Documents?.FirstOrDefault();
             return doc is null ? Results.NotFound() : Results.Ok(doc);
         });
 

@@ -129,7 +129,7 @@ export default function TeacherContentDetailPage() {
       </section>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        {data.state === "RevisionRequested" && (
+        {(data.state === "RevisionRequested" || data.state === "AutoRejected") && (
           <button
             type="button"
             onClick={revise}
@@ -138,7 +138,14 @@ export default function TeacherContentDetailPage() {
             <RefreshCw className="w-4 h-4" /> Revize et
           </button>
         )}
-        {(data.state === "Draft" || data.state === "RevisionRequested") && (
+        {data.state === "AutoRejected" && (
+          <p className="w-full text-sm text-rose-800 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3">
+            AI moderasyon bu içeriği otomatik reddetti. Oyunlarda skor kaydı için kullanılan{" "}
+            <code className="text-xs bg-rose-100 px-1 rounded">localStorage</code> artık doğrudan red nedeni değil;
+            yine de içeriği kazanıma uygun hale getirip yeniden gönderin.
+          </p>
+        )}
+        {(data.state === "Draft" || data.state === "RevisionRequested" || data.state === "AutoRejected") && (
           <Link
             to="/teacher/contents/wizard"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-brand-200 text-brand-800 font-semibold hover:bg-brand-50"

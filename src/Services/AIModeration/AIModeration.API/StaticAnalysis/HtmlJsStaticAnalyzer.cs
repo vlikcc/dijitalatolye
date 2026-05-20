@@ -9,11 +9,17 @@ namespace DijitalAtolye.AIModeration.API.StaticAnalysis;
 /// </summary>
 public sealed class HtmlJsStaticAnalyzer : IStaticAnalyzer
 {
-    private static readonly string[] BannedJsPatterns =
+    /// <summary>Yüksek risk — tek başına otomatik red (ModerationPipeline karar matrisi).</summary>
+    private static readonly string[] CriticalJsPatterns =
     [
         "eval(", "Function(", "document.write", "document.cookie",
-        "window.opener", "navigator.sendBeacon", "navigator.geolocation",
-        "localStorage.setItem", "indexedDB",
+        "window.opener", "navigator.geolocation",
+    ];
+
+    /// <summary>Düzeltilebilir risk — uyarı; editör incelemesine gider (PRD §6.3).</summary>
+    private static readonly string[] WarningJsPatterns =
+    [
+        "navigator.sendBeacon", "localStorage.", "indexedDB",
     ];
 
     private static readonly string[] AllowedExternalHosts =
@@ -81,11 +87,19 @@ public sealed class HtmlJsStaticAnalyzer : IStaticAnalyzer
 
     private static void ScanJsContent(string content, string path, List<string> critical, List<string> warnings)
     {
-        foreach (var pattern in BannedJsPatterns)
+        foreach (var pattern in CriticalJsPatterns)
         {
             if (content.Contains(pattern, StringComparison.Ordinal))
             {
-                critical.Add($"{path}: yasaklı API kullanımı '{pattern}'");
+                critical.Add($"{path}: yüksek riskli API '{pattern}'");
+            }
+        }
+
+        foreach (var pattern in WarningJsPatterns)
+        {
+            if (content.Contains(pattern, StringComparison.Ordinal))
+            {
+                warnings.Add($"{path}: dikkat gerektiren API '{pattern}'");
             }
         }
 

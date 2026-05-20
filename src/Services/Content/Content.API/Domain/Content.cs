@@ -57,6 +57,7 @@ public sealed class Content
             (ContentState.EditorReviewing, ContentState.Rejected) => true,
             (ContentState.EditorReviewing, ContentState.RevisionRequested) => true,
             (ContentState.RevisionRequested, ContentState.Draft) => true,
+            (ContentState.AutoRejected, ContentState.Draft) => true,
             (ContentState.Approved, ContentState.Published) => true,
             (ContentState.Published, ContentState.Unpublished) => true,
             (ContentState.Unpublished, ContentState.Published) => true,
