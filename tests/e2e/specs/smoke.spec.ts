@@ -10,7 +10,7 @@ test.describe('Vertical Slice Smoke', () => {
     await expect(page).toHaveTitle(/Dijital Atol/i);
   });
 
-  test('kayit ve giris akisi', async ({ page }) => {
+  test('kayit ve giris akisi @requires-api', async ({ page }) => {
     await page.goto('/register');
     await page.getByLabel(/e-posta/i).fill(TEACHER_EMAIL);
     await page.getByLabel(/sifre|password/i).first().fill(TEACHER_PASSWORD);

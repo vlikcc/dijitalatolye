@@ -53,6 +53,51 @@ public sealed class AuthFlowTests
     }
 
     [Fact]
+    public async Task Resend_verification_accepts_request()
+    {
+        if (!PostgresAvailable()) return;
+
+        await using var factory = new IdentityWebAppFactory();
+        using var client = factory.CreateClient();
+
+        var email = $"verify{Guid.NewGuid():N}@meb.k12.tr";
+        await client.PostAsJsonAsync("/auth/register", new
+        {
+            email,
+            password = "Test1234!Aa",
+            displayName = "Verify Test",
+            role = "Teacher",
+        });
+
+        var resend = await client.PostAsJsonAsync("/auth/resend-verification", new { email });
+        resend.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Login_rate_limit_returns_429_after_burst()
+    {
+        if (!PostgresAvailable()) return;
+
+        await using var factory = new IdentityWebAppFactory();
+        using var client = factory.CreateClient();
+
+        HttpStatusCode? lastStatus = null;
+        for (var i = 0; i < 12; i++)
+        {
+            var resp = await client.PostAsJsonAsync("/auth/login", new
+            {
+                email = "nonexistent@example.com",
+                password = "wrong",
+            });
+            lastStatus = resp.StatusCode;
+            if (resp.StatusCode == HttpStatusCode.TooManyRequests)
+                break;
+        }
+
+        lastStatus.Should().Be(HttpStatusCode.TooManyRequests);
+    }
+
+    [Fact]
     public async Task Health_ready_returns_ok()
     {
         if (!PostgresAvailable()) return;

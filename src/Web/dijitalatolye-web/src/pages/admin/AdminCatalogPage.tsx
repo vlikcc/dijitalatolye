@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import api from "@/lib/api";
+import api, { getApiErrorMessage } from "@/lib/api";
 
 interface Grade { id: number; code: string; name: string }
 interface Subject { id: number; code: string; name: string }
@@ -9,6 +9,21 @@ export default function AdminCatalogPage() {
   const [grades, setGrades] = useState<Grade[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reindexMsg, setReindexMsg] = useState<string | null>(null);
+  const [reindexing, setReindexing] = useState(false);
+
+  async function reindexSearch() {
+    setReindexing(true);
+    setReindexMsg(null);
+    try {
+      const { data } = await api.post<{ indexed: number; indexRecreated: boolean }>("/search/admin/reindex");
+      setReindexMsg(`${data.indexed} içerik indekslendi.`);
+    } catch (err) {
+      setReindexMsg(getApiErrorMessage(err));
+    } finally {
+      setReindexing(false);
+    }
+  }
 
   useEffect(() => {
     Promise.all([
@@ -21,10 +36,23 @@ export default function AdminCatalogPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h1 className="text-2xl font-bold">Müfredat / Kazanım</h1>
-        <Link to="/admin" className="text-sm text-brand-600 hover:underline">← Panele dön</Link>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            disabled={reindexing}
+            onClick={reindexSearch}
+            className="text-sm px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-60"
+          >
+            {reindexing ? "Arama indeksi yenileniyor…" : "Arama indeksini yenile"}
+          </button>
+          <Link to="/admin" className="text-sm text-brand-600 hover:underline">← Panele dön</Link>
+        </div>
       </div>
+      {reindexMsg && (
+        <p className="mb-4 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">{reindexMsg}</p>
+      )}
 
       {loading ? (
         <p className="text-slate-500">Yükleniyor…</p>

@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/state/auth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const justRegistered = searchParams.get("registered") === "1";
+  const registeredEmail = searchParams.get("email") ?? "";
   const { setTokens, setUser } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -59,6 +62,18 @@ export default function LoginPage() {
           <h1 className="text-2xl font-extrabold text-slate-900">Tekrar hoş geldiniz</h1>
           <p className="mt-1 text-sm text-slate-600">Hesabınıza giriş yaparak içerik üretmeye devam edin.</p>
 
+          {justRegistered && (
+            <div className="mt-4 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900">
+              Kayıt tamamlandı. E-posta doğrulama bağlantısı gönderildi.{" "}
+              <Link
+                to={registeredEmail ? `/verify-email?email=${encodeURIComponent(registeredEmail)}` : "/verify-email"}
+                className="font-semibold underline"
+              >
+                E-postayı doğrula
+              </Link>
+            </div>
+          )}
+
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             <Field icon={Mail} type="email" placeholder="ornek@meb.gov.tr" label="E-posta"
               value={email} onChange={setEmail} autoComplete="email" />
@@ -88,7 +103,16 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-sm text-center text-slate-600">
+          <div className="mt-6">
+            <a
+              href={`${import.meta.env.VITE_API_BASE_URL ?? "/api"}/auth/google`}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition"
+            >
+              Google ile giriş yap
+            </a>
+          </div>
+
+          <p className="mt-4 text-sm text-center text-slate-600">
             Hesabınız yok mu?{" "}
             <Link to="/register" className="font-semibold text-brand-700 hover:text-brand-800">
               Ücretsiz kayıt olun

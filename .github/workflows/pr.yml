@@ -187,13 +187,48 @@ jobs:
           PREVIEW_PID=$!
           sleep 3
           cd ../../../tests/e2e
-          npx playwright test --grep-invert "kayit ve giris"
+          npx playwright test --grep-invert "@requires-api|Auth \\(live API\\)"
           kill $PREVIEW_PID || true
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
           path: tests/e2e/playwright-report/
+
+  e2e-vertical-slice:
+    name: E2E vertical slice (live API)
+    runs-on: ubuntu-latest
+    needs: [backend, detect-changes]
+    if: needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.frontend == 'true'
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+      - run: dotnet restore DijitalAtolye.sln
+      - name: Run vertical slice E2E (infra + API + Playwright)
+        run: |
+          chmod +x scripts/ci/*.sh
+          ./scripts/ci/run-e2e-vertical-slice.sh
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-vertical-slice-report
+          path: |
+            tests/e2e/playwright-report/
+            .ci-e2e-logs/
 
   container-security:
     name: Container security (Trivy)

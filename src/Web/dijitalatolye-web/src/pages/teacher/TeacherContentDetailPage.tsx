@@ -1,7 +1,8 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ExternalLink, Loader2, RefreshCw } from "lucide-react";
-import { api } from "@/lib/api";
+import { useState } from "react";
+import { api, getApiErrorMessage } from "@/lib/api";
 
 type ContentStatus =
   | "Draft"
@@ -37,6 +38,7 @@ export default function TeacherContentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["teacher-content", id],
@@ -46,12 +48,13 @@ export default function TeacherContentDetailPage() {
 
   async function revise() {
     if (!id) return;
+    setActionError(null);
     try {
       await api.post(`/contents/${id}/revise`);
       await qc.invalidateQueries({ queryKey: ["teacher-contents"] });
       navigate("/teacher/contents/wizard");
-    } catch {
-      // 409 vb. — liste sayfasında da aynı davranış
+    } catch (err) {
+      setActionError(getApiErrorMessage(err));
     }
   }
 
@@ -127,6 +130,12 @@ export default function TeacherContentDetailPage() {
           </p>
         )}
       </section>
+
+      {actionError && (
+        <div className="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">
+          {actionError}
+        </div>
+      )}
 
       <div className="mt-6 flex flex-wrap gap-3">
         {(data.state === "RevisionRequested" || data.state === "AutoRejected") && (

@@ -12,7 +12,8 @@ public static class UserStatsEndpoints
         {
             var totalUsers = await db.Profiles.CountAsync(ct);
             var teachers = await db.Profiles.CountAsync(p => p.PrimaryRole == "Teacher", ct);
-            return Results.Ok(new { totalUsers, teachers });
+            var activeEditors = await db.Profiles.CountAsync(p => p.PrimaryRole == "Editor", ct);
+            return Results.Ok(new { totalUsers, teachers, activeEditors });
         }).RequireAuthorization(Policies.AdminOnly).WithTags("Admin");
 
         return routes;

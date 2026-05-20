@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, FileText, Clock, CheckCircle2, XCircle, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
-import { api } from "@/lib/api";
+import { useState } from "react";
+import { api, getApiErrorMessage } from "@/lib/api";
 
 type ContentStatus =
   | "Draft"
@@ -28,6 +29,7 @@ interface ContentItem {
 export default function TeacherMyContentsPage() {
   const nav = useNavigate();
   const qc = useQueryClient();
+  const [actionError, setActionError] = useState<string | null>(null);
   const { data, isLoading, isError } = useQuery({
     queryKey: ["teacher-contents"],
     queryFn: async () => {
@@ -37,12 +39,13 @@ export default function TeacherMyContentsPage() {
   });
 
   async function revise(id: string) {
+    setActionError(null);
     try {
       await api.post(`/contents/${id}/revise`);
       await qc.invalidateQueries({ queryKey: ["teacher-contents"] });
       nav("/teacher/contents/wizard");
-    } catch {
-      // Backend zaten 409 döndürüyor; UI'da sessizce yutuyoruz, en kötü liste güncel kalır.
+    } catch (err) {
+      setActionError(getApiErrorMessage(err));
     }
   }
 
@@ -58,6 +61,12 @@ export default function TeacherMyContentsPage() {
           <Plus className="w-4 h-4" /> Yeni içerik
         </Link>
       </header>
+
+      {actionError && (
+        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">
+          {actionError}
+        </div>
+      )}
 
       {isLoading && (
         <div className="rounded-2xl bg-white border border-slate-200 p-12 flex flex-col items-center text-slate-500">

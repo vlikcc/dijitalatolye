@@ -44,7 +44,7 @@ public sealed class DashboardAggregator
             content.TotalContents,
             content.PendingReview,
             content.PublishedToday,
-            ActiveEditors: 0,
+            users.ActiveEditors,
             users.TotalUsers,
             LlmDailyCostUsd: 0m);
     }
@@ -58,16 +58,25 @@ public sealed class DashboardAggregator
         var users = await GetJsonAsync<UserStatsDto>($"{_options.UserBaseUrl}/users/admin/stats", ct)
             ?? new UserStatsDto();
 
+        var aiRate = content.AiApprovalRatePercent > 0
+            ? $"{content.AiApprovalRatePercent:0.#}%"
+            : "—";
+        var topTeachers = (content.TopTeachers ?? [])
+            .Select(t => new TopTeacherDto(t.Name, t.Contents))
+            .ToArray();
+
         return new ReportsStats(
-            ActiveUsers: users.TotalUsers.ToString("N0"),
-            ActiveUsersDelta: "+0%",
-            PublishedContents: content.PublishedTotal.ToString(),
-            PublishedContentsDelta: "+0%",
+            ActiveUsers: analytics.ActiveUsersLast30Days > 0
+                ? analytics.ActiveUsersLast30Days.ToString("N0")
+                : users.TotalUsers.ToString("N0"),
+            ActiveUsersDelta: analytics.ActiveUsersLast30Days > 0 ? "son 30 gün" : "—",
+            PublishedContents: content.PublishedTotal.ToString("N0"),
+            PublishedContentsDelta: content.PublishedToday > 0 ? $"+{content.PublishedToday} bugün" : "—",
             TotalPlays: analytics.TotalPlays.ToString("N0"),
-            TotalPlaysDelta: "+0%",
-            AiApprovalRate: "—",
-            AiApprovalRateDelta: "—",
-            TopTeachers: Array.Empty<TopTeacherDto>());
+            TotalPlaysDelta: "—",
+            AiApprovalRate: aiRate,
+            AiApprovalRateDelta: content.AiAutoRejected > 0 ? $"{content.AiAutoRejected} otomatik red" : "—",
+            TopTeachers: topTeachers);
     }
 
     private async Task<T?> GetJsonAsync<T>(string url, CancellationToken ct) where T : class
@@ -98,9 +107,12 @@ public sealed class DashboardAggregator
         int TotalContents = 0,
         int PendingReview = 0,
         int PublishedToday = 0,
-        int PublishedTotal = 0);
+        int PublishedTotal = 0,
+        int AiAutoRejected = 0,
+        double AiApprovalRatePercent = 0,
+        IReadOnlyList<TopTeacherDto>? TopTeachers = null);
     private sealed record AnalyticsStatsDto(int TotalPlays = 0, int ActiveUsersLast30Days = 0);
-    private sealed record UserStatsDto(int TotalUsers = 0, int Teachers = 0);
+    private sealed record UserStatsDto(int TotalUsers = 0, int Teachers = 0, int ActiveEditors = 0);
 }
 
 public sealed record DashboardStats(

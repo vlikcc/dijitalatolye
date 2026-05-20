@@ -169,7 +169,8 @@ public static class ContentEndpoints
             ContentDbContext db,
             CancellationToken ct) =>
         {
-            if (current.UserId is null || !current.Roles.Contains("Admin") && !current.Roles.Contains("SuperAdmin"))
+            if (current.UserId is null
+                || (!current.IsInRole(Roles.Admin) && !current.IsInRole(Roles.SuperAdmin)))
                 return Results.Forbid();
 
             var items = await db.Contents.AsNoTracking()
@@ -236,15 +237,41 @@ public static class ContentEndpoints
             return Results.NoContent();
         }).RequireAuthorization(Policies.TeacherOrAbove);
 
-        contents.MapGet("/{id:guid}", async (Guid id, ContentDbContext db, CancellationToken ct) =>
+        contents.MapGet("/{id:guid}", async (
+            Guid id,
+            ICurrentUser current,
+            ContentDbContext db,
+            CancellationToken ct) =>
         {
+            if (current.UserId is null) return Results.Unauthorized();
+
             var content = await db.Contents.AsNoTracking()
                 .Include(c => c.Versions)
                 .FirstOrDefaultAsync(c => c.Id == id, ct);
-            return content is null ? Results.NotFound() : Results.Json(content);
+            if (content is null) return Results.NotFound();
+            if (!CanReadContent(content, current)) return Results.Forbid();
+
+            return Results.Json(content);
         });
 
         return routes;
+    }
+
+    public static bool CanReadContent(Domain.Content content, ICurrentUser current)
+    {
+        if (current.IsInRole(Roles.Admin) || current.IsInRole(Roles.SuperAdmin))
+            return true;
+        if (content.AuthorUserId == current.UserId)
+            return true;
+        if (content.State is ContentState.Published or ContentState.Unpublished)
+            return true;
+        if (current.IsInRole(Roles.Editor)
+            && content.State is ContentState.EditorReviewing
+                or ContentState.AIReviewed
+                or ContentState.Submitted
+                or ContentState.AIReviewing)
+            return true;
+        return false;
     }
 
     private static string? NormalizeDifficulty(string? value)

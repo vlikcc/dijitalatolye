@@ -42,8 +42,22 @@ public sealed class CurrentUserAccessor : ICurrentUser
 
     public string? DisplayName => _accessor.HttpContext?.User?.FindFirstValue("name");
 
-    public IReadOnlyCollection<string> Roles =>
-        _accessor.HttpContext?.User?.FindAll(ClaimTypes.Role).Select(c => c.Value).ToArray() ?? [];
+    public IReadOnlyCollection<string> Roles
+    {
+        get
+        {
+            var user = _accessor.HttpContext?.User;
+            if (user is null) return [];
 
-    public bool IsInRole(string role) => _accessor.HttpContext?.User?.IsInRole(role) ?? false;
+            // JWT RoleClaimType="role" (MapInboundClaims=false); ClaimTypes.Role bos kalir.
+            var roleClaims = user.FindAll("role").Select(c => c.Value);
+            if (roleClaims.Any()) return roleClaims.ToArray();
+
+            return user.FindAll(ClaimTypes.Role).Select(c => c.Value).ToArray();
+        }
+    }
+
+    public bool IsInRole(string role) =>
+        Roles.Contains(role, StringComparer.OrdinalIgnoreCase)
+        || (_accessor.HttpContext?.User?.IsInRole(role) ?? false);
 }

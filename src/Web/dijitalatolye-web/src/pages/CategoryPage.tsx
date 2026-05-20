@@ -14,9 +14,19 @@ interface SearchItem {
   likes?: number;
 }
 
+interface FacetBucket {
+  value: string | number;
+  count: number;
+}
+
 interface SearchResponse {
   total: number;
   items: SearchItem[];
+  facets?: {
+    subject: FacetBucket[];
+    gradeLevel: FacetBucket[];
+    tags: FacetBucket[];
+  };
 }
 
 export default function CategoryPage() {
@@ -51,6 +61,24 @@ export default function CategoryPage() {
 
       <h1 className="text-3xl font-bold mb-2">{decodedSubject} içerikleri</h1>
       <p className="text-sm text-gray-500 mb-6">{data?.total ?? 0} sonuç</p>
+
+      {data?.facets?.gradeLevel && data.facets.gradeLevel.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {data.facets.gradeLevel.map((b) => {
+            const g = String(b.value);
+            const active = grade === g;
+            return (
+              <Link
+                key={g}
+                to={`/category/${encodeURIComponent(decodedSubject)}?grade=${active ? "" : g}`}
+                className={`text-sm px-3 py-1 rounded-full border ${active ? "bg-brand-600 text-white border-brand-600" : "bg-white text-slate-700 border-slate-200 hover:border-brand-300"}`}
+              >
+                {g}. sınıf ({b.count})
+              </Link>
+            );
+          })}
+        </div>
+      )}
 
       {isLoading ? (
         <p>Yükleniyor…</p>

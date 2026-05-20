@@ -12,4 +12,11 @@ export default defineConfig({
       "/hubs": { target: "http://localhost:5000", changeOrigin: true, ws: true },
     },
   },
+  preview: {
+    port: 4173,
+    proxy: {
+      "/api": { target: "http://localhost:5000", changeOrigin: true },
+      "/hubs": { target: "http://localhost:5000", changeOrigin: true, ws: true },
+    },
+  },
 });

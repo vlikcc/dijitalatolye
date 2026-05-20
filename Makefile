@@ -142,6 +142,11 @@ web-build:  ## Frontend production build
 web-test:  ## Frontend testleri
 	cd src/Web/dijitalatolye-web && npm run test
 
+.PHONY: e2e-vertical-slice
+e2e-vertical-slice:  ## Canli API ile Playwright vertical slice (Docker infra + servisler)
+	chmod +x scripts/ci/*.sh
+	./scripts/ci/run-e2e-vertical-slice.sh
+
 # === Docker images ===
 
 .PHONY: docker-build

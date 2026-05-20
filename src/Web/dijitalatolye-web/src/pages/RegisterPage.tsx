@@ -21,7 +21,7 @@ export default function RegisterPage() {
     setError(null);
     try {
       await api.post("/auth/register", form);
-      navigate("/login?registered=1");
+      navigate(`/login?registered=1&email=${encodeURIComponent(form.email)}`);
     } catch (err: unknown) {
       const msg = extractApiError(err) ?? "Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.";
       setError(msg);

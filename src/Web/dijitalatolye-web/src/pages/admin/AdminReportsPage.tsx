@@ -50,8 +50,10 @@ export default function AdminReportsPage() {
             </h2>
             <span className="text-xs text-slate-500">Son 30 gün</span>
           </div>
-          <div className="h-64 rounded-xl bg-gradient-to-br from-brand-50 to-accent-50 border border-brand-100 flex items-center justify-center text-slate-500 text-sm">
-            Grafik verisi henüz bağlanmadı (Prometheus / Reports endpoint).
+          <div className="h-64 rounded-xl bg-gradient-to-br from-brand-50 to-accent-50 border border-brand-100 flex items-center justify-center text-slate-500 text-sm text-center px-6">
+            {data
+              ? `Özet: ${data.publishedContents} yayınlanan içerik, ${data.totalPlays} oynatma, AI onay ${data.aiApprovalRate}.`
+              : "Rapor verisi yükleniyor…"}
           </div>
         </div>
 

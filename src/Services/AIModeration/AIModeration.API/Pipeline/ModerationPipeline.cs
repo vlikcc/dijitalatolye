@@ -67,7 +67,7 @@ public sealed class ModerationPipeline
 
         // 5) Karar matrisi
         var (score, summary) = ParseLlmJson(llmResponse.RawJson);
-        var decision = DecideFinal(score, staticReport.CriticalIssues.Count);
+        var decision = ModerationDecisionRules.Decide(score, staticReport.CriticalIssues.Count);
 
         var report = new ModerationReport
         {
@@ -200,10 +200,4 @@ public sealed class ModerationPipeline
         }
     }
 
-    private static ModerationDecision DecideFinal(int score, int criticalCount) =>
-        criticalCount > 0 ? ModerationDecision.AutoReject :
-        score >= 85 ? ModerationDecision.AutoApproveCandidate :
-        score >= 60 ? ModerationDecision.NeedsReview :
-        score >= 35 ? ModerationDecision.FlaggedForReview :
-        ModerationDecision.AutoReject;
 }

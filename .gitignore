@@ -28,6 +28,8 @@ coverage*.info
 *.sln.iml
 
 # Node / Frontend
+src/Web/dijitalatolye-web/src/**/*.js
+!src/Web/dijitalatolye-web/src/**/*.config.js
 node_modules/
 dist/
 build/

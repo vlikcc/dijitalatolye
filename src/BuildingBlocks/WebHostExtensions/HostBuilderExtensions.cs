@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +12,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Sentry.AspNetCore;
 using Serilog;
+using Serilog.Context;
 using Serilog.Events;
 
 namespace DijitalAtolye.BuildingBlocks.WebHostExtensions;
@@ -70,6 +72,7 @@ public static class HostBuilderExtensions
     public static WebApplication UseDijitalAtolyeServiceDefaults(this WebApplication app)
     {
         app.UseSerilogRequestLogging();
+        app.Use(CorrelationIdMiddleware);
 
         if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("staging"))
         {
@@ -161,6 +164,17 @@ public static class HostBuilderExtensions
                     t.AddOtlpExporter(opt => opt.Endpoint = new Uri(otlpEndpoint));
                 }
             });
+    }
+
+    private static async Task CorrelationIdMiddleware(HttpContext context, Func<Task> next)
+    {
+        var correlationId = context.Request.Headers["X-Correlation-Id"].FirstOrDefault()
+            ?? Guid.NewGuid().ToString("N");
+        context.Response.Headers["X-Correlation-Id"] = correlationId;
+        using (LogContext.PushProperty("correlationId", correlationId))
+        {
+            await next();
+        }
     }
 
     private static void ConfigureSentry(WebApplicationBuilder builder, string serviceName)

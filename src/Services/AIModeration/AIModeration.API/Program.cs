@@ -1,4 +1,5 @@
 using DijitalAtolye.AIModeration.API.Consumers;
+using DijitalAtolye.AIModeration.API.Health;
 using DijitalAtolye.AIModeration.API.Endpoints;
 using DijitalAtolye.AIModeration.API.Llm;
 using DijitalAtolye.AIModeration.API.Persistence;
@@ -60,7 +61,8 @@ builder.Services.AddDijitalAtolyeEventBus(
     configureBus: null,
     typeof(ContentSubmittedConsumer).Assembly);
 
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddCheck<MongoHealthCheck>("mongodb", tags: ["ready"]);
 
 var app = builder.Build();
 app.UseDijitalAtolyeServiceDefaults();
