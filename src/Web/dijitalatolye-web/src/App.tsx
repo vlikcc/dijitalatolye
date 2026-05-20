@@ -12,6 +12,7 @@ import TeacherUploadPage from "@/pages/teacher/TeacherUploadPage";
 import TeacherUploadWizard from "@/pages/teacher/TeacherUploadWizard";
 import TeacherDashboardPage from "@/pages/teacher/TeacherDashboardPage";
 import TeacherMyContentsPage from "@/pages/teacher/TeacherMyContentsPage";
+import TeacherContentDetailPage from "@/pages/teacher/TeacherContentDetailPage";
 import TeacherProfilePage from "@/pages/teacher/TeacherProfilePage";
 import CollectionsPage from "@/pages/teacher/CollectionsPage";
 import EditorQueuePage from "@/pages/editor/EditorQueuePage";
@@ -58,6 +59,7 @@ export default function App() {
         <Route path="/teacher/contents" element={<TeacherMyContentsPage />} />
         <Route path="/teacher/contents/new" element={<TeacherUploadPage />} />
         <Route path="/teacher/contents/wizard" element={<TeacherUploadWizard />} />
+        <Route path="/teacher/contents/:id" element={<TeacherContentDetailPage />} />
         <Route path="/teacher/profile" element={<TeacherProfilePage />} />
         <Route path="/teacher/collections" element={<CollectionsPage />} />
         <Route path="/editor" element={<EditorDashboardPage />} />

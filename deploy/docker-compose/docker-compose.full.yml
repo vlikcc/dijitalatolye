@@ -11,6 +11,7 @@ name: dijitalatolye
 # ----- Genel ortak parcalar -----
 x-common-env: &common-env
   ASPNETCORE_ENVIRONMENT: Development
+  Database__AutoMigrate: "true"
   ASPNETCORE_URLS: http://+:8080
   TZ: Europe/Istanbul
   Jwt__Authority: http://identity:8080

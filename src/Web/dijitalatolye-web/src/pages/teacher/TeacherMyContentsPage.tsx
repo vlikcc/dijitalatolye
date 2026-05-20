@@ -112,7 +112,7 @@ export default function TeacherMyContentsPage() {
                           <RefreshCw className="w-3.5 h-3.5" /> Revize et
                         </button>
                       )}
-                      <Link to={`/contents/${c.id}`} className="text-brand-700 font-medium hover:text-brand-800">
+                      <Link to={`/teacher/contents/${c.id}`} className="text-brand-700 font-medium hover:text-brand-800">
                         Detay →
                       </Link>
                     </div>
