@@ -17,7 +17,7 @@
     "clsx": "^2.1.1",
     "i18next": "^23.16.4",
     "lucide-react": "^0.460.0",
-    "react": "^19.0.0",
+    "react": "^19.2.6",
     "react-dom": "^19.0.0",
     "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.53.2",
@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
-    "@types/react": "^19.0.0",
+    "@types/react": "^19.2.15",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.20",
