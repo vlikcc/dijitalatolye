@@ -18,8 +18,8 @@
 		X-Frame-Options "SAMEORIGIN"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "geolocation=(), microphone=(), camera=()"
-		# CSP'yi ihtiyaca gore daraltin (icerikler iframe'lenecekse genisletmek gerekebilir)
-		Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' wss: https:; frame-ancestors 'self'"
+		# Angular build: inline critical CSS + deferred stylesheet onload + Google Fonts
+		Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self' 'unsafe-inline'; connect-src 'self' wss: https:; frame-ancestors 'self'"
 		-Server
 	}
 
