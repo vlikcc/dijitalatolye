@@ -24,8 +24,6 @@ ALL_SERVICES=(
   "notification:src/Services/Notification/Notification.API"
   "search:src/Services/Search/Search.API"
   "analytics:src/Services/Analytics/Analytics.API"
-  "admin:src/Services/Admin/Admin.API"
-  "web:src/Web/dijitalatolye-web"
 )
 
 BUILD_LIST=()
@@ -52,21 +50,12 @@ for entry in "${BUILD_LIST[@]}"; do
   path="${entry#*:}"
   image="${REGISTRY}/dijitalatolye-${name}:${TAG}"
   echo ""
-  if [[ "$name" == "web" ]]; then
-    echo "==> Building $image (context=${path}, dockerfile=Dockerfile)"
-    docker build \
-      -t "$image" \
-      -t "${REGISTRY}/dijitalatolye-${name}:latest" \
-      -f "${path}/Dockerfile" \
-      "${path}"
-  else
-    echo "==> Building $image (context=., dockerfile=${path}/Dockerfile)"
-    docker build \
-      -t "$image" \
-      -t "${REGISTRY}/dijitalatolye-${name}:latest" \
-      -f "${path}/Dockerfile" \
-      .
-  fi
+  echo "==> Building $image (context=., dockerfile=${path}/Dockerfile)"
+  docker build \
+    -t "$image" \
+    -t "${REGISTRY}/dijitalatolye-${name}:latest" \
+    -f "${path}/Dockerfile" \
+    .
 done
 
 echo ""

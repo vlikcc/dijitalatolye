@@ -11,7 +11,6 @@ name: dijitalatolye
 # ----- Genel ortak parcalar -----
 x-common-env: &common-env
   ASPNETCORE_ENVIRONMENT: Development
-  Database__AutoMigrate: "true"
   ASPNETCORE_URLS: http://+:8080
   TZ: Europe/Istanbul
   Jwt__Authority: http://identity:8080
@@ -24,9 +23,8 @@ x-common-env: &common-env
   RabbitMq__Username: ${POSTGRES_USER}
   RabbitMq__Password: ${COMPOSE_DEV_SECRET}
   Kestrel__Endpoints__Http__Url: http://+:8080
-  # Gözlemlenebilirlik: make observability-up sonrasi http://tempo:4317 veya Jaeger OTLP
-  OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
-  SENTRY_DSN: ${SENTRY_DSN:-}
+  OTEL_EXPORTER_OTLP_ENDPOINT: ""
+  SENTRY_DSN: ""
 
 x-restart: &restart
   restart: unless-stopped
@@ -314,9 +312,8 @@ services:
       Minio__SecretKey: ${COMPOSE_DEV_SECRET}
       Minio__UseSsl: "false"
       Llm__DeepSeekApiKey: ${DEEPSEEK_API_KEY:-}
-      Llm__DeepSeekModel: ${DEEPSEEK_MODEL:-deepseek-chat}
-      Llm__DeepSeekEndpoint: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}/v1
-      Llm__DeepSeekMaxTokens: ${DEEPSEEK_MAX_TOKENS:-2048}
+      Llm__DeepSeekModel: deepseek-chat
+      Llm__DeepSeekEndpoint: https://api.deepseek.com/v1
     expose: ["8080"]
     ports:
       - "5006:8080"
@@ -453,10 +450,11 @@ services:
     <<: *restart
 
   web:
+    # Angular v21 frontend (Faz 2 sonrası cutover)
     build:
-      context: ../../src/Web/dijitalatolye-web
+      context: ../../src/Web/dijitalatolye-web-ng
       dockerfile: Dockerfile
-    image: dijitalatolye/web:dev
+    image: dijitalatolye/web-ng:dev
     container_name: da-web
     depends_on:
       gateway: { condition: service_started }

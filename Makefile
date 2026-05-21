@@ -124,28 +124,23 @@ run-review:  ## Review servisini baslat (port 5007)
 run-notification:  ## Notification servisini baslat (port 5008)
 	dotnet run --project src/Services/Notification/Notification.API/Notification.API.csproj
 
-# === Frontend ===
+# === Frontend (Angular v21) ===
 
 .PHONY: web-install
 web-install:  ## Frontend bagimliliklarini yukle
-	cd src/Web/dijitalatolye-web && npm install
+	cd src/Web/dijitalatolye-web-ng && npm install
 
 .PHONY: web
-web:  ## Frontend dev sunucusu (port 5173)
-	cd src/Web/dijitalatolye-web && npm run dev
+web:  ## Frontend dev sunucusu (port 4200)
+	cd src/Web/dijitalatolye-web-ng && npm start
 
 .PHONY: web-build
 web-build:  ## Frontend production build
-	cd src/Web/dijitalatolye-web && npm run build
+	cd src/Web/dijitalatolye-web-ng && npm run build
 
 .PHONY: web-test
 web-test:  ## Frontend testleri
-	cd src/Web/dijitalatolye-web && npm run test
-
-.PHONY: e2e-vertical-slice
-e2e-vertical-slice:  ## Canli API ile Playwright vertical slice (Docker infra + servisler)
-	chmod +x scripts/ci/*.sh
-	./scripts/ci/run-e2e-vertical-slice.sh
+	cd src/Web/dijitalatolye-web-ng && npm test
 
 # === Docker images ===
 

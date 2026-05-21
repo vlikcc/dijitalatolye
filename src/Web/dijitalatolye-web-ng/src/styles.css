@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background: #faf7ff;
+  color: #1a1033;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: #d6bdff; color: #2c0c54; }
+
+*:focus-visible {
+  outline: 2px solid #9a5cff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Material density override — daha kompakt görünüm */
+.mat-mdc-form-field { width: 100%; }

@@ -39,7 +39,6 @@ jobs:
           - notification
           - search
           - analytics
-          - admin
           - web
     steps:
       - uses: actions/checkout@v4
@@ -68,7 +67,7 @@ jobs:
         run: |
           case "${{ matrix.service }}" in
             apigateway)    echo "context=." >> $GITHUB_OUTPUT; echo "file=src/ApiGateway/Dockerfile" >> $GITHUB_OUTPUT ;;
-            web)           echo "context=src/Web/dijitalatolye-web" >> $GITHUB_OUTPUT; echo "file=src/Web/dijitalatolye-web/Dockerfile" >> $GITHUB_OUTPUT ;;
+            web)           echo "context=src/Web/dijitalatolye-web-ng" >> $GITHUB_OUTPUT; echo "file=src/Web/dijitalatolye-web-ng/Dockerfile" >> $GITHUB_OUTPUT ;;
             *)             svc="${{ matrix.service }}"; PASCAL=$(echo "$svc" | sed 's/.*/\u&/' | sed 's/aimoderation/AIModeration/'); echo "context=." >> $GITHUB_OUTPUT; echo "file=src/Services/$PASCAL/$PASCAL.API/Dockerfile" >> $GITHUB_OUTPUT ;;
           esac
 

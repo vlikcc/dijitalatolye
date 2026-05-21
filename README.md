@@ -10,7 +10,7 @@ MEB müfredatına uygun (sınıf, ders, kazanım) içerik kataloğu sunan, kalit
 
 - **Stil:** Microservices + Event-Driven + CQRS (kısmi)
 - **Backend:** .NET 10 + ASP.NET Core Minimal API + EF Core
-- **Frontend:** React 19 + TypeScript + Vite + Tailwind + shadcn/ui
+- **Frontend:** Angular v21 + TypeScript + Angular Material + Tailwind CSS
 - **Mesaj Broker:** RabbitMQ + MassTransit
 - **API Gateway:** YARP
 - **Auth:** OpenIddict
@@ -95,7 +95,7 @@ dijitalatolye/
 │   │   ├── Outbox/                      # Transactional Outbox
 │   │   ├── Authentication/              # JWT middleware
 │   │   └── WebHostExtensions/           # Serilog + OTel + healthcheck
-│   └── Web/dijitalatolye-web/           # React 19 SPA
+│   └── Web/dijitalatolye-web-ng/        # Angular v21 SPA (standalone components, Signals)
 ├── tests/
 │   ├── UnitTests/
 │   ├── IntegrationTests/                # Testcontainers

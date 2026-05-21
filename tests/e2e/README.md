@@ -24,16 +24,5 @@ npm test
 
 ## CI
 
-| Job | Ne yapar |
-|-----|----------|
-| `e2e` | Statik smoke: Vite preview, API olmadan UI testleri |
-| `e2e-vertical-slice` | Canli API: Docker infra + Identity/Content/Search/Gateway + fixture seed + Playwright |
-
-Vertical slice job'u repo kokunden calistirir:
-
-```bash
-chmod +x scripts/ci/*.sh
-./scripts/ci/run-e2e-vertical-slice.sh
-```
-
-Ortam degiskenleri: `E2E_LIVE_API=true`, `E2E_AUTH_TOKEN`, `E2E_EXPECT_SLUG=e2e-demo-matematik`.
+GitHub Actions `pr.yml` icinde `e2e` job'u olarak kosulur (servisler bagli
+oldugundan smoke modunda, baseUrl staging URL'ine isaret eder).

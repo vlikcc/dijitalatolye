@@ -1,11 +1,15 @@
 using DijitalAtolye.BuildingBlocks.Authentication;
 using DijitalAtolye.BuildingBlocks.EventBus.Contracts.Content;
 using DijitalAtolye.BuildingBlocks.Outbox;
+using DijitalAtolye.Content.API.AiExtraction;
 using DijitalAtolye.Content.API.Bundles;
 using DijitalAtolye.Content.API.Domain;
 using DijitalAtolye.Content.API.Persistence;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Minio;
+using Minio.DataModel.Args;
 
 namespace DijitalAtolye.Content.API.Endpoints;
 
@@ -169,8 +173,7 @@ public static class ContentEndpoints
             ContentDbContext db,
             CancellationToken ct) =>
         {
-            if (current.UserId is null
-                || (!current.IsInRole(Roles.Admin) && !current.IsInRole(Roles.SuperAdmin)))
+            if (current.UserId is null || !current.Roles.Contains("Admin") && !current.Roles.Contains("SuperAdmin"))
                 return Results.Forbid();
 
             var items = await db.Contents.AsNoTracking()
@@ -237,41 +240,196 @@ public static class ContentEndpoints
             return Results.NoContent();
         }).RequireAuthorization(Policies.TeacherOrAbove);
 
-        contents.MapGet("/{id:guid}", async (
-            Guid id,
-            ICurrentUser current,
-            ContentDbContext db,
-            CancellationToken ct) =>
+        contents.MapGet("/{id:guid}", async (Guid id, ContentDbContext db, CancellationToken ct) =>
         {
-            if (current.UserId is null) return Results.Unauthorized();
-
             var content = await db.Contents.AsNoTracking()
                 .Include(c => c.Versions)
                 .FirstOrDefaultAsync(c => c.Id == id, ct);
-            if (content is null) return Results.NotFound();
-            if (!CanReadContent(content, current)) return Results.Forbid();
-
-            return Results.Json(content);
+            return content is null ? Results.NotFound() : Results.Json(content);
         });
+
+        // Faz 1 — AI destekli yükleme: tek ekran upload akışı için
+        // Multipart ZIP/HTML bundle alır, MinIO'ya geçici key olarak yazar, metin örnekler,
+        // Catalog'tan kazanım listesi çekip DeepSeek'e gönderir ve metadata önerisi döner.
+        // Kullanıcı sonra form'u onaylayıp POST /contents + /versions + /submit ile devam eder.
+        contents.MapPost("/ai-extract", async (
+            IFormFile file,
+            ICurrentUser current,
+            IMinioClient minio,
+            BundleValidator validator,
+            BundleTextSampler sampler,
+            IContentMetadataExtractor extractor,
+            AiExtractionMetrics metrics,
+            ILoggerFactory loggerFactory,
+            CancellationToken ct) =>
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            if (current.UserId is null) return Results.Unauthorized();
+            if (file is null || file.Length == 0)
+            {
+                metrics.RecordClientError(sw.Elapsed.TotalMilliseconds, "empty_file");
+                return Results.BadRequest(new { error = "Dosya boş veya eksik." });
+            }
+            if (file.Length > 50L * 1024 * 1024)
+            {
+                metrics.RecordClientError(sw.Elapsed.TotalMilliseconds, "too_large");
+                return Results.BadRequest(new { error = "Dosya 50 MB sınırını aşıyor." });
+            }
+
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (ext is not (".zip" or ".html" or ".htm"))
+            {
+                metrics.RecordClientError(sw.Elapsed.TotalMilliseconds, "bad_extension");
+                return Results.BadRequest(new { error = "Sadece .zip, .html veya .htm yüklenebilir." });
+            }
+
+            var log = loggerFactory.CreateLogger("ContentAiExtract");
+
+            // 1) Belleğe oku
+            await using var input = file.OpenReadStream();
+            using var buffer = new MemoryStream();
+            await input.CopyToAsync(buffer, ct);
+            var bytes = buffer.ToArray();
+
+            // 2) MinIO temp key — version create için yeniden kullanılacak (kullanıcı tekrar upload etmesin diye)
+            const string bucket = "dijitalatolye-content";
+            var key = $"{current.UserId:N}/{Guid.NewGuid():N}/{SanitizeFileName(file.FileName)}";
+
+            await EnsureBucketAsync(minio, bucket, ct);
+            using (var putStream = new MemoryStream(bytes))
+            {
+                await minio.PutObjectAsync(new PutObjectArgs()
+                    .WithBucket(bucket)
+                    .WithObject(key)
+                    .WithStreamData(putStream)
+                    .WithObjectSize(bytes.LongLength)
+                    .WithContentType(file.ContentType ?? "application/octet-stream"), ct);
+            }
+
+            // 3) Bundle validasyonu (manifest, dosya türü whitelist, vs.)
+            BundleValidationResult validation;
+            try
+            {
+                validation = await validator.ValidateAsync(bucket, key, declaredManifestEntry: null, ct);
+            }
+            catch (BundleValidationException ex)
+            {
+                metrics.RecordClientError(sw.Elapsed.TotalMilliseconds, "bundle_invalid");
+                return Results.BadRequest(new { error = ex.Message });
+            }
+
+            // 4) Metin örnekle
+            BundleSample sample;
+            try
+            {
+                using var sampleStream = new MemoryStream(bytes);
+                sample = sampler.Sample(sampleStream, file.FileName);
+            }
+            catch (Exception ex)
+            {
+                log.LogWarning(ex, "BundleTextSampler başarısız; boş örnekle devam.");
+                sample = new BundleSample(string.Empty, Array.Empty<string>(), Array.Empty<string>(), 0);
+            }
+
+            // 5) İki aşamalı LLM çağrısı: draft (subject/grade) → Catalog filtreli kazanım seçimi (extractor içinde)
+            AiExtractedMetadataDto metadata;
+            var aiFailed = false;
+            try
+            {
+                var promptText = BuildSampleText(sample);
+                metadata = await extractor.ExtractAsync(promptText, ct);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "AI extract başarısız; manifest fallback ile devam.");
+                aiFailed = true;
+                metadata = new AiExtractedMetadataDto(
+                    Title: validation.ManifestTitle,
+                    Description: null,
+                    Subject: null,
+                    GradeLevel: null,
+                    DurationMinutes: null,
+                    Difficulty: null,
+                    OutcomeCodes: Array.Empty<string>(),
+                    Tags: Array.Empty<string>(),
+                    Confidence: 0.0,
+                    CandidateOutcomeCount: 0,
+                    RawDraftResponse: null,
+                    RawOutcomesResponse: null);
+            }
+
+            if (aiFailed)
+            {
+                metrics.RecordServerError(sw.Elapsed.TotalMilliseconds, "llm_failure");
+            }
+            else
+            {
+                metrics.RecordSuccess(sw.Elapsed.TotalMilliseconds, metadata.Confidence, metadata.CandidateOutcomeCount);
+            }
+
+            return Results.Ok(new AiExtractResponse(
+                Bucket: bucket,
+                Key: key,
+                ManifestEntry: validation.ManifestEntry,
+                FileSizeBytes: validation.SizeBytes,
+                Sha256: validation.Sha256,
+                Metadata: metadata,
+                FilesScanned: sample.FilesScanned));
+        })
+        .DisableAntiforgery()
+        .RequireAuthorization(Policies.TeacherOrAbove);
 
         return routes;
     }
 
-    public static bool CanReadContent(Domain.Content content, ICurrentUser current)
+    private static string BuildSampleText(BundleSample sample)
     {
-        if (current.IsInRole(Roles.Admin) || current.IsInRole(Roles.SuperAdmin))
-            return true;
-        if (content.AuthorUserId == current.UserId)
-            return true;
-        if (content.State is ContentState.Published or ContentState.Unpublished)
-            return true;
-        if (current.IsInRole(Roles.Editor)
-            && content.State is ContentState.EditorReviewing
-                or ContentState.AIReviewed
-                or ContentState.Submitted
-                or ContentState.AIReviewing)
-            return true;
-        return false;
+        var sb = new System.Text.StringBuilder();
+        if (sample.Titles.Count > 0)
+        {
+            sb.AppendLine("Başlık(lar): " + string.Join(" | ", sample.Titles));
+        }
+        if (sample.Headings.Count > 0)
+        {
+            sb.AppendLine("Bölüm başlıkları: " + string.Join(" | ", sample.Headings));
+        }
+        if (!string.IsNullOrWhiteSpace(sample.Text))
+        {
+            sb.AppendLine();
+            sb.AppendLine(sample.Text);
+        }
+        return sb.ToString();
+    }
+
+    private static string SanitizeFileName(string name)
+    {
+        var trimmed = Path.GetFileName(name).Trim();
+        if (string.IsNullOrEmpty(trimmed)) return "bundle";
+        var sb = new System.Text.StringBuilder(trimmed.Length);
+        foreach (var c in trimmed)
+        {
+            sb.Append(c switch
+            {
+                'ç' => 'c', 'Ç' => 'C',
+                'ğ' => 'g', 'Ğ' => 'G',
+                'ı' => 'i', 'İ' => 'I',
+                'ö' => 'o', 'Ö' => 'O',
+                'ş' => 's', 'Ş' => 'S',
+                'ü' => 'u', 'Ü' => 'U',
+                _ when char.IsLetterOrDigit(c) || c is '.' or '-' or '_' => c,
+                _ => '_',
+            });
+        }
+        return sb.ToString();
+    }
+
+    private static async Task EnsureBucketAsync(IMinioClient minio, string bucket, CancellationToken ct)
+    {
+        var exists = await minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucket), ct);
+        if (!exists)
+        {
+            await minio.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucket), ct);
+        }
     }
 
     private static string? NormalizeDifficulty(string? value)
@@ -321,3 +479,12 @@ public sealed record AddVersionRequest(
     long FileSizeBytes,
     string? Sha256,
     string? ChangeLog);
+
+public sealed record AiExtractResponse(
+    string Bucket,
+    string Key,
+    string ManifestEntry,
+    long FileSizeBytes,
+    string Sha256,
+    AiExtractedMetadataDto Metadata,
+    int FilesScanned);

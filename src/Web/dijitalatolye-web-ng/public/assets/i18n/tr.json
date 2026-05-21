@@ -1,0 +1,8 @@
+{
+  "common": {
+    "save": "Kaydet",
+    "cancel": "Vazgeç",
+    "loading": "Yükleniyor…",
+    "error": "Bir hata oluştu"
+  }
+}
