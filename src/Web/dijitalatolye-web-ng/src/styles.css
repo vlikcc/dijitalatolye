@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tailwind preflight kapalı olduğu için global border-box reset'i elle uygulanır;
+   aksi halde w-full + padding olan inputlar parent'ı taşırır. */
+*, *::before, *::after { box-sizing: border-box; }
+
 html, body { height: 100%; }
 body {
   margin: 0;

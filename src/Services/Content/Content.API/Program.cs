@@ -42,6 +42,25 @@ builder.Services.AddSingleton<IMinioClient>(_ => new MinioClient()
 builder.Services.AddScoped<DijitalAtolye.Content.API.Bundles.BundleValidator>();
 builder.Services.AddScoped<DijitalAtolye.Content.API.Bundles.BundleExtractor>();
 
+builder.Services.AddSingleton<DijitalAtolye.Content.API.AiExtraction.BundleTextSampler>();
+builder.Services.AddSingleton<DijitalAtolye.Content.API.AiExtraction.AiExtractionMetrics>();
+builder.Services.Configure<DijitalAtolye.Content.API.AiExtraction.DeepSeekExtractorOptions>(
+    builder.Configuration.GetSection("AiExtraction:DeepSeek"));
+
+var catalogBaseUrl = builder.Configuration["Catalog:BaseUrl"] ?? "http://localhost:5003";
+builder.Services.AddHttpClient<DijitalAtolye.Content.API.AiExtraction.ICatalogOutcomeProvider,
+                              DijitalAtolye.Content.API.AiExtraction.CatalogOutcomeProvider>(c =>
+{
+    c.BaseAddress = new Uri(catalogBaseUrl.TrimEnd('/'));
+    c.Timeout = TimeSpan.FromSeconds(10);
+});
+
+builder.Services.AddHttpClient<DijitalAtolye.Content.API.AiExtraction.IContentMetadataExtractor,
+                              DijitalAtolye.Content.API.AiExtraction.DeepSeekMetadataExtractor>(c =>
+{
+    c.Timeout = TimeSpan.FromSeconds(60);
+});
+
 builder.Services.AddSingleton<DijitalAtolye.Content.API.Endpoints.PlayPresignClient>(_ =>
 {
     var publicUri = !string.IsNullOrWhiteSpace(minioOpts.PublicEndpoint)

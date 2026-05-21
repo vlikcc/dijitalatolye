@@ -256,10 +256,10 @@ public static class ContentEndpoints
             IFormFile file,
             ICurrentUser current,
             IMinioClient minio,
-            BundleValidator validator,
-            BundleTextSampler sampler,
-            IContentMetadataExtractor extractor,
-            AiExtractionMetrics metrics,
+            [FromServices] BundleValidator validator,
+            [FromServices] BundleTextSampler sampler,
+            [FromServices] IContentMetadataExtractor extractor,
+            [FromServices] AiExtractionMetrics metrics,
             ILoggerFactory loggerFactory,
             CancellationToken ct) =>
         {
