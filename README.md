@@ -1,6 +1,6 @@
 # DijitalAtölye
 
-Öğretmenlerin hazırladığı HTML tabanlı eğitici oyun, simülasyon ve interaktif içerikleri toplayan, AI destekli moderasyon ve editör onayı süreçlerinden geçirerek öğrencilere ve öğretmenlere yayınlayan **eğitim teknolojileri (EdTech) platformu**.
+Öğretmenlerin hazırladığı HTML/ZIP tabanlı eğitici oyun, simülasyon ve interaktif içerikleri toplayan; **Guard** ile dosya güvenliği, AI destekli moderasyon ve editör onayı süreçlerinden geçirerek öğrencilere ve öğretmenlere yayınlayan **EdTech platformu**.
 
 ## Vizyon
 
@@ -8,33 +8,40 @@ MEB müfredatına uygun (sınıf, ders, kazanım) içerik kataloğu sunan, kalit
 
 ## Mimari Genel Bakış
 
-- **Stil:** Microservices + Event-Driven + CQRS (kısmi)
+- **Stil:** Microservices + Event-Driven + Transactional Outbox
 - **Backend:** .NET 10 + ASP.NET Core Minimal API + EF Core
 - **Frontend:** Angular v21 + TypeScript + Angular Material + Tailwind CSS
-- **Mesaj Broker:** RabbitMQ + MassTransit
+- **Mesaj broker:** RabbitMQ + MassTransit
 - **API Gateway:** YARP
-- **Auth:** OpenIddict
-- **LLM:** DeepSeek (primary), Gemini + Claude (fallback)
-- **Cluster:** Self-hosted K3s
-- **Observability:** Loki + Prometheus + Grafana + Tempo + Sentry
+- **Auth:** ASP.NET Core Identity + JWT (OpenIddict uyumlu yol haritası)
+- **Object storage:** MinIO (S3 uyumlu)
+- **Dosya güvenliği:** [Guard](https://github.com/gorkemio/guard) — ClamAV/YARA tarama, admin onayı, HMAC imzalı teslim (`ghcr.io/gorkemio/guard`)
+- **LLM:** DeepSeek (birincil), Gemini + Claude (fallback)
+- **Arama:** Elasticsearch
+- **Prod deploy:** Docker Compose + Caddy (TLS), opsiyonel K3s/Helm
+- **Observability:** OpenTelemetry, Sentry; opsiyonel Loki/Prometheus/Grafana stack
 
-Detaylar için: [`02-Sistem-Mimarisi.md`](02-Sistem-Mimarisi.md), [`docs/adr/`](docs/adr/)
+Detaylar: [`02-Sistem-Mimarisi.md`](02-Sistem-Mimarisi.md), [`docs/adr/`](docs/adr/)
 
 ## Servisler
 
-| Servis | Sorumluluk | Port (dev) |
-|--------|-----------|-----------:|
-| ApiGateway | Routing, JWT validation, rate limit | 5000 |
-| Identity | Kimlik doğrulama, JWT, OAuth | 5001 |
-| User | Profil, öğretmen doğrulama, favori | 5002 |
-| Catalog | Sınıf/ders/kazanım/etiket | 5003 |
-| Storage | MinIO/GCS soyutlama, presigned URL | 5004 |
-| Content | İçerik yükleme, versiyonlama, durum | 5005 |
-| AIModeration | Statik analiz + DeepSeek LLM | 5006 |
+| Servis | Sorumluluk | Port (host / `make up-full`) |
+|--------|-----------|------------------------------:|
+| ApiGateway | Routing, JWT, rate limit | 5000 |
+| Identity | Kayıt, giriş, JWT, şifre sıfırlama | 5001 |
+| User | Profil, favoriler, bildirim tercihleri | 5002 |
+| Catalog | Sınıf/ders/kazanım/etiket (MEB) | 5003 |
+| Storage | MinIO, presigned URL, Guard entegrasyonu | 5004 |
+| Content | Yükleme, versiyonlama, AI metadata çıkarımı, durum makinesi | 5005 |
+| AIModeration | Statik analiz + LLM moderasyon | 5006 |
 | Review | Editör kuyruğu ve karar akışı | 5007 |
-| Notification | E-posta + in-app bildirim | 5008 |
-| Search | Elasticsearch tam metin + facet | 5009 |
-| Analytics | Görüntülenme/oynanma metrikleri | 5010 |
+| Notification | E-posta + SignalR in-app | 5008 |
+| Analytics | Görüntülenme / etkileşim metrikleri | 5109 |
+| Search | Elasticsearch tam metin + facet | 5110 |
+| Admin | Dashboard, audit, operasyon metrikleri | 5111 |
+| Web (Angular) | SPA — prod/full stack'te nginx | 8080 (full) / 4200 (`make web`) |
+
+**Guard alt stack** (prod/full compose ile birlikte): `guard-web`, worker'lar, Postgres, Redis, ClamAV — Storage.API ile HMAC üzerinden konuşur.
 
 ## Hızlı Başlangıç
 
@@ -42,90 +49,117 @@ Detaylar için: [`02-Sistem-Mimarisi.md`](02-Sistem-Mimarisi.md), [`docs/adr/`](
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop) veya Podman
-- [Node.js 22+](https://nodejs.org/) (frontend için)
-- [Task](https://taskfile.dev/) (opsiyonel — `make` da kullanılabilir)
+- [Node.js 22+](https://nodejs.org/) (frontend geliştirme için)
+- [GNU Make](https://www.gnu.org/software/make/) (opsiyonel)
+- **DeepSeek API key** — AI moderasyon ve içerik metadata çıkarımı için
 
-### Lokal Geliştirme
+### Seçenek A — Sadece altyapı + `dotnet run` (günlük geliştirme)
 
 ```bash
-# Bağımlılıkları başlat (PostgreSQL, RabbitMQ, Redis, Elasticsearch, MinIO, MongoDB, ClamAV)
-make up
+make env          # .env + COMPOSE_DEV_SECRET + JWT_SIGNING_KEY
+# .env içine DEEPSEEK_API_KEY yazın
 
-# Migration'ları çalıştır
+make up           # Postgres, RabbitMQ, Redis, ES, MinIO, MongoDB, Mailhog
 make migrate
-
-# Tüm servisleri build et
 make build
 
-# Tüm testleri çalıştır
-make test
+# Ayrı terminallerde:
+make run-gateway  # :5000
+make run-identity # :5001
+# ... diğer servisler (make help)
 
-# Frontend geliştirme sunucusu
-make web
+make web          # Angular dev server — http://localhost:4200
 ```
 
-İlk çalıştırma için: [`docs/getting-started.md`](docs/getting-started.md)
+Detaylı adımlar: [`docs/getting-started.md`](docs/getting-started.md)
 
-### Production Self-Host (Docker Compose)
-
-Tek sunucuda production konfigürasyonuyla çalıştırma — Caddy + otomatik TLS, kapalı veri portları, EF auto-migrate, log rotation, yedekleme:
+### Seçenek B — Tüm sistem Docker'da (dev profili)
 
 ```bash
-make prod-env       # .env.prod uretir, secret'lari otomatik doldurur
-make prod-up        # build + up (Caddy 80/443 public)
-make prod-smoke     # https://<domain>/health/live testi
+make env
+make up-full      # infra + tüm API'ler + Angular nginx — http://localhost:8080, API :5000
 ```
 
+Guard stack `docker-compose.full.yml` içinde `guard.stack.yml` ile birlikte gelir; `.env` içinde `GUARD_*` secret'larını doldurun (bkz. `.env.example`).
+
+### Seçenek C — Production self-host (Caddy + TLS)
+
+Tek sunucuda production konfigürasyonu — Caddy 80/443, kapalı veri portları, EF auto-migrate, Guard entegrasyonu:
+
+```bash
+make prod-env       # .env.prod oluşturur, temel secret'ları üretir
+# .env.prod: DEEPSEEK_API_KEY + GUARD_HMAC_SECRET, GUARD_HMAC_SECRETS, vb.
+
+make prod-up-mail   # SMTP testi için Mailhog profili ile
+# veya: make prod-up
+
+make prod-smoke     # https://<PUBLIC_DOMAIN>/ health kontrolü
+```
+
+Lokal test: `PUBLIC_DOMAIN=localhost`, tarayıcıda self-signed sertifikayı kabul edin → **https://localhost**
+
 Detay: [`docs/runbooks/selfhost-prod.md`](docs/runbooks/selfhost-prod.md)
+
+### Varsayılan seed admin (Identity)
+
+İlk migration/seed sonrası (Development veya `Database__AutoMigrate=true`):
+
+| Alan | Değer |
+|------|-------|
+| E-posta | `admin@dijitalatolye.local` |
+| Şifre | `Admin123!` |
+
+Production'da bu hesabı değiştirin veya devre dışı bırakın.
+
+### Test
+
+```bash
+make test           # unit + integration (LiveLLM hariç)
+make test-llm       # gerçek DeepSeek API (DEEPSEEK_API_KEY gerekli)
+make web-test       # Angular unit testleri
+```
+
+E2E: [`tests/e2e/`](tests/e2e/)
+
+## İçerik ve güvenlik akışı (özet)
+
+1. Öğretmen ZIP/HTML yükler → Content.API AI ile metadata önerir → MinIO'ya kaydedilir.
+2. `FileUploadedV1` → Storage.API dosyayı **Guard**'a iletir (HMAC imzalı multipart).
+3. Guard tarar; durum callback'leri → `GuardScanUpdatedV1` → Content durumu güncellenir.
+4. Admin onayı sonrası Guard dosyayı Storage.API'ye teslim eder → MinIO → `GuardFileDeliveredV1`.
+5. Paralel: AI moderasyon → editör incelemesi → yayın → Search indeksleme.
 
 ## Repo Yapısı
 
 ```
 dijitalatolye/
 ├── src/
-│   ├── ApiGateway/                      # YARP reverse proxy
-│   ├── Services/                        # 10 mikroservis
-│   │   ├── Identity/                    # Clean Architecture: API/App/Domain/Infrastructure
-│   │   ├── User/
-│   │   ├── Content/
-│   │   ├── ...
-│   ├── BuildingBlocks/                  # Ortak kütüphaneler
-│   │   ├── Common/                      # Result, Error, Paging
-│   │   ├── EventBus/                    # MassTransit + CloudEvents
-│   │   ├── Outbox/                      # Transactional Outbox
-│   │   ├── Authentication/              # JWT middleware
-│   │   └── WebHostExtensions/           # Serilog + OTel + healthcheck
-│   └── Web/dijitalatolye-web-ng/        # Angular v21 SPA (standalone components, Signals)
-├── tests/
-│   ├── UnitTests/
-│   ├── IntegrationTests/                # Testcontainers
-│   └── E2ETests/                        # Playwright
+│   ├── ApiGateway/                 # YARP reverse proxy
+│   ├── Services/                   # Mikroservisler (Identity, Content, Storage, …)
+│   ├── BuildingBlocks/             # EventBus, Outbox, Auth, WebHostExtensions, …
+│   └── Web/dijitalatolye-web-ng/   # Angular v21 SPA
+├── tests/                          # Unit, integration, Playwright E2E
 ├── deploy/
-│   ├── docker-compose/                  # Lokal bağımlılıklar
-│   ├── helm/                            # K8s deployment chart'ları
-│   ├── ansible/                         # K3s cluster bootstrap
-│   └── terraform/                       # Cloud kaynakları (hybrid)
-├── docs/
-│   └── adr/                             # Architecture Decision Records
-├── scripts/
-└── .github/workflows/                   # CI/CD
+│   ├── docker-compose/             # dev.yml, full.yml, prod.yml, guard.stack.yml
+│   ├── helm/                       # K8s chart'ları
+│   └── ansible/                    # K3s bootstrap
+├── docs/                           # ADR, runbook, demo
+├── scripts/                        # CI, backup, smoke
+└── .github/workflows/              # CI/CD
 ```
 
-## Yol Haritası
+## Faydalı Make komutları
 
-| Faz | Süre | Çıktı |
-|-----|------|-------|
-| Faz 0 | 2 hafta | Foundation: repo, ADR, docker-compose, K3s, CI/CD |
-| Faz 1 | 6 hafta | Çekirdek servisler + vertical slice demo |
-| Faz 2 | 6 hafta | AI olgunlaşma + öğretmen/editör paneli |
-| Faz 3 | 4 hafta | Search + keşif + etkileşim + SEO |
-| Faz 4 | 4 hafta | Admin, audit, güvenlik, KVKK, beta |
-
-Detaylı todo: [`03-Todo-List.md`](03-Todo-List.md)
+```bash
+make help           # Tüm komutlar
+make ps / ps-full   # Container durumu
+make prod-logs      # Prod log takibi
+make prod-backup    # Postgres + Mongo + MinIO yedek
+```
 
 ## Katkı
 
-[`CONTRIBUTING.md`](CONTRIBUTING.md) okuyun. Conventional Commits zorunlu.
+[`CONTRIBUTING.md`](CONTRIBUTING.md) — Conventional Commits.
 
 ## Lisans
 
