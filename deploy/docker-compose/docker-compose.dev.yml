@@ -127,20 +127,6 @@ services:
         mc anonymous set download local/dijitalatolye-content-published || true
         echo 'MinIO buckets ready.'
 
-  clamav:
-    image: clamav/clamav:1.4
-    container_name: da-clamav
-    ports:
-      - "3310:3310"
-    volumes:
-      - clamav-data:/var/lib/clamav
-    healthcheck:
-      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
-      interval: 60s
-      timeout: 30s
-      retries: 3
-      start_period: 5m
-
   mailhog:
     image: mailhog/mailhog:latest
     container_name: da-mailhog
@@ -155,4 +141,3 @@ volumes:
   redis-data:
   es-data:
   minio-data:
-  clamav-data:

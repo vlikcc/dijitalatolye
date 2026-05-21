@@ -1,5 +1,8 @@
 name: dijitalatolye-prod
 
+include:
+  - path: guard.stack.yml
+
 # Production-grade self-hosted stack (single host, Docker Compose).
 #
 # Calistirma:
@@ -230,21 +233,6 @@ services:
     restart: "no"
     logging: { driver: json-file, options: { max-size: "5m", max-file: "2" } }
 
-  clamav:
-    image: clamav/clamav:stable
-    container_name: da-clamav
-    volumes:
-      - clamav-data:/var/lib/clamav
-    healthcheck:
-      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
-      interval: 60s
-      timeout: 30s
-      retries: 3
-      start_period: 5m
-    mem_limit: 2g
-    mem_reservation: 1g
-    <<: *data-defaults
-
   # MailHog: lokal prod testlerinde gercek SMTP yokken; uretimde profili etkinlestirmeyin.
   # Aktif etmek icin: --profile mailhog
   mailhog:
@@ -321,9 +309,9 @@ services:
     image: dijitalatolye/storage:${IMAGE_TAG:-latest}
     container_name: da-storage
     depends_on:
-      minio:    { condition: service_healthy }
-      clamav:   { condition: service_healthy }
-      rabbitmq: { condition: service_healthy }
+      minio:      { condition: service_healthy }
+      guard-web:  { condition: service_healthy }
+      rabbitmq:   { condition: service_healthy }
     environment:
       <<: *common-env
       Minio__Endpoint: minio:9000
@@ -334,8 +322,11 @@ services:
       Minio__BucketContent: ${MINIO_BUCKET_CONTENT:-dijitalatolye-content}
       Minio__BucketPublished: ${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published}
       Minio__BucketAvatars: ${MINIO_BUCKET_AVATARS:-dijitalatolye-avatars}
-      ClamAv__Host: clamav
-      ClamAv__Port: "3310"
+      Guard__BaseUrl: http://guard-web:8000
+      Guard__SourceId: ${GUARD_SOURCE_ID:-dijitalatolye}
+      Guard__Secret: ${GUARD_HMAC_SECRET:?GUARD_HMAC_SECRET is required}
+      Guard__InboundSecret: ${GUARD_MAIN_SITE_HMAC_SECRET:-${GUARD_HMAC_SECRET}}
+      Guard__CallbackBaseUrl: http://storage:8080
     expose: ["8080"]
     <<: *app-defaults
 
@@ -513,6 +504,24 @@ services:
     expose: ["8080"]
     <<: *app-defaults
 
+  # guard.stack.yml servislerini prod internal agina bagla
+  guard-postgres:
+    networks: [internal]
+  guard-redis:
+    networks: [internal]
+  guard-clamav:
+    networks: [internal]
+  guard-migrate:
+    networks: [internal]
+  guard-web:
+    networks: [internal]
+  guard-worker-scan:
+    networks: [internal]
+  guard-worker-delivery:
+    networks: [internal]
+  guard-beat:
+    networks: [internal]
+
 volumes:
   postgres-data:
   mongo-data:
@@ -520,7 +529,6 @@ volumes:
   redis-data:
   es-data:
   minio-data:
-  clamav-data:
   caddy-data:
   caddy-config:
 

@@ -1,12 +1,11 @@
 using DijitalAtolye.BuildingBlocks.Authentication;
 using DijitalAtolye.BuildingBlocks.WebHostExtensions;
 using DijitalAtolye.BuildingBlocks.EventBus.Configuration;
-using DijitalAtolye.Storage.API.Antivirus;
 using DijitalAtolye.Storage.API.Consumers;
 using DijitalAtolye.Storage.API.Endpoints;
+using DijitalAtolye.Storage.API.Guard;
 using DijitalAtolye.Storage.API.Storage;
 using Minio;
-using nClam;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,10 +46,15 @@ builder.Services.AddSingleton<MinioPresignClient>(_ =>
 
 builder.Services.AddScoped<IObjectStorage, MinioObjectStorage>();
 
-var clamHost = builder.Configuration["ClamAv:Host"] ?? "localhost";
-var clamPort = builder.Configuration.GetValue("ClamAv:Port", 3310);
-builder.Services.AddSingleton<IClamClient>(_ => new ClamClient(clamHost, clamPort) { MaxStreamSize = 256 * 1024 * 1024 });
-builder.Services.AddScoped<IAntivirusScanner, ClamAvScanner>();
+builder.Services.Configure<GuardOptions>(builder.Configuration.GetSection("Guard"));
+builder.Services.AddSingleton<GuardSignatureService>();
+builder.Services.AddHttpClient<IGuardClient, GuardClient>((sp, client) =>
+{
+    var opts = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<GuardOptions>>().Value;
+    client.BaseAddress = new Uri(opts.BaseUrl.TrimEnd('/') + "/");
+    client.Timeout = Timeout.InfiniteTimeSpan;
+});
+builder.Services.AddScoped<IFileVettingService, GuardVettingService>();
 
 builder.Services.AddScoped<ICurrentUser, CurrentUserAccessor>();
 builder.Services.AddDijitalAtolyeJwtAuth(builder.Configuration);
@@ -59,7 +63,7 @@ builder.Services.AddDijitalAtolyeEventBus(
     builder.Configuration,
     serviceName: "storage",
     configureBus: null,
-    typeof(FileUploadedConsumer).Assembly);
+    typeof(GuardVettingConsumer).Assembly);
 
 builder.Services.AddHealthChecks();
 
@@ -68,6 +72,7 @@ app.UseDijitalAtolyeServiceDefaults();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapStorageEndpoints();
+app.MapGuardCallbackEndpoints();
 app.Run();
 
 static Uri? TryParsePublic(string value)

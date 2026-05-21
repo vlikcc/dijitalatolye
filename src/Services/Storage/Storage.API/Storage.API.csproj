@@ -14,6 +14,5 @@
 
   <ItemGroup>
     <PackageReference Include="Minio" />
-    <PackageReference Include="nClam" />
   </ItemGroup>
 </Project>

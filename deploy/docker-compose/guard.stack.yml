@@ -1,0 +1,165 @@
+# Guard alt-stack — dijitalatolye full/prod compose ile birlikte kullanılır.
+# Image: ghcr.io/gorkemio/guard:latest (PR #2 merge sonrası GHCR'da)
+#
+# Gerekli .env:
+#   GUARD_HMAC_SECRET=<64-hex>
+#   GUARD_PG_PASSWORD=<postgres sifresi>
+#   GUARD_DJANGO_SECRET_KEY=<django secret>
+
+x-guard-env: &guard-env
+  DJANGO_SETTINGS_MODULE: config.settings.prod
+  DJANGO_SECRET_KEY: ${GUARD_DJANGO_SECRET_KEY:?GUARD_DJANGO_SECRET_KEY is required}
+  DJANGO_DEBUG: "False"
+  DJANGO_ALLOWED_HOSTS: ${GUARD_ALLOWED_HOSTS:-guard-web,localhost}
+  DJANGO_CSRF_TRUSTED_ORIGINS: ${GUARD_CSRF_TRUSTED_ORIGINS:-}
+  DATABASE_URL: postgres://guard:${GUARD_PG_PASSWORD:?GUARD_PG_PASSWORD is required}@guard-postgres:5432/guard
+  REDIS_URL: redis://guard-redis:6379/0
+  CELERY_BROKER_URL: redis://guard-redis:6379/1
+  CELERY_RESULT_BACKEND: redis://guard-redis:6379/2
+  GUARD_STORAGE_ROOT: /var/lib/guard
+  GUARD_QUARANTINE_DIR: /var/lib/guard/quarantine
+  GUARD_CLEAN_DIR: /var/lib/guard/clean
+  GUARD_INFECTED_DIR: /var/lib/guard/infected
+  GUARD_REJECTED_DIR: /var/lib/guard/rejected
+  GUARD_WORK_DIR: /var/lib/guard/work
+  GUARD_CLAMD_SOCKET: ""
+  GUARD_CLAMD_TCP_HOST: guard-clamav
+  GUARD_CLAMD_TCP_PORT: "3310"
+  GUARD_CLAMD_TIMEOUT: "120"
+  GUARD_HMAC_SECRETS: ${GUARD_HMAC_SECRETS:?GUARD_HMAC_SECRETS JSON required — see .env.example}
+  GUARD_HMAC_TIMESTAMP_SKEW: "300"
+  GUARD_HMAC_NONCE_TTL: "600"
+  GUARD_INGEST_ALLOWED_CIDRS: ${GUARD_INGEST_ALLOWED_CIDRS:-0.0.0.0/0}
+  GUARD_MAIN_SITE_BASE: ${GUARD_MAIN_SITE_BASE:-http://storage:8080}
+  GUARD_MAIN_SITE_HMAC_SECRET: ${GUARD_MAIN_SITE_HMAC_SECRET:?GUARD_MAIN_SITE_HMAC_SECRET is required}
+  GUARD_DELIVERY_TIMEOUT: "120"
+  GUARD_DELIVERY_MAX_RETRIES: "5"
+  GUARD_YARA_RULES_DIR: /etc/guard/yara_rules
+  GUARD_PROMETHEUS_ENABLED: "false"
+
+services:
+  guard-postgres:
+    image: postgres:16-alpine
+    container_name: guard-postgres
+    environment:
+      POSTGRES_USER: guard
+      POSTGRES_PASSWORD: ${GUARD_PG_PASSWORD:?GUARD_PG_PASSWORD is required}
+      POSTGRES_DB: guard
+    volumes:
+      - guard-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U guard -d guard"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  guard-redis:
+    image: redis:7-alpine
+    container_name: guard-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - guard-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+
+  guard-clamav:
+    image: clamav/clamav:1.4
+    container_name: guard-clamav
+    platform: linux/amd64
+    environment:
+      CLAMAV_NO_CLAMD: "false"
+      CLAMAV_NO_FRESHCLAMD: "false"
+      CLAMAV_NO_MILTERD: "true"
+    volumes:
+      - guard-clamav-data:/var/lib/clamav
+    healthcheck:
+      test: ["CMD", "clamdcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 360s
+
+  guard-migrate:
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    container_name: guard-migrate
+    restart: "no"
+    command: ["bootstrap"]
+    environment: *guard-env
+    volumes:
+      - guard-data:/var/lib/guard
+    depends_on:
+      guard-postgres:
+        condition: service_healthy
+
+  guard-web:
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    container_name: guard-web
+    command: ["web"]
+    environment: *guard-env
+    volumes:
+      - guard-data:/var/lib/guard
+    expose:
+      - "8000"
+    depends_on:
+      guard-migrate:
+        condition: service_completed_successfully
+      guard-redis:
+        condition: service_healthy
+      guard-clamav:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/v1/health/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  guard-worker-scan:
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    container_name: guard-worker-scan
+    command: ["worker-scan"]
+    environment: *guard-env
+    volumes:
+      - guard-data:/var/lib/guard
+    depends_on:
+      guard-migrate:
+        condition: service_completed_successfully
+      guard-redis:
+        condition: service_healthy
+      guard-clamav:
+        condition: service_healthy
+
+  guard-worker-delivery:
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    container_name: guard-worker-delivery
+    command: ["worker-delivery"]
+    environment: *guard-env
+    volumes:
+      - guard-data:/var/lib/guard
+    depends_on:
+      guard-migrate:
+        condition: service_completed_successfully
+      guard-redis:
+        condition: service_healthy
+
+  guard-beat:
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    container_name: guard-beat
+    command: ["beat"]
+    environment: *guard-env
+    volumes:
+      - guard-data:/var/lib/guard
+    depends_on:
+      guard-migrate:
+        condition: service_completed_successfully
+      guard-redis:
+        condition: service_healthy
+
+volumes:
+  guard-pg-data:
+  guard-redis-data:
+  guard-clamav-data:
+  guard-data:

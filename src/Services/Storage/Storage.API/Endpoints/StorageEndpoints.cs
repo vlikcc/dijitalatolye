@@ -1,5 +1,5 @@
 using DijitalAtolye.BuildingBlocks.Authentication;
-using DijitalAtolye.Storage.API.Antivirus;
+using DijitalAtolye.Storage.API.Guard;
 using DijitalAtolye.Storage.API.Storage;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,16 +29,42 @@ public static class StorageEndpoints
             return Results.Json(new PresignedUploadResponse(url, bucket, key, DateTime.UtcNow.AddMinutes(15)));
         });
 
-        storage.MapPost("/scan", async (
-            [FromBody] ScanRequest body,
-            IObjectStorage objectStorage,
-            IAntivirusScanner scanner,
+        storage.MapPost("/guard/upload", async (
+            IFormFile file,
+            [FromForm] Guid contentId,
+            [FromForm] Guid versionId,
+            [FromForm] string bucket,
+            [FromForm] string key,
+            ICurrentUser current,
+            IFileVettingService vetting,
             CancellationToken ct) =>
         {
-            await using var stream = await objectStorage.GetAsync(body.Bucket, body.Key, ct);
-            var result = await scanner.ScanAsync(stream, ct);
-            return Results.Json(result);
-        }).RequireAuthorization(Policies.EditorOrAbove);
+            if (current.UserId is null) return Results.Unauthorized();
+            if (file is null || file.Length == 0)
+            {
+                return Results.BadRequest(new { error = "Dosya boş veya eksik." });
+            }
+            if (string.IsNullOrWhiteSpace(bucket) || string.IsNullOrWhiteSpace(key))
+            {
+                return Results.BadRequest(new { error = "bucket ve key zorunlu." });
+            }
+
+            await using var stream = file.OpenReadStream();
+            var response = await vetting.SubmitAsync(new VettingSubmission(
+                stream,
+                file.FileName,
+                contentId,
+                versionId,
+                bucket,
+                key,
+                current.UserId.Value.ToString("N")), ct);
+
+            return Results.Json(new GuardUploadEndpointResponse(
+                response.Id,
+                response.Status,
+                response.Sha256,
+                response.FileSize));
+        }).DisableAntiforgery();
 
         storage.MapGet("/download-url", async (
             [FromQuery] string bucket,
@@ -95,7 +121,6 @@ public static class StorageEndpoints
                 sb.Append(ch);
                 continue;
             }
-            // Birleştirme imleri (combining marks) ve diğer non-ASCII'leri at.
             if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(ch) is
                 System.Globalization.UnicodeCategory.NonSpacingMark or
                 System.Globalization.UnicodeCategory.SpacingCombiningMark or
@@ -113,4 +138,4 @@ public static class StorageEndpoints
 
 public sealed record PresignedUploadRequest(string FileName, string ContentType, string Purpose);
 public sealed record PresignedUploadResponse(string Url, string Bucket, string Key, DateTime ExpiresAtUtc);
-public sealed record ScanRequest(string Bucket, string Key);
+public sealed record GuardUploadEndpointResponse(string GuardFileId, string Status, string Sha256, long FileSize);
