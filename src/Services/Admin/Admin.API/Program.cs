@@ -5,6 +5,7 @@ using DijitalAtolye.Admin.API.Persistence;
 using DijitalAtolye.Admin.API.Services;
 using DijitalAtolye.BuildingBlocks.Audit;
 using DijitalAtolye.BuildingBlocks.Authentication;
+using DijitalAtolye.BuildingBlocks.Common;
 using DijitalAtolye.BuildingBlocks.EventBus.Configuration;
 using DijitalAtolye.BuildingBlocks.WebHostExtensions;
 using Elastic.Clients.Elasticsearch;
@@ -58,7 +59,7 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Databas
     await app.Services.EnsureAuditSchemaAsync().ConfigureAwait(false);
     using var scope = app.Services.CreateScope();
     var adminDb = scope.ServiceProvider.GetRequiredService<AdminDbContext>();
-    await adminDb.Database.EnsureCreatedAsync();
+    await adminDb.EnsureSchemaAsync().ConfigureAwait(false);
     if (!await adminDb.AiConfigs.AnyAsync())
     {
         adminDb.AiConfigs.Add(new DijitalAtolye.Admin.API.Domain.AiModerationConfig());

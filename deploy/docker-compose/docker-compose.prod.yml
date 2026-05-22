@@ -339,9 +339,19 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
+      minio:    { condition: service_healthy }
     environment:
       <<: *common-env
       ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=content;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      Minio__Endpoint: minio:9000
+      Minio__AccessKey: ${MINIO_ROOT_USER}
+      Minio__SecretKey: ${MINIO_ROOT_PASSWORD}
+      Minio__UseSsl: "false"
+      Minio__PublicEndpoint: ${MINIO_PUBLIC_ENDPOINT:-https://${PUBLIC_DOMAIN:-localhost}/cdn}
+      Catalog__BaseUrl: http://catalog:8080
+      AiExtraction__DeepSeek__ApiKey: ${DEEPSEEK_API_KEY:-}
+      AiExtraction__DeepSeek__Endpoint: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}/v1
+      AiExtraction__DeepSeek__Model: ${DEEPSEEK_MODEL:-deepseek-chat}
     expose: ["8080"]
     <<: *app-defaults
 
