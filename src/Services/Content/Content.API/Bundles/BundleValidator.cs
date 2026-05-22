@@ -79,6 +79,7 @@ public sealed class BundleValidator
         foreach (var entry in archive.Entries)
         {
             if (string.IsNullOrEmpty(entry.Name)) continue; // klasör girdileri
+            if (IsOsMetadataEntry(entry.FullName, entry.Name)) continue; // macOS __MACOSX/._*, .DS_Store, Thumbs.db vb.
             if (entry.FullName.Contains("..", StringComparison.Ordinal) || entry.FullName.StartsWith('/'))
                 throw new BundleValidationException($"Şüpheli yol: {entry.FullName}");
             if (entry.Length > MaxBundleBytes)
@@ -136,6 +137,17 @@ public sealed class BundleValidator
             ManifestVersion: manifest.Version,
             ManifestAuthor: manifest.Author,
             FileCount: fileCount);
+    }
+
+    private static bool IsOsMetadataEntry(string fullName, string name)
+    {
+        var normalized = fullName.Replace('\\', '/');
+        if (normalized.StartsWith("__MACOSX/", StringComparison.Ordinal)) return true;
+        if (name.StartsWith("._", StringComparison.Ordinal)) return true;
+        if (string.Equals(name, ".DS_Store", StringComparison.OrdinalIgnoreCase)) return true;
+        if (string.Equals(name, "Thumbs.db", StringComparison.OrdinalIgnoreCase)) return true;
+        if (string.Equals(name, "desktop.ini", StringComparison.OrdinalIgnoreCase)) return true;
+        return false;
     }
 
     private sealed record ManifestDto(string? Entry, string? Title, string? Version, string? Author, string? Description);

@@ -52,7 +52,13 @@ public sealed class Content
             (ContentState.Submitted, ContentState.AIReviewing) => true,
             (ContentState.AIReviewing, ContentState.AIReviewed) => true,
             (ContentState.AIReviewed, ContentState.EditorReviewing) => true,
+            // Guard reddi paralel akışta herhangi bir pre-publish state'te gelebilir;
+            // README §"İçerik ve güvenlik akışı" gereği rejection state'i her zaman uygulanmalı.
+            (ContentState.Draft, ContentState.AutoRejected) => true,
+            (ContentState.Submitted, ContentState.AutoRejected) => true,
+            (ContentState.AIReviewing, ContentState.AutoRejected) => true,
             (ContentState.AIReviewed, ContentState.AutoRejected) => true,
+            (ContentState.EditorReviewing, ContentState.AutoRejected) => true,
             (ContentState.EditorReviewing, ContentState.Approved) => true,
             (ContentState.EditorReviewing, ContentState.Rejected) => true,
             (ContentState.EditorReviewing, ContentState.RevisionRequested) => true,
