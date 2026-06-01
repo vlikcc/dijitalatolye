@@ -251,7 +251,7 @@ services:
       Minio__SecretKey: ${COMPOSE_DEV_SECRET}
       Minio__UseSsl: "false"
       Minio__PublicEndpoint: http://localhost:9000
-      Guard__BaseUrl: http://guard-web:8000
+      Guard__BaseUrl: http://guard-nginx
       Guard__SourceId: ${GUARD_SOURCE_ID:-dijitalatolye}
       Guard__Secret: ${GUARD_HMAC_SECRET:-}
       Guard__InboundSecret: ${GUARD_MAIN_SITE_HMAC_SECRET:-${GUARD_HMAC_SECRET:-}}

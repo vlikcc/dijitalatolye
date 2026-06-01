@@ -41,7 +41,7 @@ Detaylar: [`02-Sistem-Mimarisi.md`](02-Sistem-Mimarisi.md), [`docs/adr/`](docs/a
 | Admin | Dashboard, audit, operasyon metrikleri | 5111 |
 | Web (Angular) | SPA — prod/full stack'te nginx | 8080 (full) / 4200 (`make web`) |
 
-**Guard alt stack** (prod/full compose ile birlikte): `guard-web`, worker'lar, Postgres, Redis, ClamAV — Storage.API ile HMAC üzerinden konuşur.
+**Guard alt stack** (prod/full compose ile birlikte): `guard-web`, worker'lar, Postgres, Redis, ClamAV, **nginx + React yönetim paneli** — Storage.API ile HMAC üzerinden konuşur. Lokal UI: **http://localhost:18000**
 
 ## Hızlı Başlangıç
 
@@ -97,6 +97,8 @@ make prod-smoke     # https://<PUBLIC_DOMAIN>/ health kontrolü
 ```
 
 Lokal test: `PUBLIC_DOMAIN=localhost`, tarayıcıda self-signed sertifikayı kabul edin → **https://localhost**
+
+Guard yönetim paneli (dosya tarama / onay): **http://localhost:18000** — ilk giriş için `docker exec -it guard-web guard-entrypoint manage createsuperuser`
 
 Detay: [`docs/runbooks/selfhost-prod.md`](docs/runbooks/selfhost-prod.md)
 

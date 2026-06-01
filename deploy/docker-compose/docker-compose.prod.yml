@@ -322,7 +322,7 @@ services:
       Minio__BucketContent: ${MINIO_BUCKET_CONTENT:-dijitalatolye-content}
       Minio__BucketPublished: ${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published}
       Minio__BucketAvatars: ${MINIO_BUCKET_AVATARS:-dijitalatolye-avatars}
-      Guard__BaseUrl: http://guard-web:8000
+      Guard__BaseUrl: http://guard-nginx
       Guard__SourceId: ${GUARD_SOURCE_ID:-dijitalatolye}
       Guard__Secret: ${GUARD_HMAC_SECRET:?GUARD_HMAC_SECRET is required}
       Guard__InboundSecret: ${GUARD_MAIN_SITE_HMAC_SECRET:-${GUARD_HMAC_SECRET}}
@@ -530,6 +530,12 @@ services:
   guard-worker-delivery:
     networks: [internal]
   guard-beat:
+    networks: [internal]
+  guard-frontend-publisher:
+    networks: [internal]
+  guard-static-publisher:
+    networks: [internal]
+  guard-nginx:
     networks: [internal]
 
 volumes:

@@ -219,6 +219,7 @@ prod-up: prod-env  ## Production stack'i ayaga kaldir (lokalde test icin de kull
 	@echo ""
 	@echo "==> Production stack ayakta:"
 	@echo "  Public:           https://$$(grep -E '^PUBLIC_DOMAIN=' .env.prod | cut -d= -f2 | tr -d '\"' )/"
+	@echo "  Guard panel:      http://127.0.0.1:$${GUARD_HTTP_PORT:-18000}/"
 	@echo "  (lokalde 'localhost' ise self-signed cert; tarayici uyarisini gecin)"
 	@echo "  Veri portlari sadece 127.0.0.1 uzerinde (debug/backup):"
 	@echo "    Postgres 5432, Mongo 27017, Redis 6379, RabbitMQ 5672/15672, ES 9200, MinIO 9000/9001"

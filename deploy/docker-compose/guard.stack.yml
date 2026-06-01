@@ -5,13 +5,16 @@
 #   GUARD_HMAC_SECRET=<64-hex>
 #   GUARD_PG_PASSWORD=<postgres sifresi>
 #   GUARD_DJANGO_SECRET_KEY=<django secret>
+#
+# Lokal UI: guard-nginx -> http://localhost:${GUARD_HTTP_PORT:-18000}
+# (React panel + /api proxy + Django /admin/)
 
 x-guard-env: &guard-env
-  DJANGO_SETTINGS_MODULE: config.settings.prod
+  DJANGO_SETTINGS_MODULE: config.settings.compose_local
   DJANGO_SECRET_KEY: ${GUARD_DJANGO_SECRET_KEY:?GUARD_DJANGO_SECRET_KEY is required}
   DJANGO_DEBUG: "False"
-  DJANGO_ALLOWED_HOSTS: ${GUARD_ALLOWED_HOSTS:-guard-web,localhost}
-  DJANGO_CSRF_TRUSTED_ORIGINS: ${GUARD_CSRF_TRUSTED_ORIGINS:-}
+  DJANGO_ALLOWED_HOSTS: ${GUARD_ALLOWED_HOSTS:-guard-web,guard-nginx,localhost,127.0.0.1}
+  DJANGO_CSRF_TRUSTED_ORIGINS: ${GUARD_CSRF_TRUSTED_ORIGINS:-http://localhost:18000,http://127.0.0.1:18000}
   DATABASE_URL: postgres://guard:${GUARD_PG_PASSWORD:?GUARD_PG_PASSWORD is required}@guard-postgres:5432/guard
   REDIS_URL: redis://guard-redis:6379/0
   CELERY_BROKER_URL: redis://guard-redis:6379/1
@@ -36,6 +39,10 @@ x-guard-env: &guard-env
   GUARD_DELIVERY_MAX_RETRIES: "5"
   GUARD_YARA_RULES_DIR: /etc/guard/yara_rules
   GUARD_PROMETHEUS_ENABLED: "false"
+
+x-guard-volumes: &guard-volumes
+  - guard-data:/var/lib/guard
+  - ./guard/settings_compose_local.py:/app/config/settings/compose_local.py:ro
 
 services:
   guard-postgres:
@@ -88,8 +95,7 @@ services:
     restart: "no"
     command: ["bootstrap"]
     environment: *guard-env
-    volumes:
-      - guard-data:/var/lib/guard
+    volumes: *guard-volumes
     depends_on:
       guard-postgres:
         condition: service_healthy
@@ -99,8 +105,7 @@ services:
     container_name: guard-web
     command: ["web"]
     environment: *guard-env
-    volumes:
-      - guard-data:/var/lib/guard
+    volumes: *guard-volumes
     expose:
       - "8000"
     depends_on:
@@ -122,8 +127,7 @@ services:
     container_name: guard-worker-scan
     command: ["worker-scan"]
     environment: *guard-env
-    volumes:
-      - guard-data:/var/lib/guard
+    volumes: *guard-volumes
     depends_on:
       guard-migrate:
         condition: service_completed_successfully
@@ -137,8 +141,7 @@ services:
     container_name: guard-worker-delivery
     command: ["worker-delivery"]
     environment: *guard-env
-    volumes:
-      - guard-data:/var/lib/guard
+    volumes: *guard-volumes
     depends_on:
       guard-migrate:
         condition: service_completed_successfully
@@ -150,16 +153,62 @@ services:
     container_name: guard-beat
     command: ["beat"]
     environment: *guard-env
-    volumes:
-      - guard-data:/var/lib/guard
+    volumes: *guard-volumes
     depends_on:
       guard-migrate:
         condition: service_completed_successfully
       guard-redis:
         condition: service_healthy
 
+  guard-frontend-publisher:
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    container_name: guard-frontend-publisher
+    restart: "no"
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        cp -a /app/frontend-dist/. /publish/
+        chown -R 101:101 /publish
+    volumes:
+      - guard-frontend:/publish
+
+  guard-static-publisher:
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    container_name: guard-static-publisher
+    restart: "no"
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        cp -a /app/staticfiles/. /publish/
+        chown -R 101:101 /publish
+    volumes:
+      - guard-static:/publish
+
+  guard-nginx:
+    image: nginx:1.27-alpine
+    container_name: guard-nginx
+    depends_on:
+      guard-web:
+        condition: service_healthy
+      guard-frontend-publisher:
+        condition: service_completed_successfully
+      guard-static-publisher:
+        condition: service_completed_successfully
+    ports:
+      - "${GUARD_HTTP_PORT:-18000}:80"
+    volumes:
+      - ./guard/nginx/guard.conf:/etc/nginx/conf.d/default.conf:ro
+      - guard-frontend:/usr/share/nginx/html:ro
+      - guard-static:/var/lib/guard/staticfiles:ro
+
 volumes:
   guard-pg-data:
   guard-redis-data:
   guard-clamav-data:
   guard-data:
+  guard-frontend:
+  guard-static:
