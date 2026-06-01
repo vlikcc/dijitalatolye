@@ -29,96 +29,126 @@ interface SearchResponse {
   imports: [CommonModule, FormsModule, RouterLink, MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="max-w-7xl mx-auto p-6 flex flex-col md:flex-row gap-6">
-      <aside class="w-full md:w-64 shrink-0">
-        <h2 class="text-xl font-bold mb-4">Filtreler</h2>
-        <div class="bg-white border border-slate-200 rounded-lg p-4 space-y-6">
-          <div>
-            <h3 class="font-semibold mb-2 text-sm">Dersler</h3>
-            <ul class="space-y-1 text-sm">
-              @for (f of facets()['subjects'] || []; track f.key) {
-                <li>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="subject" [checked]="subject() === f.key" (change)="setFilter('subject', f.key)" />
-                    <span class="flex-1 truncate">{{ f.key }}</span>
-                    <span class="text-slate-400 text-xs">({{ f.count }})</span>
-                  </label>
-                </li>
-              }
-              @if (subject()) {
-                <li><button (click)="setFilter('subject', null)" class="text-rose-600 text-xs mt-1">Seçimi Temizle</button></li>
-              }
-            </ul>
-          </div>
-          <div>
-            <h3 class="font-semibold mb-2 text-sm">Sınıf Seviyesi</h3>
-            <ul class="space-y-1 text-sm">
-              @for (f of facets()['gradeLevels'] || []; track f.key) {
-                <li>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="grade" [checked]="grade() === f.key" (change)="setFilter('grade', f.key)" />
-                    <span class="flex-1 truncate">{{ f.key }}. Sınıf</span>
-                    <span class="text-slate-400 text-xs">({{ f.count }})</span>
-                  </label>
-                </li>
-              }
-              @if (grade()) {
-                <li><button (click)="setFilter('grade', null)" class="text-rose-600 text-xs mt-1">Seçimi Temizle</button></li>
-              }
-            </ul>
-          </div>
-          <div>
-            <h3 class="font-semibold mb-2 text-sm">Popüler Etiketler</h3>
-            <div class="flex flex-wrap gap-1">
-              @for (f of (facets()['tags'] || []).slice(0, 15); track f.key) {
-                <button (click)="toggleTag(f.key)"
-                  [class]="tag() === f.key
-                    ? 'text-xs px-2 py-1 rounded border bg-brand-600 text-white border-brand-600'
-                    : 'text-xs px-2 py-1 rounded border bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'">
-                  {{ f.key }} ({{ f.count }})
-                </button>
-              }
+    <div class="da-science-bg min-h-screen">
+      <div class="max-w-7xl mx-auto px-4 pt-12 pb-6">
+        <div class="da-eyebrow mb-3">[ Oyunlar ] Keşfet</div>
+        <h1 class="da-display text-4xl md:text-5xl font-bold text-ink">
+          İlgini çeken <span class="da-serif text-accent">içeriği</span> bul.
+        </h1>
+        <p class="mt-2 text-muted max-w-xl">Editör onaylı, güvenli ve kazanım odaklı eğitsel oyunlar.</p>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-4 pb-16 flex flex-col md:flex-row gap-8">
+        <aside class="w-full md:w-64 shrink-0">
+          <div class="bg-surface border border-line/10 rounded-2xl p-5 space-y-6 md:sticky md:top-24">
+            <div class="font-mono text-[11px] tracking-widest uppercase text-dim">Filtreler</div>
+            <div>
+              <h3 class="font-display font-semibold mb-3 text-sm text-ink">Dersler</h3>
+              <ul class="space-y-1.5 text-sm">
+                @for (f of facets()['subjects'] || []; track f.key) {
+                  <li>
+                    <label class="flex items-center gap-2 cursor-pointer text-muted hover:text-ink transition">
+                      <input type="radio" name="subject" class="accent-accent" [checked]="subject() === f.key" (change)="setFilter('subject', f.key)" />
+                      <span class="flex-1 truncate">{{ f.key }}</span>
+                      <span class="text-dim font-mono text-xs">{{ f.count }}</span>
+                    </label>
+                  </li>
+                }
+                @if (subject()) {
+                  <li><button (click)="setFilter('subject', null)" class="text-accent2 text-xs mt-1 hover:underline">Seçimi temizle</button></li>
+                }
+              </ul>
+            </div>
+            <div>
+              <h3 class="font-display font-semibold mb-3 text-sm text-ink">Sınıf Seviyesi</h3>
+              <ul class="space-y-1.5 text-sm">
+                @for (f of facets()['gradeLevels'] || []; track f.key) {
+                  <li>
+                    <label class="flex items-center gap-2 cursor-pointer text-muted hover:text-ink transition">
+                      <input type="radio" name="grade" class="accent-accent" [checked]="grade() === f.key" (change)="setFilter('grade', f.key)" />
+                      <span class="flex-1 truncate">{{ f.key }}. Sınıf</span>
+                      <span class="text-dim font-mono text-xs">{{ f.count }}</span>
+                    </label>
+                  </li>
+                }
+                @if (grade()) {
+                  <li><button (click)="setFilter('grade', null)" class="text-accent2 text-xs mt-1 hover:underline">Seçimi temizle</button></li>
+                }
+              </ul>
+            </div>
+            <div>
+              <h3 class="font-display font-semibold mb-3 text-sm text-ink">Popüler Etiketler</h3>
+              <div class="flex flex-wrap gap-1.5">
+                @for (f of (facets()['tags'] || []).slice(0, 15); track f.key) {
+                  <button (click)="toggleTag(f.key)"
+                    [class]="tag() === f.key
+                      ? 'text-xs px-2.5 py-1 rounded-full bg-accent text-white'
+                      : 'text-xs px-2.5 py-1 rounded-full bg-panel text-muted border border-line/10 hover:border-accent/40 hover:text-accent transition'">
+                    {{ f.key }}
+                  </button>
+                }
+              </div>
             </div>
           </div>
-        </div>
-      </aside>
+        </aside>
 
-      <section class="flex-1">
-        <div class="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
-          <h1 class="text-3xl font-bold text-slate-900">İçerik Keşfi</h1>
-          <div class="relative w-full sm:w-72">
-            <input class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none"
-              placeholder="Başlık veya açıklama ara…" [value]="q()" (keydown.enter)="onSearch($event)" />
+        <section class="flex-1">
+          <div class="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
+            <p class="font-mono text-[11px] tracking-widest uppercase text-dim">{{ total() }} sonuç</p>
+            <div class="relative w-full sm:w-80">
+              <mat-icon class="!text-dim absolute left-3 top-1/2 -translate-y-1/2" style="font-size:18px;width:18px;height:18px">search</mat-icon>
+              <input class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-line/15 bg-surface text-ink placeholder:text-dim focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition"
+                placeholder="Oyun veya içerik ara…" [value]="q()" (keydown.enter)="onSearch($event)" />
+            </div>
           </div>
-        </div>
 
-        <p class="text-sm text-slate-500 mb-4">{{ total() }} sonuç bulundu</p>
-
-        @if (loading()) {
-          <p class="mt-6 text-slate-500">Yükleniyor…</p>
-        } @else {
-          <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            @for (it of items(); track it.id) {
-              <a [routerLink]="['/contents', it.slug]" class="border border-slate-200 rounded-lg p-4 hover:shadow transition bg-white">
-                <div class="text-xs text-slate-500 mb-1">{{ it.subject }} {{ it.gradeLevel ? '· ' + it.gradeLevel + '. sınıf' : '' }}</div>
-                <h3 class="font-semibold text-lg">{{ it.title }}</h3>
-                @if (it.description) {
-                  <p class="text-sm text-slate-600 mt-2 line-clamp-3">{{ it.description }}</p>
-                }
-                <div class="flex flex-wrap gap-1 mt-3">
-                  @for (t of (it.tags || []).slice(0, 4); track t) {
-                    <span class="text-xs bg-slate-100 rounded px-2 py-0.5">{{ t }}</span>
-                  }
+          @if (loading()) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              @for (i of [1,2,3,4,5,6]; track i) {
+                <div class="rounded-2xl border border-line/10 bg-surface overflow-hidden animate-pulse">
+                  <div class="h-36 bg-panel"></div>
+                  <div class="p-4 space-y-3"><div class="h-4 bg-panel rounded w-3/4"></div><div class="h-3 bg-panel rounded w-1/2"></div></div>
                 </div>
-                <div class="text-xs text-slate-500 mt-3 flex gap-3">
-                  <span>👁 {{ it.views ?? 0 }}</span>
-                  <span>♥ {{ it.likes ?? 0 }}</span>
-                </div>
-              </a>
-            }
-          </div>
-        }
-      </section>
+              }
+            </div>
+          } @else if (!items().length) {
+            <div class="text-center py-20">
+              <mat-icon class="!text-dim" style="font-size:48px;width:48px;height:48px">search_off</mat-icon>
+              <p class="mt-3 text-muted">Sonuç bulunamadı. Filtreleri değiştirip tekrar dene.</p>
+            </div>
+          } @else {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              @for (it of items(); track it.id; let i = $index) {
+                <a [routerLink]="['/play', it.slug]" class="group rounded-2xl overflow-hidden border border-line/10 bg-surface hover:-translate-y-1 hover:shadow-glow transition-all duration-300">
+                  <div class="relative h-36 overflow-hidden" [style.background]="gradientFor(i)">
+                    <div class="absolute inset-0 bg-grid-line opacity-30" style="background-size:20px 20px"></div>
+                    <mat-icon class="!text-white/90 absolute top-3.5 left-3.5" style="font-size:28px;width:28px;height:28px">{{ iconFor(i) }}</mat-icon>
+                    <span class="absolute top-3.5 right-3.5 px-2 py-0.5 rounded-full bg-black/25 backdrop-blur text-white text-[10px] font-mono tracking-wider uppercase">{{ it.subject || 'Genel' }}</span>
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                      <span class="w-12 h-12 rounded-full bg-white/95 text-accent inline-flex items-center justify-center shadow-xl">
+                        <mat-icon style="font-size:26px;width:26px;height:26px">play_arrow</mat-icon>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="p-4">
+                    <h3 class="font-display font-semibold text-ink leading-snug line-clamp-2 group-hover:text-accent transition">{{ it.title }}</h3>
+                    @if (it.description) {
+                      <p class="text-sm text-muted mt-1.5 line-clamp-2">{{ it.description }}</p>
+                    }
+                    <div class="mt-3 flex items-center justify-between font-mono text-[11px] tracking-wider uppercase text-dim">
+                      <span>{{ it.gradeLevel ? it.gradeLevel + '. Sınıf' : 'Tüm Seviyeler' }}</span>
+                      <span class="inline-flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1"><mat-icon style="font-size:13px;width:13px;height:13px">visibility</mat-icon>{{ it.views ?? 0 }}</span>
+                        <span class="inline-flex items-center gap-1 text-accent2"><mat-icon style="font-size:13px;width:13px;height:13px">favorite</mat-icon>{{ it.likes ?? 0 }}</span>
+                      </span>
+                    </div>
+                  </div>
+                </a>
+              }
+            </div>
+          }
+        </section>
+      </div>
     </div>
   `,
 })
@@ -135,6 +165,19 @@ export class DiscoverComponent implements OnInit {
   readonly facets = signal<Record<string, Array<{ key: string; count: number }>>>({});
   readonly total = signal(0);
   readonly loading = signal(false);
+
+  private readonly gradients = [
+    'linear-gradient(135deg,#0b5f8c,#5a3fcb)',
+    'linear-gradient(135deg,#5a3fcb,#8b6bf0)',
+    'linear-gradient(135deg,#0cb5db,#0b5f8c)',
+    'linear-gradient(135deg,#1a72a3,#0cb5db)',
+    'linear-gradient(135deg,#b57f1f,#d6a52f)',
+    'linear-gradient(135deg,#4a32a8,#5a3fcb)',
+  ];
+  private readonly icons = ['extension', 'casino', 'rocket_launch', 'psychology', 'lightbulb', 'emoji_objects', 'auto_awesome', 'science'];
+
+  gradientFor(i: number): string { return this.gradients[i % this.gradients.length]; }
+  iconFor(i: number): string { return this.icons[i % this.icons.length]; }
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((p) => {

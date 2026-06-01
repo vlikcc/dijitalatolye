@@ -27,8 +27,8 @@ interface ContentItem {
   template: `
     <header class="flex items-center justify-between mb-6">
       <div>
-        <h1 class="text-2xl font-extrabold text-slate-900">İçeriklerim</h1>
-        <p class="text-sm text-slate-600 mt-1">Yüklediğiniz tüm içeriklerin durumunu buradan takip edebilirsiniz.</p>
+        <h1 class="text-2xl font-extrabold text-ink">İçeriklerim</h1>
+        <p class="text-sm text-muted mt-1">Yüklediğiniz tüm içeriklerin durumunu buradan takip edebilirsiniz.</p>
       </div>
       <a routerLink="/teacher/contents/new"
         class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-md shadow-brand-600/20">
@@ -37,34 +37,34 @@ interface ContentItem {
     </header>
 
     @if (loading()) {
-      <div class="rounded-2xl bg-white border border-slate-200 p-12 flex flex-col items-center text-slate-500">
+      <div class="rounded-2xl bg-surface border border-line/10 p-12 flex flex-col items-center text-dim">
         <mat-spinner diameter="24" color="primary"></mat-spinner>
         <p class="mt-3 text-sm">İçerikleriniz yükleniyor…</p>
       </div>
     } @else if (error()) {
-      <div class="rounded-2xl bg-white border border-rose-200 p-8 flex items-start gap-3">
+      <div class="rounded-2xl bg-surface border border-rose-200 p-8 flex items-start gap-3">
         <mat-icon class="!text-rose-600 mt-0.5" style="font-size:20px;width:20px;height:20px">warning</mat-icon>
         <div>
-          <p class="font-semibold text-slate-900">İçerikler yüklenemedi</p>
-          <p class="text-sm text-slate-600 mt-1">Bağlantınızı kontrol edip sayfayı yenileyin.</p>
+          <p class="font-semibold text-ink">İçerikler yüklenemedi</p>
+          <p class="text-sm text-muted mt-1">Bağlantınızı kontrol edip sayfayı yenileyin.</p>
         </div>
       </div>
     } @else if (items().length === 0) {
-      <div class="rounded-2xl bg-white border border-dashed border-brand-200 p-12 text-center">
+      <div class="rounded-2xl bg-surface border border-dashed border-brand-200 p-12 text-center">
         <div class="inline-flex w-12 h-12 rounded-xl bg-brand-50 text-brand-700 items-center justify-center">
           <mat-icon style="font-size:24px;width:24px;height:24px">description</mat-icon>
         </div>
-        <h2 class="mt-4 font-semibold text-slate-900">Henüz içerik yüklemediniz</h2>
-        <p class="mt-1 text-sm text-slate-600">İlk interaktif içeriğinizi 5 dakikada yayına hazırlayabilirsiniz.</p>
+        <h2 class="mt-4 font-semibold text-ink">Henüz içerik yüklemediniz</h2>
+        <p class="mt-1 text-sm text-muted">İlk interaktif içeriğinizi 5 dakikada yayına hazırlayabilirsiniz.</p>
         <a routerLink="/teacher/contents/new"
           class="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">
           <mat-icon style="font-size:16px;width:16px;height:16px">add</mat-icon> İlk içeriği yükle
         </a>
       </div>
     } @else {
-      <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden">
+      <div class="rounded-2xl bg-surface border border-line/10 overflow-hidden">
         <table class="w-full text-sm">
-          <thead class="bg-slate-50 text-slate-600 text-left">
+          <thead class="bg-panel text-muted text-left">
             <tr>
               <th class="px-4 py-3 font-semibold">Başlık</th>
               <th class="px-4 py-3 font-semibold">Sınıf / Ders</th>
@@ -73,18 +73,18 @@ interface ContentItem {
               <th class="px-4 py-3"></th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-line/10">
             @for (c of items(); track c.id) {
               <tr class="hover:bg-brand-50/40">
-                <td class="px-4 py-3 font-medium text-slate-900">{{ c.title }}</td>
-                <td class="px-4 py-3 text-slate-600">{{ c.grade ?? '—' }} {{ c.subject ? '• ' + c.subject : '' }}</td>
+                <td class="px-4 py-3 font-medium text-ink">{{ c.title }}</td>
+                <td class="px-4 py-3 text-muted">{{ c.grade ?? '—' }} {{ c.subject ? '• ' + c.subject : '' }}</td>
                 <td class="px-4 py-3">
                   <span [class]="badgeClass(c.status)">
                     <mat-icon style="font-size:14px;width:14px;height:14px">{{ badgeIcon(c.status) }}</mat-icon>
                     {{ badgeLabel(c.status) }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-slate-600">{{ formatDate(c.updatedAt) }}</td>
+                <td class="px-4 py-3 text-muted">{{ formatDate(c.updatedAt) }}</td>
                 <td class="px-4 py-3 text-right">
                   <div class="inline-flex items-center gap-3">
                     @if (c.status === 'RevisionRequested') {
@@ -132,13 +132,13 @@ export class MyContentsComponent implements OnInit {
   badgeClass(s: ContentStatus): string {
     const base = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ';
     switch (s) {
-      case 'Draft': case 'Unpublished': return base + 'bg-slate-100 text-slate-700';
+      case 'Draft': case 'Unpublished': return base + 'bg-panel text-muted';
       case 'Submitted': return base + 'bg-brand-50 text-brand-700';
       case 'AIReviewing': case 'AIReviewed': return base + 'bg-violet-50 text-violet-700';
       case 'EditorReviewing': case 'RevisionRequested': return base + 'bg-amber-50 text-amber-700';
       case 'Approved': case 'Published': return base + 'bg-emerald-50 text-emerald-700';
       case 'Rejected': case 'AutoRejected': return base + 'bg-rose-50 text-rose-700';
-      default: return base + 'bg-slate-100 text-slate-700';
+      default: return base + 'bg-panel text-muted';
     }
   }
 

@@ -13,40 +13,40 @@ import { CatalogGrade, CatalogSubject } from '@core/api/contracts';
   template: `
     <div>
       <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-slate-900">Müfredat / Kazanım</h1>
+        <h1 class="text-2xl font-bold text-ink">Müfredat / Kazanım</h1>
         <a routerLink="/admin" class="text-sm text-brand-600 hover:underline">← Panele dön</a>
       </div>
 
       @if (loading()) {
-        <p class="text-slate-500">Yükleniyor…</p>
+        <p class="text-dim">Yükleniyor…</p>
       } @else {
         <div class="grid md:grid-cols-2 gap-6">
-          <section class="bg-white border border-slate-200 rounded-lg p-5">
+          <section class="bg-surface border border-line/10 rounded-lg p-5">
             <h2 class="font-semibold mb-3">Sınıflar ({{ grades().length }})</h2>
             @if (grades().length === 0) {
-              <p class="text-slate-500 text-sm">Sınıf verisi bulunamadı.</p>
+              <p class="text-dim text-sm">Sınıf verisi bulunamadı.</p>
             } @else {
               <ul class="space-y-1 text-sm">
                 @for (g of grades(); track g.id) {
-                  <li class="flex justify-between py-1.5 border-b border-slate-100 last:border-0">
+                  <li class="flex justify-between py-1.5 border-b border-line/10 last:border-0">
                     <span class="font-medium">{{ g.name }}</span>
-                    <span class="text-slate-500">{{ g.code }}</span>
+                    <span class="text-dim">{{ g.code }}</span>
                   </li>
                 }
               </ul>
             }
           </section>
 
-          <section class="bg-white border border-slate-200 rounded-lg p-5">
+          <section class="bg-surface border border-line/10 rounded-lg p-5">
             <h2 class="font-semibold mb-3">Dersler ({{ subjects().length }})</h2>
             @if (subjects().length === 0) {
-              <p class="text-slate-500 text-sm">Ders verisi bulunamadı.</p>
+              <p class="text-dim text-sm">Ders verisi bulunamadı.</p>
             } @else {
               <ul class="space-y-1 text-sm">
                 @for (s of subjects(); track s.id) {
-                  <li class="flex justify-between py-1.5 border-b border-slate-100 last:border-0">
+                  <li class="flex justify-between py-1.5 border-b border-line/10 last:border-0">
                     <span class="font-medium">{{ s.name }}</span>
-                    <span class="text-slate-500">{{ s.code }}</span>
+                    <span class="text-dim">{{ s.code }}</span>
                   </li>
                 }
               </ul>

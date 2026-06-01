@@ -24,23 +24,23 @@ interface DashboardStats {
       <p class="p-6">Veri yok.</p>
     } @else {
       <div class="max-w-6xl mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-6 text-slate-900">Yönetim Paneli</h1>
+        <h1 class="text-3xl font-bold mb-6 text-ink">Yönetim Paneli</h1>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
           @for (c of cards(); track c.label) {
-            <div class="bg-white border border-slate-200 rounded-lg p-5">
-              <p class="text-sm text-slate-500">{{ c.label }}</p>
-              <p class="text-2xl font-bold mt-2 text-slate-900">{{ c.value }}</p>
+            <div class="bg-surface border border-line/10 rounded-lg p-5">
+              <p class="text-sm text-dim">{{ c.label }}</p>
+              <p class="text-2xl font-bold mt-2 text-ink">{{ c.value }}</p>
             </div>
           }
         </div>
 
         <div class="grid md:grid-cols-2 gap-4 mt-8">
-          <a routerLink="/admin/contents" class="block bg-white border border-slate-200 rounded-lg p-5 hover:shadow transition"><span class="font-medium">İçerik Yönetimi</span></a>
-          <a routerLink="/admin/users" class="block bg-white border border-slate-200 rounded-lg p-5 hover:shadow transition"><span class="font-medium">Kullanıcılar</span></a>
-          <a routerLink="/admin/catalog" class="block bg-white border border-slate-200 rounded-lg p-5 hover:shadow transition"><span class="font-medium">Müfredat / Kazanım</span></a>
-          <a routerLink="/admin/audit" class="block bg-white border border-slate-200 rounded-lg p-5 hover:shadow transition"><span class="font-medium">Audit Log</span></a>
-          <a routerLink="/admin/ai" class="block bg-white border border-slate-200 rounded-lg p-5 hover:shadow transition"><span class="font-medium">AI Konfigürasyon</span></a>
-          <a routerLink="/admin/reports" class="block bg-white border border-slate-200 rounded-lg p-5 hover:shadow transition"><span class="font-medium">Raporlar</span></a>
+          <a routerLink="/admin/contents" class="block bg-surface border border-line/10 rounded-lg p-5 hover:shadow transition"><span class="font-medium">İçerik Yönetimi</span></a>
+          <a routerLink="/admin/users" class="block bg-surface border border-line/10 rounded-lg p-5 hover:shadow transition"><span class="font-medium">Kullanıcılar</span></a>
+          <a routerLink="/admin/catalog" class="block bg-surface border border-line/10 rounded-lg p-5 hover:shadow transition"><span class="font-medium">Müfredat / Kazanım</span></a>
+          <a routerLink="/admin/audit" class="block bg-surface border border-line/10 rounded-lg p-5 hover:shadow transition"><span class="font-medium">Audit Log</span></a>
+          <a routerLink="/admin/ai" class="block bg-surface border border-line/10 rounded-lg p-5 hover:shadow transition"><span class="font-medium">AI Konfigürasyon</span></a>
+          <a routerLink="/admin/reports" class="block bg-surface border border-line/10 rounded-lg p-5 hover:shadow transition"><span class="font-medium">Raporlar</span></a>
         </div>
       </div>
     }

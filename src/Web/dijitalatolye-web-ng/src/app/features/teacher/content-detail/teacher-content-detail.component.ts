@@ -15,14 +15,14 @@ type ContentStatus = ContentDetail['state'];
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (loading()) {
-      <div class="rounded-2xl bg-white border border-slate-200 p-12 flex flex-col items-center text-slate-500">
+      <div class="rounded-2xl bg-surface border border-line/10 p-12 flex flex-col items-center text-dim">
         <mat-spinner diameter="24" color="primary"></mat-spinner>
         <p class="mt-3 text-sm">İçerik yükleniyor…</p>
       </div>
     } @else if (error() || !content()) {
-      <div class="rounded-2xl bg-white border border-rose-200 p-8">
-        <p class="font-semibold text-slate-900">İçerik bulunamadı</p>
-        <p class="text-sm text-slate-600 mt-1">Bu içeriğe erişiminiz olmayabilir veya kayıt silinmiş olabilir.</p>
+      <div class="rounded-2xl bg-surface border border-rose-200 p-8">
+        <p class="font-semibold text-ink">İçerik bulunamadı</p>
+        <p class="text-sm text-muted mt-1">Bu içeriğe erişiminiz olmayabilir veya kayıt silinmiş olabilir.</p>
         <a routerLink="/teacher/contents" class="inline-block mt-4 text-sm font-medium text-brand-700 hover:text-brand-800">← İçeriklerime dön</a>
       </div>
     } @else {
@@ -31,12 +31,12 @@ type ContentStatus = ContentDetail['state'];
           <mat-icon style="font-size:16px;width:16px;height:16px">arrow_back</mat-icon> İçeriklerime dön
         </a>
 
-        <header class="rounded-2xl bg-white border border-slate-200 p-6 shadow-sm">
+        <header class="rounded-2xl bg-surface border border-line/10 p-6 shadow-sm">
           <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">İçerik detayı</p>
-              <h1 class="text-2xl font-extrabold text-slate-900 mt-1">{{ content()!.title }}</h1>
-              <p class="text-sm text-slate-600 mt-2">
+              <p class="text-xs font-semibold uppercase tracking-wide text-dim">İçerik detayı</p>
+              <h1 class="text-2xl font-extrabold text-ink mt-1">{{ content()!.title }}</h1>
+              <p class="text-sm text-muted mt-2">
                 {{ content()!.subject || '—' }}
                 @if (content()!.gradeLevel) { · {{ content()!.gradeLevel }}. sınıf }
               </p>
@@ -44,7 +44,7 @@ type ContentStatus = ContentDetail['state'];
             <span [class]="statusClass(content()!.state)">{{ statusLabel(content()!.state) }}</span>
           </div>
           @if (content()!.description) {
-            <p class="mt-4 text-slate-700 leading-relaxed">{{ content()!.description }}</p>
+            <p class="mt-4 text-muted leading-relaxed">{{ content()!.description }}</p>
           }
           @if (content()!.tags.length) {
             <div class="mt-4 flex flex-wrap gap-2">
@@ -55,10 +55,10 @@ type ContentStatus = ContentDetail['state'];
           }
         </header>
 
-        <section class="mt-6 rounded-2xl bg-white border border-slate-200 p-6 text-sm text-slate-700 space-y-3">
-          <div class="flex justify-between gap-4 py-1 border-b border-slate-100"><span class="text-slate-500">Durum</span><span class="font-medium">{{ statusLabel(content()!.state) }}</span></div>
-          <div class="flex justify-between gap-4 py-1 border-b border-slate-100"><span class="text-slate-500">Oluşturulma</span><span class="font-medium">{{ formatDate(content()!.createdAtUtc) }}</span></div>
-          <div class="flex justify-between gap-4 py-1"><span class="text-slate-500">Son güncelleme</span><span class="font-medium">{{ formatDate(content()!.updatedAtUtc) }}</span></div>
+        <section class="mt-6 rounded-2xl bg-surface border border-line/10 p-6 text-sm text-muted space-y-3">
+          <div class="flex justify-between gap-4 py-1 border-b border-line/10"><span class="text-dim">Durum</span><span class="font-medium">{{ statusLabel(content()!.state) }}</span></div>
+          <div class="flex justify-between gap-4 py-1 border-b border-line/10"><span class="text-dim">Oluşturulma</span><span class="font-medium">{{ formatDate(content()!.createdAtUtc) }}</span></div>
+          <div class="flex justify-between gap-4 py-1"><span class="text-dim">Son güncelleme</span><span class="font-medium">{{ formatDate(content()!.updatedAtUtc) }}</span></div>
         </section>
 
         @if (actionError()) {
@@ -126,7 +126,7 @@ export class TeacherContentDetailComponent implements OnInit {
     if (status === 'Published' || status === 'Approved') return base + 'bg-emerald-50 text-emerald-800 border-emerald-200';
     if (status === 'Rejected' || status === 'AutoRejected') return base + 'bg-rose-50 text-rose-800 border-rose-200';
     if (status === 'RevisionRequested') return base + 'bg-amber-50 text-amber-800 border-amber-200';
-    return base + 'bg-slate-100 text-slate-700 border-slate-200';
+    return base + 'bg-panel text-muted border-line/10';
   }
 
   formatDate(iso: string): string {

@@ -5,6 +5,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthStore } from '@core/auth/auth.store';
 
+type Theme = 'light' | 'dark';
+
 @Component({
   selector: 'da-app-layout',
   standalone: true,
@@ -12,56 +14,61 @@ import { AuthStore } from '@core/auth/auth.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`:host { display: block; min-height: 100%; }`],
   template: `
-    <div class="min-h-full flex flex-col bg-slate-50">
-      <header class="bg-white border-b border-brand-100/70 sticky top-0 z-30">
+    <div class="min-h-full flex flex-col bg-bg text-ink">
+      <header class="bg-bg/80 backdrop-blur-xl border-b border-line/10 sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-          <a routerLink="/" class="flex items-center gap-2 font-bold text-brand-700 shrink-0">
-            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 text-white">
-              <mat-icon class="!text-white" style="font-size:16px;width:16px;height:16px">auto_awesome</mat-icon>
+          <a routerLink="/" class="flex items-center gap-2 font-display font-bold text-ink shrink-0">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent2 text-white shadow-lg shadow-accent/25">
+              <mat-icon class="!text-white" style="font-size:16px;width:16px;height:16px">sports_esports</mat-icon>
             </span>
-            <span class="hidden sm:inline">DijitalAtölye</span>
+            <span class="hidden sm:inline">Dijital<span class="text-accent">Atölye</span></span>
           </a>
 
           <nav class="flex items-center gap-1 overflow-x-auto">
             @if (isTeacher()) {
-              <a routerLink="/teacher/dashboard" routerLinkActive="bg-brand-100 !text-brand-700"
-                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 transition">Panel</a>
-              <a routerLink="/teacher/contents" routerLinkActive="bg-brand-100 !text-brand-700"
-                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 transition">İçeriklerim</a>
-              <a routerLink="/teacher/contents/new" routerLinkActive="bg-brand-100 !text-brand-700"
-                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 transition">Yükle</a>
+              <a routerLink="/teacher/dashboard" routerLinkActive="!bg-accent/10 !text-accent"
+                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Panel</a>
+              <a routerLink="/teacher/contents" routerLinkActive="!bg-accent/10 !text-accent"
+                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">İçeriklerim</a>
+              <a routerLink="/teacher/contents/new" routerLinkActive="!bg-accent/10 !text-accent"
+                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Yükle</a>
             }
             @if (isEditor()) {
-              <a routerLink="/editor" routerLinkActive="bg-brand-100 !text-brand-700" [routerLinkActiveOptions]="{ exact: true }"
-                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 transition">Editör</a>
-              <a routerLink="/editor/queue" routerLinkActive="bg-brand-100 !text-brand-700"
-                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 transition">Kuyruk</a>
+              <a routerLink="/editor" routerLinkActive="!bg-accent/10 !text-accent" [routerLinkActiveOptions]="{ exact: true }"
+                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Editör</a>
+              <a routerLink="/editor/queue" routerLinkActive="!bg-accent/10 !text-accent"
+                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Kuyruk</a>
             }
             @if (isAdmin()) {
-              <a routerLink="/admin" routerLinkActive="bg-brand-100 !text-brand-700" [routerLinkActiveOptions]="{ exact: true }"
-                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 transition">Yönetim</a>
+              <a routerLink="/admin" routerLinkActive="!bg-accent/10 !text-accent" [routerLinkActiveOptions]="{ exact: true }"
+                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Yönetim</a>
             }
           </nav>
 
           <div class="flex items-center gap-2 shrink-0">
-            <a routerLink="/notifications" routerLinkActive="bg-brand-100 !text-brand-700"
-               class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-600 hover:bg-brand-50 hover:text-brand-700 transition"
+            <button type="button" (click)="toggleTheme()"
+              class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-muted hover:bg-accent/5 hover:text-accent transition"
+              [attr.aria-label]="theme() === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'">
+              <mat-icon style="font-size:18px;width:18px;height:18px">{{ theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            </button>
+            <a routerLink="/notifications" routerLinkActive="!bg-accent/10 !text-accent"
+               class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-muted hover:bg-accent/5 hover:text-accent transition"
                aria-label="Bildirimler">
               <mat-icon style="font-size:18px;width:18px;height:18px">notifications</mat-icon>
             </a>
 
-            <button mat-button [matMenuTriggerFor]="userMenu" class="inline-flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-brand-50 text-slate-700">
-              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 text-white text-xs font-bold flex items-center justify-center">
+            <button mat-button [matMenuTriggerFor]="userMenu" class="inline-flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-accent/5 text-ink">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-accent to-accent2 text-white text-xs font-bold flex items-center justify-center">
                 {{ initial() }}
               </div>
               <span class="hidden md:inline text-sm">{{ email() }}</span>
               <mat-icon style="font-size:14px;width:14px;height:14px">expand_more</mat-icon>
             </button>
             <mat-menu #userMenu="matMenu">
-              <div class="px-4 py-3 border-b border-slate-100" style="min-width:220px">
-                <p class="text-xs text-slate-500">Giriş yapan</p>
-                <p class="text-sm font-medium text-slate-900 truncate">{{ email() }}</p>
-                <p class="text-xs text-slate-500 mt-0.5">{{ rolesLabel() }}</p>
+              <div class="px-4 py-3 border-b border-line/10" style="min-width:220px">
+                <p class="text-xs text-dim">Giriş yapan</p>
+                <p class="text-sm font-medium text-ink truncate">{{ email() }}</p>
+                <p class="text-xs text-dim mt-0.5">{{ rolesLabel() }}</p>
               </div>
               @if (isTeacher()) {
                 <a mat-menu-item routerLink="/teacher/profile">Profilim</a>
@@ -91,6 +98,20 @@ export class AppLayoutComponent {
   readonly isTeacher = this.auth.isTeacher;
   readonly initial = computed(() => (this.auth.email() ?? '?').charAt(0).toUpperCase());
   readonly rolesLabel = computed(() => this.auth.roles().join(', ') || '—');
+
+  readonly theme = signal<Theme>(this.readTheme());
+
+  private readTheme(): Theme {
+    if (typeof document === 'undefined') return 'light';
+    return (document.documentElement.getAttribute('data-theme') as Theme) || 'light';
+  }
+
+  toggleTheme(): void {
+    const next: Theme = this.theme() === 'dark' ? 'light' : 'dark';
+    this.theme.set(next);
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('da-theme', next); } catch { /* yoksay */ }
+  }
 
   logout(): void {
     this.auth.logout();

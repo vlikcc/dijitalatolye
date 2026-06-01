@@ -14,47 +14,47 @@ import { AuthStore } from '@core/auth/auth.store';
   template: `
     <div class="max-w-3xl">
       <header class="mb-6">
-        <h1 class="text-2xl font-extrabold text-slate-900">Profil</h1>
-        <p class="text-sm text-slate-600 mt-1">Hesap bilgileriniz ve öğretmen profiliniz.</p>
+        <h1 class="text-2xl font-extrabold text-ink">Profil</h1>
+        <p class="text-sm text-muted mt-1">Hesap bilgileriniz ve öğretmen profiliniz.</p>
       </header>
 
-      <div class="rounded-2xl bg-white border border-slate-200 p-6 mb-6">
+      <div class="rounded-2xl bg-surface border border-line/10 p-6 mb-6">
         <div class="flex items-start gap-4">
           <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white flex items-center justify-center font-bold text-lg">
             {{ initial() }}
           </div>
           <div>
-            <p class="text-sm text-slate-500 inline-flex items-center gap-1.5">
+            <p class="text-sm text-dim inline-flex items-center gap-1.5">
               <mat-icon style="font-size:14px;width:14px;height:14px">mail</mat-icon> {{ email() }}
             </p>
-            <p class="mt-1 text-sm text-slate-500 inline-flex items-center gap-1.5">
+            <p class="mt-1 text-sm text-dim inline-flex items-center gap-1.5">
               <mat-icon style="font-size:14px;width:14px;height:14px">verified_user</mat-icon> Roller: {{ rolesLabel() }}
             </p>
           </div>
         </div>
       </div>
 
-      <form (ngSubmit)="onSubmit()" class="rounded-2xl bg-white border border-slate-200 p-6 space-y-4">
-        <h2 class="font-semibold text-slate-900 inline-flex items-center gap-2">
+      <form (ngSubmit)="onSubmit()" class="rounded-2xl bg-surface border border-line/10 p-6 space-y-4">
+        <h2 class="font-semibold text-ink inline-flex items-center gap-2">
           <mat-icon class="!text-brand-600" style="font-size:16px;width:16px;height:16px">person</mat-icon> Öğretmen Bilgileri
         </h2>
 
         <label class="block">
-          <span class="text-xs font-semibold text-slate-700">Görünen ad</span>
+          <span class="text-xs font-semibold text-muted">Görünen ad</span>
           <input [(ngModel)]="displayName" name="displayName" placeholder="Ayşe Yılmaz"
-            class="mt-1 w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition" />
+            class="mt-1 w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition" />
         </label>
 
         <label class="block">
-          <span class="text-xs font-semibold text-slate-700">Okul / Kurum</span>
+          <span class="text-xs font-semibold text-muted">Okul / Kurum</span>
           <input [(ngModel)]="school" name="school" placeholder="Örn. Atatürk İlkokulu"
-            class="mt-1 w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition" />
+            class="mt-1 w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition" />
         </label>
 
         <label class="block">
-          <span class="text-xs font-semibold text-slate-700">Hakkında</span>
+          <span class="text-xs font-semibold text-muted">Hakkında</span>
           <textarea [(ngModel)]="bio" name="bio" rows="4" placeholder="Branş, deneyim, ilgi alanları…"
-            class="mt-1 w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition resize-y"></textarea>
+            class="mt-1 w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition resize-y"></textarea>
         </label>
 
         <div class="flex items-center justify-between pt-2">

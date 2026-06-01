@@ -31,12 +31,12 @@ interface AuditList {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto p-6">
-      <h1 class="text-3xl font-bold mb-6 text-slate-900">Audit Log</h1>
+      <h1 class="text-3xl font-bold mb-6 text-ink">Audit Log</h1>
 
       <div class="flex gap-3 mb-4">
-        <input class="border border-slate-200 rounded px-3 py-2" placeholder="Eylem (ör. content.published)"
+        <input class="border border-line/10 rounded px-3 py-2" placeholder="Eylem (ör. content.published)"
           [(ngModel)]="action" (ngModelChange)="reload(1)" />
-        <select class="border border-slate-200 rounded px-3 py-2" [(ngModel)]="severity" (ngModelChange)="reload(1)">
+        <select class="border border-line/10 rounded px-3 py-2" [(ngModel)]="severity" (ngModelChange)="reload(1)">
           <option value="">Tüm Seviyeler</option>
           <option value="Info">Info</option>
           <option value="Warning">Warning</option>
@@ -48,9 +48,9 @@ interface AuditList {
       @if (loading()) {
         <p>Yükleniyor...</p>
       } @else if (data()) {
-        <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+        <div class="bg-surface border border-line/10 rounded-lg overflow-hidden">
           <table class="w-full text-sm">
-            <thead class="bg-slate-50">
+            <thead class="bg-panel">
               <tr class="text-left">
                 <th class="p-3">Zaman</th>
                 <th class="p-3">Servis</th>
@@ -63,8 +63,8 @@ interface AuditList {
             </thead>
             <tbody>
               @for (e of data()!.items; track e.id) {
-                <tr class="border-t border-slate-100">
-                  <td class="p-3 whitespace-nowrap text-slate-500">{{ formatDate(e.occurredAt) }}</td>
+                <tr class="border-t border-line/10">
+                  <td class="p-3 whitespace-nowrap text-dim">{{ formatDate(e.occurredAt) }}</td>
                   <td class="p-3">{{ e.serviceName }}</td>
                   <td class="p-3 font-mono text-xs">{{ e.action }}</td>
                   <td class="p-3">{{ e.userName ?? (e.userId ? e.userId.slice(0, 8) : '-') }}</td>
@@ -76,16 +76,16 @@ interface AuditList {
                 </tr>
               }
               @if (data()!.items.length === 0) {
-                <tr><td colspan="7" class="p-6 text-center text-slate-500">Kayıt bulunamadı.</td></tr>
+                <tr><td colspan="7" class="p-6 text-center text-dim">Kayıt bulunamadı.</td></tr>
               }
             </tbody>
           </table>
-          <div class="flex items-center justify-between p-3 border-t border-slate-100 bg-slate-50 text-sm">
+          <div class="flex items-center justify-between p-3 border-t border-line/10 bg-panel text-sm">
             <span>Toplam: {{ data()!.total }} | Sayfa: {{ data()!.page }}</span>
             <div class="flex gap-2">
-              <button class="px-3 py-1 border border-slate-200 rounded disabled:opacity-50"
+              <button class="px-3 py-1 border border-line/10 rounded disabled:opacity-50"
                 (click)="reload(page() - 1)" [disabled]="page() === 1">Önceki</button>
-              <button class="px-3 py-1 border border-slate-200 rounded disabled:opacity-50"
+              <button class="px-3 py-1 border border-line/10 rounded disabled:opacity-50"
                 (click)="reload(page() + 1)" [disabled]="data()!.items.length < data()!.pageSize">Sonraki</button>
             </div>
           </div>
@@ -126,7 +126,7 @@ export class AdminAuditComponent implements OnInit {
       case 'Warning': return base + 'bg-amber-50 text-amber-700';
       case 'Error': return base + 'bg-rose-50 text-rose-700';
       case 'Critical': return base + 'bg-rose-100 text-rose-900';
-      default: return base + 'bg-slate-100';
+      default: return base + 'bg-panel';
     }
   }
 

@@ -24,8 +24,8 @@ type RoleFilter = 'all' | 'Teacher' | 'Editor' | 'Student';
     <div class="max-w-7xl mx-auto p-6">
       <header class="flex items-end justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 class="text-3xl font-bold text-slate-900">Kullanıcılar</h1>
-          <p class="text-sm text-slate-500 mt-1">
+          <h1 class="text-3xl font-bold text-ink">Kullanıcılar</h1>
+          <p class="text-sm text-dim mt-1">
             Toplam {{ counts().total }} · Öğretmen {{ counts().teacher }} · Editör {{ counts().editor }}.
             Editör ataması yalnızca kayıtlı öğretmenlere yapılabilir.
           </p>
@@ -33,9 +33,9 @@ type RoleFilter = 'all' | 'Teacher' | 'Editor' | 'Student';
       </header>
 
       <div class="flex flex-wrap gap-3 mb-4">
-        <input class="border border-slate-200 rounded px-3 py-2 w-80" placeholder="E-posta veya isim..."
+        <input class="border border-line/10 rounded px-3 py-2 w-80" placeholder="E-posta veya isim..."
           [(ngModel)]="q" (ngModelChange)="reload()" />
-        <select class="border border-slate-200 rounded px-3 py-2" [(ngModel)]="roleFilter" (ngModelChange)="reload()">
+        <select class="border border-line/10 rounded px-3 py-2" [(ngModel)]="roleFilter" (ngModelChange)="reload()">
           <option value="all">Tüm roller</option>
           <option value="Teacher">Öğretmenler</option>
           <option value="Editor">Editörler</option>
@@ -50,9 +50,9 @@ type RoleFilter = 'all' | 'Teacher' | 'Editor' | 'Student';
       @if (loading()) {
         <p>Yükleniyor...</p>
       } @else {
-        <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+        <div class="bg-surface border border-line/10 rounded-lg overflow-hidden">
           <table class="w-full text-sm">
-            <thead class="bg-slate-50">
+            <thead class="bg-panel">
               <tr class="text-left">
                 <th class="p-3">Ad</th>
                 <th class="p-3">E-posta</th>
@@ -64,7 +64,7 @@ type RoleFilter = 'all' | 'Teacher' | 'Editor' | 'Student';
             </thead>
             <tbody>
               @for (u of users(); track u.id) {
-                <tr class="border-t border-slate-100">
+                <tr class="border-t border-line/10">
                   <td class="p-3">{{ u.displayName || '-' }}</td>
                   <td class="p-3">{{ u.email }}</td>
                   <td class="p-3 text-xs">
@@ -78,12 +78,12 @@ type RoleFilter = 'all' | 'Teacher' | 'Editor' | 'Student';
                     {{ u.isVerified ? 'Evet' : 'Hayır' }}
                     @if (u.mebVerified) { <span class="ml-1 text-xs text-emerald-600">(MEB)</span> }
                   </td>
-                  <td class="p-3 text-slate-500">{{ formatDate(u.createdAt) }}</td>
+                  <td class="p-3 text-dim">{{ formatDate(u.createdAt) }}</td>
                   <td class="p-3 text-right">
-                    @if (isAdmin(u)) { <span class="text-xs text-slate-400">—</span> }
+                    @if (isAdmin(u)) { <span class="text-xs text-dim">—</span> }
                     @else if (canRevoke(u)) {
                       <button [disabled]="pendingId() === u.id" (click)="toggleEditor(u)"
-                        class="px-3 py-1.5 rounded text-xs font-medium border bg-white text-rose-700 border-rose-300 hover:bg-rose-50"
+                        class="px-3 py-1.5 rounded text-xs font-medium border bg-surface text-rose-700 border-rose-300 hover:bg-rose-50"
                         [class.opacity-50]="pendingId() === u.id" [class.cursor-wait]="pendingId() === u.id">
                         {{ pendingId() === u.id ? 'İşleniyor...' : 'Editör Yetkisini Al' }}
                       </button>
@@ -94,13 +94,13 @@ type RoleFilter = 'all' | 'Teacher' | 'Editor' | 'Student';
                         {{ pendingId() === u.id ? 'İşleniyor...' : 'Editör Yap' }}
                       </button>
                     } @else {
-                      <span class="text-xs text-slate-400" title="Editör yalnızca öğretmen hesaplarına atanır">—</span>
+                      <span class="text-xs text-dim" title="Editör yalnızca öğretmen hesaplarına atanır">—</span>
                     }
                   </td>
                 </tr>
               }
               @if (users().length === 0) {
-                <tr><td colspan="6" class="p-6 text-center text-slate-500">Kullanıcı bulunamadı.</td></tr>
+                <tr><td colspan="6" class="p-6 text-center text-dim">Kullanıcı bulunamadı.</td></tr>
               }
             </tbody>
           </table>
@@ -175,7 +175,7 @@ export class AdminUsersComponent implements OnInit {
     if (r === 'Editor') return base + 'bg-indigo-100 text-indigo-800';
     if (r === 'Admin' || r === 'SuperAdmin') return base + 'bg-amber-100 text-amber-800';
     if (r === 'Teacher') return base + 'bg-emerald-100 text-emerald-800';
-    return base + 'bg-slate-100 text-slate-700';
+    return base + 'bg-panel text-muted';
   }
 
   formatDate(iso: string): string { return new Date(iso).toLocaleDateString('tr-TR'); }

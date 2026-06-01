@@ -36,18 +36,18 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
   template: `
     <div class="max-w-4xl mx-auto">
       <header class="mb-6">
-        <h1 class="text-2xl font-extrabold text-slate-900">İçerik Yükle</h1>
-        <p class="text-sm text-slate-600 mt-1">
+        <h1 class="text-2xl font-extrabold text-ink">İçerik Yükle</h1>
+        <p class="text-sm text-muted mt-1">
           ZIP veya HTML bundle'ınızı yükleyin; AI sizin için başlık, ders, sınıf, süre, kazanım ve etiketleri otomatik doldursun.
         </p>
       </header>
 
       <!-- DROPZONE -->
       @if (phase() === 'idle' || phase() === 'extracting') {
-        <div class="rounded-2xl border-2 border-dashed bg-white p-12 text-center transition"
+        <div class="rounded-2xl border-2 border-dashed bg-surface p-12 text-center transition"
              [class.border-brand-400]="dragOver()"
              [class.bg-brand-50]="dragOver()"
-             [class.border-slate-300]="!dragOver()"
+             [class.border-line]="!dragOver()"
              (dragenter)="$event.preventDefault(); dragOver.set(true)"
              (dragover)="$event.preventDefault(); dragOver.set(true)"
              (dragleave)="dragOver.set(false)"
@@ -55,8 +55,8 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
           <div class="mx-auto inline-flex w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white items-center justify-center mb-4 shadow-lg shadow-brand-700/20">
             <mat-icon style="font-size:32px;width:32px;height:32px">cloud_upload</mat-icon>
           </div>
-          <h2 class="text-xl font-bold text-slate-900">Dosyayı buraya bırakın</h2>
-          <p class="text-sm text-slate-600 mt-1">veya tıklayıp seçin. ZIP ya da tek HTML, en fazla 50 MB.</p>
+          <h2 class="text-xl font-bold text-ink">Dosyayı buraya bırakın</h2>
+          <p class="text-sm text-muted mt-1">veya tıklayıp seçin. ZIP ya da tek HTML, en fazla 50 MB.</p>
           <button (click)="fileInput.click()" type="button"
             class="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-md shadow-brand-600/20">
             <mat-icon style="font-size:16px;width:16px;height:16px">folder_open</mat-icon>
@@ -84,57 +84,57 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
 
       <!-- SUGGESTION FORM -->
       @if (phase() === 'form' && extraction()) {
-        <div class="rounded-2xl bg-white border border-slate-200 p-6 shadow-sm">
+        <div class="rounded-2xl bg-surface border border-line/10 p-6 shadow-sm">
           <div class="flex items-center gap-2 mb-1">
             <mat-icon class="!text-brand-600" style="font-size:20px;width:20px;height:20px">auto_awesome</mat-icon>
-            <h2 class="font-semibold text-slate-900">AI Önerileri</h2>
+            <h2 class="font-semibold text-ink">AI Önerileri</h2>
             <span class="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-brand-50 text-brand-700 border border-brand-200">
               Güven: {{ confidencePct() }}%
             </span>
           </div>
-          <p class="text-xs text-slate-500 mb-6">
+          <p class="text-xs text-dim mb-6">
             Aşağıdaki alanlar AI tarafından dolduruldu. İstediğiniz değişikliği yapın ve gönderin.
-            Dosya zaten yüklendi (<code class="bg-slate-100 px-1 rounded">{{ extraction()!.key }}</code>),
+            Dosya zaten yüklendi (<code class="bg-panel px-1 rounded">{{ extraction()!.key }}</code>),
             tekrar yüklemeniz gerekmez.
           </p>
 
           <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
             <!-- Başlık -->
             <div class="space-y-1">
-              <label class="text-xs font-semibold text-slate-700 flex items-center gap-2">
+              <label class="text-xs font-semibold text-muted flex items-center gap-2">
                 Başlık <span [class]="badgeClass('title')">{{ badgeLabel('title') }}</span>
               </label>
               <input type="text" formControlName="title" (input)="markManual('title')"
-                class="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none" />
+                class="w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none" />
             </div>
 
             <!-- Açıklama -->
             <div class="space-y-1">
-              <label class="text-xs font-semibold text-slate-700 flex items-center gap-2">
+              <label class="text-xs font-semibold text-muted flex items-center gap-2">
                 Açıklama <span [class]="badgeClass('description')">{{ badgeLabel('description') }}</span>
               </label>
               <textarea rows="3" formControlName="description" (input)="markManual('description')"
-                class="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none resize-y"></textarea>
+                class="w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none resize-y"></textarea>
             </div>
 
             <!-- Ders + Sınıf yan yana -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-1">
-                <label class="text-xs font-semibold text-slate-700 flex items-center gap-2">
+                <label class="text-xs font-semibold text-muted flex items-center gap-2">
                   Ders <span [class]="badgeClass('subject')">{{ badgeLabel('subject') }}</span>
                 </label>
                 <select formControlName="subject" (change)="markManual('subject')"
-                  class="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none">
+                  class="w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none">
                   <option value="">Seçiniz…</option>
                   @for (s of subjects; track s) { <option [value]="s">{{ s }}</option> }
                 </select>
               </div>
               <div class="space-y-1">
-                <label class="text-xs font-semibold text-slate-700 flex items-center gap-2">
+                <label class="text-xs font-semibold text-muted flex items-center gap-2">
                   Sınıf <span [class]="badgeClass('gradeLevel')">{{ badgeLabel('gradeLevel') }}</span>
                 </label>
                 <select formControlName="gradeLevel" (change)="markManual('gradeLevel')"
-                  class="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none">
+                  class="w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none">
                   <option [ngValue]="null">Seçiniz…</option>
                   @for (g of grades; track g) { <option [ngValue]="g">{{ g }}. Sınıf</option> }
                 </select>
@@ -144,14 +144,14 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
             <!-- Süre + Zorluk yan yana -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-1">
-                <label class="text-xs font-semibold text-slate-700 flex items-center gap-2">
+                <label class="text-xs font-semibold text-muted flex items-center gap-2">
                   Tahmini süre (dk) <span [class]="badgeClass('durationMinutes')">{{ badgeLabel('durationMinutes') }}</span>
                 </label>
                 <input type="number" min="1" max="120" formControlName="durationMinutes" (input)="markManual('durationMinutes')"
-                  class="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none" />
+                  class="w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none" />
               </div>
               <div class="space-y-1">
-                <label class="text-xs font-semibold text-slate-700 flex items-center gap-2">
+                <label class="text-xs font-semibold text-muted flex items-center gap-2">
                   Zorluk <span [class]="badgeClass('difficulty')">{{ badgeLabel('difficulty') }}</span>
                 </label>
                 <mat-button-toggle-group formControlName="difficulty" (change)="markManual('difficulty')" class="w-full">
@@ -164,7 +164,7 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
 
             <!-- Kazanım kodları -->
             <div class="space-y-1">
-              <label class="text-xs font-semibold text-slate-700 flex items-center gap-2">
+              <label class="text-xs font-semibold text-muted flex items-center gap-2">
                 Kazanım kodları (MEB) <span [class]="badgeClass('outcomeCodes')">{{ badgeLabel('outcomeCodes') }}</span>
               </label>
               <mat-form-field appearance="outline" class="w-full">
@@ -192,7 +192,7 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
 
             <!-- Etiketler -->
             <div class="space-y-1">
-              <label class="text-xs font-semibold text-slate-700 flex items-center gap-2">
+              <label class="text-xs font-semibold text-muted flex items-center gap-2">
                 Etiketler <span [class]="badgeClass('tags')">{{ badgeLabel('tags') }}</span>
               </label>
               <mat-form-field appearance="outline" class="w-full">
@@ -216,7 +216,7 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
             }
 
             <div class="pt-2 flex gap-3 justify-end">
-              <button type="button" (click)="reset()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50">
+              <button type="button" (click)="reset()" class="px-4 py-2.5 rounded-xl border border-line/15 text-muted font-semibold hover:bg-panel">
                 Vazgeç ve yeniden yükle
               </button>
               <button type="submit" [disabled]="submitting() || form.invalid"
@@ -360,9 +360,9 @@ export class UploadComponent {
 
   badgeClass(field: AiField): string {
     const base = 'text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded ';
-    if (this.manualEdited().has(field)) return base + 'bg-slate-100 text-slate-600';
+    if (this.manualEdited().has(field)) return base + 'bg-panel text-muted';
     if (this.aiFilled().has(field)) return base + 'bg-violet-50 text-violet-700 border border-violet-200';
-    return base + 'bg-slate-50 text-slate-400 border border-slate-200';
+    return base + 'bg-panel text-dim border border-line/10';
   }
   badgeLabel(field: AiField): string {
     if (this.manualEdited().has(field)) return 'Manuel';

@@ -21,12 +21,12 @@ type Decision = 'Approved' | 'Rejected' | 'RevisionRequested';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (!item()) {
-      <p class="text-slate-500">Yükleniyor...</p>
+      <p class="text-dim">Yükleniyor...</p>
     } @else {
       <section class="grid lg:grid-cols-2 gap-6">
         <div>
-          <h1 class="text-xl font-bold mb-4 text-slate-900">{{ item()!.title }}</h1>
-          <div class="bg-white border border-slate-200 rounded p-4 mb-4">
+          <h1 class="text-xl font-bold mb-4 text-ink">{{ item()!.title }}</h1>
+          <div class="bg-surface border border-line/10 rounded p-4 mb-4">
             <h2 class="font-semibold mb-2">AI Raporu</h2>
             @if (report()) {
               <div class="space-y-2 text-sm">
@@ -47,15 +47,15 @@ type Decision = 'Approved' | 'Rejected' | 'RevisionRequested';
                     </ul>
                   </div>
                 }
-                <details class="text-xs"><summary>LLM Ham JSON</summary><pre class="overflow-x-auto bg-slate-100 p-2 mt-1">{{ report()!.llmRawJson }}</pre></details>
+                <details class="text-xs"><summary>LLM Ham JSON</summary><pre class="overflow-x-auto bg-panel p-2 mt-1">{{ report()!.llmRawJson }}</pre></details>
               </div>
             } @else {
-              <p class="text-sm text-slate-500">Rapor yükleniyor...</p>
+              <p class="text-sm text-dim">Rapor yükleniyor...</p>
             }
           </div>
 
           <textarea placeholder="Editör yorumu (opsiyonel)" [(ngModel)]="comment" rows="3"
-            class="w-full px-3 py-2 border border-slate-200 rounded mb-3 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none"></textarea>
+            class="w-full px-3 py-2 border border-line/10 rounded mb-3 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none"></textarea>
           <div class="flex gap-2 flex-wrap">
             <button [disabled]="busy()" (click)="decide('Approved')" class="px-3 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-60">Onayla</button>
             <button [disabled]="busy()" (click)="decide('RevisionRequested')" class="px-3 py-2 bg-amber-500 text-white rounded hover:bg-amber-600 disabled:opacity-60">Revizyon İste</button>
@@ -64,11 +64,11 @@ type Decision = 'Approved' | 'Rejected' | 'RevisionRequested';
         </div>
 
         <div>
-          <h2 class="font-semibold mb-2 text-slate-900">Önizleme (sandbox)</h2>
+          <h2 class="font-semibold mb-2 text-ink">Önizleme (sandbox)</h2>
           @if (downloadUrl()) {
-            <iframe [src]="downloadUrl()" sandbox="allow-scripts" class="w-full h-[480px] border border-slate-200 rounded bg-white" title="content-preview"></iframe>
+            <iframe [src]="downloadUrl()" sandbox="allow-scripts" class="w-full h-[480px] border border-line/10 rounded bg-surface" title="content-preview"></iframe>
           } @else {
-            <p class="text-sm text-slate-500">Önizleme V1 sonunda — download URL ile sandboxed iframe içinde gösterilir.</p>
+            <p class="text-sm text-dim">Önizleme V1 sonunda — download URL ile sandboxed iframe içinde gösterilir.</p>
           }
         </div>
       </section>

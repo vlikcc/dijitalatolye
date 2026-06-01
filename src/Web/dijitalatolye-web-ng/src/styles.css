@@ -2,27 +2,113 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tailwind preflight kapalı olduğu için global border-box reset'i elle uygulanır;
-   aksi halde w-full + padding olan inputlar parent'ı taşırır. */
+/* ============================================================
+   Tema tokenları (RGB kanalları — Tailwind <alpha-value> uyumlu)
+   ============================================================ */
+:root,
+[data-theme="light"] {
+  --bg: 250 251 253;        /* #fafbfd */
+  --bg-2: 255 255 255;      /* #ffffff */
+  --surface: 255 255 255;
+  --panel: 246 248 252;     /* #f6f8fc */
+  --ink: 10 19 40;          /* #0a1328 */
+  --muted: 71 84 110;
+  --dim: 124 137 158;
+  --border: 16 32 64;       /* düşük alpha ile kullanılır */
+  --grid-line: rgba(10, 19, 40, 0.045);
+  --accent: 11 95 140;      /* #0b5f8c */
+  --accent-2: 90 63 203;    /* #5a3fcb */
+  --warm: 181 127 31;       /* #b57f1f */
+  --noise-opacity: 0;
+}
+
+[data-theme="dark"] {
+  --bg: 7 11 24;            /* #070b18 */
+  --bg-2: 11 16 32;         /* #0b1020 */
+  --surface: 16 22 40;
+  --panel: 20 27 48;
+  --ink: 232 238 246;       /* #e8eef6 */
+  --muted: 156 170 190;
+  --dim: 110 124 145;
+  --border: 255 255 255;    /* düşük alpha ile kullanılır */
+  --grid-line: rgba(255, 255, 255, 0.04);
+  --accent: 12 181 219;     /* #0cb5db */
+  --accent-2: 167 139 250;  /* #a78bfa */
+  --warm: 245 201 93;       /* #f5c95d */
+  --noise-opacity: 0.035;
+}
+
+/* Tailwind preflight kapalı olduğu için border-box reset elle uygulanır. */
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body { height: 100%; }
 body {
   margin: 0;
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  background: #faf7ff;
-  color: #1a1033;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  background: rgb(var(--bg));
+  color: rgb(var(--ink));
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  transition: background-color .3s ease, color .3s ease;
 }
 
-::selection { background: #d6bdff; color: #2c0c54; }
+::selection { background: rgb(var(--accent) / 0.22); color: rgb(var(--ink)); }
 
 *:focus-visible {
-  outline: 2px solid #9a5cff;
+  outline: 2px solid rgb(var(--accent));
   outline-offset: 2px;
   border-radius: 4px;
 }
 
+/* ============================================================
+   Yardımcı sınıflar (İZBO görsel dili)
+   ============================================================ */
+
+/* Mono etiket / eyebrow: "[ 01 ] KATEGORİLER" */
+.da-eyebrow {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgb(var(--accent));
+}
+
+/* Serif italik vurgu kelime */
+.da-serif {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* Display başlık */
+.da-display {
+  font-family: "Space Grotesk", Inter, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Moleküler ağ / bilim arka planı: ince ızgara + glow */
+.da-science-bg {
+  position: relative;
+  background-color: rgb(var(--bg));
+  background-image:
+    radial-gradient(60rem 40rem at 75% -10%, rgb(var(--accent) / 0.10), transparent 60%),
+    radial-gradient(50rem 36rem at 5% 110%, rgb(var(--accent-2) / 0.10), transparent 60%),
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: auto, auto, 38px 38px, 38px 38px;
+}
+
+/* Yumuşak panel arkaplan blur lekeleri için */
+.da-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  pointer-events: none;
+}
+
 /* Material density override — daha kompakt görünüm */
 .mat-mdc-form-field { width: 100%; }
+
+/* Material ikon hizası */
+.mat-icon { vertical-align: middle; }
