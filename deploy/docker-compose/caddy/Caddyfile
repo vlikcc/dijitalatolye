@@ -52,6 +52,10 @@
 	# MinIO presigned URL imzasi 'Host: minio:9000' ile hesaplanir; Caddy bu Host
 	# header'i icerideki MinIO'ya aynen iletmek zorunda yoksa 403 SignatureDoesNotMatch.
 	handle_path /cdn/* {
+		# NOT: Untrusted icerik icin daha siki bir CSP (connect-src none) istenirdi; ancak global
+		# header bloku CSP'yi eziyor. Asil izolasyon iframe sandbox'inda allow-same-origin OLMAMASIYLA
+		# saglanir (opaque origin: app localStorage/cookie/DOM ve same-origin API erisimi yok).
+		# Takip isi: global CSP'yi per-route'a tasiyip /cdn icin connect-src none uygulamak.
 		reverse_proxy minio:9000 {
 			header_up Host minio:9000
 		}

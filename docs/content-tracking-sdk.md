@@ -59,7 +59,9 @@ Host (`PlayComponent`) gelen her mesajı iki kademede doğrular:
 1. **Kaynak penceresi:** mesaj yalnızca oynatılan içeriğin iframe'inden (`iframe.contentWindow`) geliyorsa kabul edilir — başka sekme/pencere/eklenti enjekte edemez.
 2. **Marker:** `app === 'dijitalatolye'` olmayan mesajlar yok sayılır.
 
-İçerik ayrı bir origin'de (object storage) servis edildiği için iframe `sandbox="allow-scripts allow-same-origin"` ile çalışır; bu, uygulama origin'ine erişim vermez.
+İçerik uygulamayla **aynı origin** üzerinden (`/cdn`) servis edildiği için iframe **`sandbox="allow-scripts"`** ile çalışır — `allow-same-origin` bilinçli olarak **yoktur**. Bu sayede içerik opaque (benzersiz) bir origin'de izole olur: uygulamanın `localStorage`'ına (JWT), cookie'lerine veya DOM'una erişemez ve dışarıya ağ çağrısı yapamaz (`/cdn` yanıtlarında `connect-src 'none'` CSP'si).
+
+> **Önemli:** Bu izolasyon nedeniyle içerik `localStorage`/`cookie` ile kalıcı durum tutamaz. Öğrenci ilerlemesini/skoru saklamak için **bu SDK'yı (postMessage)** kullanın — `DijitalAtolye.progress/complete(...)` sandbox'tan etkilenmez ve platforma güvenli şekilde iletilir.
 
 ## Davranış notları
 

@@ -49,12 +49,14 @@ interface ContentTrackMessage {
             </span>
             <span class="ml-2 font-mono text-[11px] tracking-wider text-dim truncate">{{ slug }} · izole oynatma</span>
           </div>
-          <!-- İçerik ayrı origin'de (MinIO) servis edilir; allow-same-origin localStorage kullanan
-               oyunlar için gerekli ve uygulama origin'iyle aynı olmadığı için sandbox kaçışı riski yok. -->
+          <!-- GÜVENLİK: İçerik /cdn üzerinden uygulamayla AYNI origin'de servis edilir. Bu yüzden
+               sandbox'a allow-same-origin EKLENMEZ; aksi halde güvenilmeyen öğretmen HTML'i app'in
+               localStorage'ındaki JWT'ye erişebilirdi. allow-scripts ile içerik opaque origin'de çalışır;
+               ilerleme bildirimi postMessage (da-sdk.js) ile yapılır (allow-same-origin gerektirmez). -->
           <iframe
             #frame
             [src]="playUrl"
-            sandbox="allow-scripts allow-same-origin"
+            sandbox="allow-scripts"
             class="w-full h-[70vh] min-h-[520px] bg-white"
             title="play">
           </iframe>

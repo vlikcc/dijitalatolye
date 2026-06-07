@@ -82,7 +82,7 @@ public static class AnalyticsEndpoints
                     return acc;
                 });
             return Results.Ok(new { totals, avgScore = totals.AvgScore, daily = stats });
-        }).RequireAuthorization();
+        }).RequireAuthorization(Policies.TeacherOrAbove);
 
         // Kazanım (MEB outcome) bazlı rollup — kazanım-bazlı ilerleme panellerinin veri temeli.
         group.MapGet("/contents/{id:guid}/outcomes", async (Guid id, AnalyticsDbContext db, CancellationToken ct) =>
@@ -107,7 +107,7 @@ public static class AnalyticsEndpoints
                 .OrderBy(o => o.outcomeCode)
                 .ToList();
             return Results.Ok(new { outcomes });
-        }).RequireAuthorization();
+        }).RequireAuthorization(Policies.TeacherOrAbove);
 
         // Giriş yapan öğrencinin kendi kazanım ilerlemesi. Kullanıcı-bazlı veri agregatlanmadığı için
         // ham events tablosundan doğrudan hesaplanır (bu ölçekte yeterli).
