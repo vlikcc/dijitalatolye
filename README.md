@@ -100,6 +100,17 @@ Lokal test: `PUBLIC_DOMAIN=localhost`, tarayıcıda self-signed sertifikayı kab
 
 Guard yönetim paneli (dosya tarama / onay): **http://localhost:18000** — ilk giriş için `docker exec -it guard-web guard-entrypoint manage createsuperuser`
 
+#### Gözlemlenebilirlik (opt-in: Prometheus + Grafana)
+
+Tüm servisler `/metrics` (Prometheus) yayınlar ve `dijitalatolye_*` domain metrikleri üretir. Görselleştirme stack'i `observability` profile'ı ile başlatılır (`.env.prod` içinde `GRAFANA_ADMIN_PASSWORD` doldurun):
+
+```bash
+docker compose -f deploy/docker-compose/docker-compose.prod.yml --env-file .env.prod --profile observability up -d prometheus grafana
+```
+
+- Grafana: **http://localhost:3000** (admin / `GRAFANA_ADMIN_PASSWORD`) — "DijitalAtölye — Genel Bakış" dashboard'u provisioned.
+- Prometheus: **http://localhost:9090** (local-bound; tüm app servislerini scrape eder).
+
 Detay: [`docs/runbooks/selfhost-prod.md`](docs/runbooks/selfhost-prod.md)
 
 ### Varsayılan seed admin (Identity)

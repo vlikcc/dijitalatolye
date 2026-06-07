@@ -518,6 +518,43 @@ services:
     expose: ["8080"]
     <<: *app-defaults
 
+  # ============================================================
+  # Gözlemlenebilirlik (opt-in): --profile observability ile baslar
+  # ============================================================
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: da-prometheus
+    profiles: [observability]
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    <<: *data-defaults
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: da-grafana
+    profiles: [observability]
+    depends_on:
+      prometheus: { condition: service_started }
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    <<: *data-defaults
+
   # guard.stack.yml servislerini prod internal agina bagla
   guard-postgres:
     networks: [internal]
@@ -550,6 +587,8 @@ volumes:
   es-data:
   minio-data:
   caddy-data:
+  prometheus-data:
+  grafana-data:
   caddy-config:
 
 networks:

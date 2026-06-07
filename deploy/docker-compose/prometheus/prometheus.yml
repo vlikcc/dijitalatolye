@@ -1,0 +1,33 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  external_labels:
+    stack: dijitalatolye-prod
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: dijitalatolye
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - identity:8080
+          - user:8080
+          - catalog:8080
+          - storage:8080
+          - content:8080
+          - aimoderation:8080
+          - review:8080
+          - notification:8080
+          - analytics:8080
+          - search:8080
+          - admin:8080
+          - gateway:8080
+    relabel_configs:
+      # instance etiketini servis adına indirge (port'suz, dashboard'da okunur)
+      - source_labels: [__address__]
+        regex: "([^:]+):.*"
+        target_label: service
+        replacement: "$1"
