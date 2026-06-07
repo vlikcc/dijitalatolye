@@ -40,12 +40,17 @@ public sealed class MebCatalogImporter
                 u.SubjectId == subject.Id && u.GradeId == grade.Id && u.Name == row.UnitName, ct);
             if (unit is null)
             {
+                // (SubjectId, GradeId, Order) unique; kaynak ünite numaraları benzersiz olmayabileceği
+                // ve birleşen dosyalarda çakışabileceği için sıradaki boş order'ı ata.
+                var nextOrder = (await _db.Units
+                    .Where(u => u.SubjectId == subject.Id && u.GradeId == grade.Id)
+                    .MaxAsync(u => (int?)u.Order, ct) ?? 0) + 1;
                 unit = new Unit
                 {
                     SubjectId = subject.Id,
                     GradeId = grade.Id,
                     Name = row.UnitName,
-                    Order = row.UnitOrder,
+                    Order = nextOrder,
                 };
                 _db.Units.Add(unit);
                 await _db.SaveChangesAsync(ct);

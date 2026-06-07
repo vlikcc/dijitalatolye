@@ -46,7 +46,7 @@ public sealed class CatalogDbContext : DbContext
         {
             b.HasKey(o => o.Id);
             b.Property(o => o.Code).HasMaxLength(60).IsRequired();
-            b.Property(o => o.Description).HasMaxLength(1000).IsRequired();
+            b.Property(o => o.Description).HasColumnType("text").IsRequired();
             b.HasIndex(o => o.Code).IsUnique();
         });
 

@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Update="Seed\meb-outcomes.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\Common\DijitalAtolye.BuildingBlocks.Common.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\WebHostExtensions\DijitalAtolye.BuildingBlocks.WebHostExtensions.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Authentication\DijitalAtolye.BuildingBlocks.Authentication.csproj" />

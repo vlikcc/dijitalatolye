@@ -28,26 +28,8 @@ public static class CatalogSeeder
             }).ToList();
         db.Grades.AddRange(grades);
 
-        var matematik = new Subject { Code = "matematik", Name = "Matematik" };
-        var turkce = new Subject { Code = "turkce", Name = "Türkçe" };
-        var fen = new Subject { Code = "fen", Name = "Fen Bilimleri" };
-        var sosyal = new Subject { Code = "sosyal", Name = "Sosyal Bilgiler" };
-        var ingilizce = new Subject { Code = "ingilizce", Name = "İngilizce" };
-        db.Subjects.AddRange(matematik, turkce, fen, sosyal, ingilizce);
-
-        var grade5 = grades.First(g => g.Id == 5);
-        var unit = new Unit
-        {
-            SubjectId = matematik.Id,
-            GradeId = grade5.Id,
-            Order = 1,
-            Name = "Doğal Sayılar",
-        };
-        db.Units.Add(unit);
-
-        db.Outcomes.AddRange(
-            new Outcome { UnitId = unit.Id, Code = "M.5.1.1.1", Description = "En çok dokuz basamaklı doğal sayıları okur ve yazar." },
-            new Outcome { UnitId = unit.Id, Code = "M.5.1.1.2", Description = "Doğal sayıların basamaklarını ve basamak değerlerini belirler." });
+        // Ders/ünite/kazanım verisi MEB Excel import'undan gelir (Seed/meb-outcomes.json → MebCatalogImporter).
+        // Burada yalnızca sınıflar ve içerik kategorileri seed'lenir.
 
         db.Categories.AddRange(
             new Category { Code = "oyun", Name = "Oyun", Description = "Eğlenceli oyun bazlı içerikler" },
