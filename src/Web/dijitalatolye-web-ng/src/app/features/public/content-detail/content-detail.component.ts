@@ -12,6 +12,7 @@ interface ContentDetail {
   subject?: string;
   gradeLevel?: number;
   tags?: string[];
+  outcomeCodes?: string[];
   authorName?: string;
   views?: number;
   likes?: number;
@@ -42,6 +43,19 @@ interface Comment { id: string; body: string; userId: string; createdAt: string;
             <span class="text-xs bg-slate-100 rounded px-2 py-0.5">{{ t }}</span>
           }
         </div>
+
+        @if (content()!.outcomeCodes?.length) {
+          <div class="mt-3">
+            <div class="text-xs text-slate-500 mb-1">Kazanımlar</div>
+            <div class="flex flex-wrap gap-2">
+              @for (code of content()!.outcomeCodes || []; track code) {
+                <a [routerLink]="['/discover']" [queryParams]="{ outcome: code }"
+                  class="text-xs font-mono bg-brand-50 text-brand-800 rounded px-2 py-0.5 hover:bg-brand-100 transition"
+                  title="Bu kazanımdaki diğer içerikler">{{ code }}</a>
+              }
+            </div>
+          </div>
+        }
 
         @if (content()!.description) {
           <p class="mt-4 text-slate-700">{{ content()!.description }}</p>

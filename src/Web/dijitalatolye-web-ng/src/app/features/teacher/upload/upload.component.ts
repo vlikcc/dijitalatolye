@@ -17,7 +17,7 @@ import { debounceTime, switchMap, of } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ApiService } from '@core/api/api.service';
 import {
-  AiExtractResponse, CatalogOutcome,
+  AiExtractResponse, CatalogOutcome, CatalogSubject,
   CreateContentRequest, AddVersionRequest,
 } from '@core/api/contracts';
 
@@ -126,7 +126,7 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
                 <select formControlName="subject" (change)="markManual('subject')"
                   class="w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none">
                   <option value="">Seçiniz…</option>
-                  @for (s of subjects; track s) { <option [value]="s">{{ s }}</option> }
+                  @for (s of subjects(); track s) { <option [value]="s">{{ s }}</option> }
                 </select>
               </div>
               <div class="space-y-1">
@@ -237,7 +237,8 @@ export class UploadComponent {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
-  readonly subjects = ['Matematik', 'Türkçe', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İngilizce'];
+  // Dersler Catalog'tan yüklenir; yüklenene kadar (ve hata halinde) makul bir fallback gösterilir.
+  readonly subjects = signal<string[]>(['Matematik', 'Türkçe', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İngilizce']);
   readonly grades = Array.from({ length: 12 }, (_, i) => i + 1);
   readonly separatorKeys = [ENTER, COMMA];
 
@@ -283,6 +284,14 @@ export class UploadComponent {
         return this.api.get<CatalogOutcome[]>('/catalog/outcomes', { subject, grade, limit: 50 });
       }),
     ).subscribe({ next: (list) => this.outcomeOptions.set(list) });
+
+    // Dersleri katalogdan yükle (16 MEB dersi); hata halinde fallback liste kalır.
+    this.api.get<CatalogSubject[]>('/catalog/subjects').subscribe({
+      next: (list) => {
+        const names = (list ?? []).map((s) => s.name).filter(Boolean);
+        if (names.length) this.subjects.set(names);
+      },
+    });
   }
 
   onFileSelected(e: Event): void {

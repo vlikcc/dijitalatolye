@@ -111,6 +111,9 @@ public sealed class ElasticSearchIndexer : ISearchIndexer
         var resp = await _client.Indices.CreateAsync(IndexName, c => c
             .Settings(s => s
                 .Analysis(a => a
+                    // turkish_lowercase ES'te built-in bir filtre değil; lowercase(language=turkish) olarak tanımlanır.
+                    .TokenFilters(tf => tf
+                        .Lowercase("turkish_lowercase", l => l.Language("turkish")))
                     .Analyzers(an => an
                         .Custom(TurkishAnalyzer, ca => ca
                             .Tokenizer("standard")

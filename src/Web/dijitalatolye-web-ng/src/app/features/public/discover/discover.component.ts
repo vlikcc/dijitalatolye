@@ -93,6 +93,15 @@ interface SearchResponse {
         </aside>
 
         <section class="flex-1">
+          @if (outcome()) {
+            <div class="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 text-accent border border-accent/20 text-sm">
+              <mat-icon style="font-size:16px;width:16px;height:16px">school</mat-icon>
+              <span>Kazanım: <span class="font-mono">{{ outcome() }}</span></span>
+              <button type="button" (click)="setFilter('outcome', null)" class="ml-1 hover:text-accent2" aria-label="Kazanım filtresini temizle">
+                <mat-icon style="font-size:16px;width:16px;height:16px">close</mat-icon>
+              </button>
+            </div>
+          }
           <div class="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
             <p class="font-mono text-[11px] tracking-widest uppercase text-dim">{{ total() }} sonuç</p>
             <div class="relative w-full sm:w-80">
@@ -161,6 +170,7 @@ export class DiscoverComponent implements OnInit {
   readonly subject = signal<string | null>(null);
   readonly grade = signal<string | null>(null);
   readonly tag = signal<string | null>(null);
+  readonly outcome = signal<string | null>(null);
   readonly items = signal<SearchItem[]>([]);
   readonly facets = signal<Record<string, Array<{ key: string; count: number }>>>({});
   readonly total = signal(0);
@@ -185,11 +195,12 @@ export class DiscoverComponent implements OnInit {
       this.subject.set(p.get('subject'));
       this.grade.set(p.get('grade'));
       this.tag.set(p.get('tag'));
+      this.outcome.set(p.get('outcome'));
       this.fetch();
     });
   }
 
-  setFilter(name: 'subject' | 'grade' | 'tag', value: string | null): void {
+  setFilter(name: 'subject' | 'grade' | 'tag' | 'outcome', value: string | null): void {
     const qp = { ...this.route.snapshot.queryParams, [name]: value ?? undefined };
     this.router.navigate([], { queryParams: qp });
   }
@@ -210,6 +221,7 @@ export class DiscoverComponent implements OnInit {
       subject: this.subject() || undefined,
       gradeLevel: this.grade() || undefined,
       tag: this.tag() || undefined,
+      outcome: this.outcome() || undefined,
       page: 1,
       pageSize: 24,
     }).subscribe({
