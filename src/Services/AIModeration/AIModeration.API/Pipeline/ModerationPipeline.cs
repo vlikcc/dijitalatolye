@@ -87,6 +87,8 @@ public sealed class ModerationPipeline
             EstimatedCostUsd = llmResponse.EstimatedCostUsd,
         };
         await _store.SaveAsync(report, ct);
+        DijitalAtolye.BuildingBlocks.WebHostExtensions.DomainMetrics.ModerationCompleted.Add(1);
+        DijitalAtolye.BuildingBlocks.WebHostExtensions.DomainMetrics.ModerationCostUsd.Record((double)report.EstimatedCostUsd);
 
         var evt = new AIModerationCompletedV1
         {

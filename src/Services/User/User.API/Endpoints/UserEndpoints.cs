@@ -45,6 +45,23 @@ public static class UserEndpoints
             return Results.Ok(students);
         }).RequireAuthorization(Policies.TeacherOrAbove);
 
+        // Verilen kullanıcı id'leri için görünen ad çözümlemesi (admin raporlarında öğretmen adı vb.).
+        users.MapGet("/names", async (
+            [FromQuery] string? ids,
+            UserDbContext db,
+            CancellationToken ct) =>
+        {
+            var guids = (ids ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(s => Guid.TryParse(s, out var g) ? g : (Guid?)null)
+                .Where(g => g is not null).Select(g => g!.Value).Distinct().Take(50).ToList();
+            if (guids.Count == 0) return Results.Ok(Array.Empty<object>());
+            var rows = await db.Profiles.AsNoTracking()
+                .Where(p => guids.Contains(p.UserId))
+                .Select(p => new { userId = p.UserId, displayName = p.DisplayName })
+                .ToListAsync(ct);
+            return Results.Ok(rows);
+        }).RequireAuthorization(Policies.TeacherOrAbove);
+
         users.MapPut("/me", async (
             [FromBody] UpdateProfileRequest body,
             ICurrentUser current,

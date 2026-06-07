@@ -43,6 +43,7 @@ public static class AnalyticsEndpoints
             };
             db.Events.Add(evt);
             await db.SaveChangesAsync(ct);
+            DijitalAtolye.BuildingBlocks.WebHostExtensions.DomainMetrics.AnalyticsEvent.Add(1);
 
             // Giriş yapmış kullanıcının tamamlaması, ödev tamamlanmasını işaretlemek için yayınlanır.
             if (evt.Type == AnalyticsEventType.Complete && evt.UserId is { } uid)

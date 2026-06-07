@@ -25,4 +25,16 @@ public sealed class MongoModerationReportStore : IModerationReportStore
 
     public async Task<ModerationReport?> GetByContentVersionAsync(Guid contentId, Guid versionId, CancellationToken ct = default) =>
         await _col.Find(r => r.ContentId == contentId && r.VersionId == versionId).FirstOrDefaultAsync(ct);
+
+    public async Task<ModerationStats> GetStatsSinceAsync(DateTime sinceUtc, CancellationToken ct = default)
+    {
+        var rows = await _col.Find(r => r.AnalyzedAtUtc >= sinceUtc)
+            .Project(r => new { r.PromptTokens, r.CompletionTokens, r.EstimatedCostUsd })
+            .ToListAsync(ct);
+        return new ModerationStats(
+            rows.Count,
+            rows.Sum(r => (long)r.PromptTokens),
+            rows.Sum(r => (long)r.CompletionTokens),
+            rows.Sum(r => r.EstimatedCostUsd));
+    }
 }

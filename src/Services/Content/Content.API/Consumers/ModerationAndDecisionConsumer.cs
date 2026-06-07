@@ -121,6 +121,7 @@ public sealed class EditorDecisionMadeConsumer : IConsumer<EditorDecisionMadeV1>
                             Subject = content.Subject,
                             PublishedAt = content.PublishedAtUtc!.Value,
                         }, ct: context.CancellationToken);
+                        DijitalAtolye.BuildingBlocks.WebHostExtensions.DomainMetrics.ContentPublished.Add(1);
                     }
                 }
                 break;

@@ -10,6 +10,7 @@ public sealed class DownstreamServiceOptions
     public string ContentBaseUrl { get; set; } = "http://localhost:5005";
     public string AnalyticsBaseUrl { get; set; } = "http://localhost:5109";
     public string UserBaseUrl { get; set; } = "http://localhost:5002";
+    public string ModerationBaseUrl { get; set; } = "http://localhost:5006";
 }
 
 public sealed class DashboardAggregator
@@ -39,6 +40,8 @@ public sealed class DashboardAggregator
             ?? new AnalyticsStatsDto();
         var users = await GetJsonAsync<UserStatsDto>($"{_options.UserBaseUrl}/users/admin/stats", ct)
             ?? new UserStatsDto();
+        var moderation = await GetJsonAsync<ModerationStatsDto>($"{_options.ModerationBaseUrl}/moderation/admin/stats", ct)
+            ?? new ModerationStatsDto();
 
         return new DashboardStats(
             content.TotalContents,
@@ -46,7 +49,7 @@ public sealed class DashboardAggregator
             content.PublishedToday,
             users.ActiveEditors,
             users.TotalUsers,
-            LlmDailyCostUsd: 0m);
+            LlmDailyCostUsd: moderation.EstimatedCostUsd);
     }
 
     public async Task<ReportsStats> GetReportsAsync(CancellationToken ct)
@@ -57,12 +60,28 @@ public sealed class DashboardAggregator
             ?? new AnalyticsStatsDto();
         var users = await GetJsonAsync<UserStatsDto>($"{_options.UserBaseUrl}/users/admin/stats", ct)
             ?? new UserStatsDto();
+        var moderation = await GetJsonAsync<ModerationStatsDto>($"{_options.ModerationBaseUrl}/moderation/admin/stats", ct)
+            ?? new ModerationStatsDto();
 
         var aiRate = content.AiApprovalRatePercent > 0
             ? $"{content.AiApprovalRatePercent:0.#}%"
             : "—";
-        var topTeachers = (content.TopTeachers ?? [])
-            .Select(t => new TopTeacherDto(t.Name, t.Contents))
+
+        // Top teacher GUID id'lerini gerçek görünen adla eşle (User servisi); başarısızsa kısa-id fallback.
+        var topRaw = content.TopTeachers ?? [];
+        var ids = topRaw.Where(t => t.AuthorId != Guid.Empty).Select(t => t.AuthorId).ToArray();
+        var nameMap = new Dictionary<Guid, string>();
+        if (ids.Length > 0)
+        {
+            var idsParam = string.Join(',', ids);
+            var names = await GetJsonAsync<List<UserNameDto>>(
+                $"{_options.UserBaseUrl}/users/names?ids={Uri.EscapeDataString(idsParam)}", ct);
+            foreach (var n in names ?? []) nameMap[n.UserId] = n.DisplayName;
+        }
+        var topTeachers = topRaw
+            .Select(t => new TopTeacherDto(
+                nameMap.TryGetValue(t.AuthorId, out var dn) && !string.IsNullOrWhiteSpace(dn) ? dn : t.Name,
+                t.Contents))
             .ToArray();
 
         return new ReportsStats(
@@ -76,6 +95,8 @@ public sealed class DashboardAggregator
             TotalPlaysDelta: "—",
             AiApprovalRate: aiRate,
             AiApprovalRateDelta: content.AiAutoRejected > 0 ? $"{content.AiAutoRejected} otomatik red" : "—",
+            AiCostToday: $"${moderation.EstimatedCostUsd:0.00##}",
+            AiCostTodayDelta: moderation.AnalysesToday > 0 ? $"{moderation.AnalysesToday} analiz" : "—",
             TopTeachers: topTeachers);
     }
 
@@ -110,9 +131,12 @@ public sealed class DashboardAggregator
         int PublishedTotal = 0,
         int AiAutoRejected = 0,
         double AiApprovalRatePercent = 0,
-        IReadOnlyList<TopTeacherDto>? TopTeachers = null);
+        IReadOnlyList<ContentTopTeacherDto>? TopTeachers = null);
+    private sealed record ContentTopTeacherDto(Guid AuthorId = default, string Name = "", int Contents = 0);
     private sealed record AnalyticsStatsDto(int TotalPlays = 0, int ActiveUsersLast30Days = 0);
     private sealed record UserStatsDto(int TotalUsers = 0, int Teachers = 0, int ActiveEditors = 0);
+    private sealed record ModerationStatsDto(int AnalysesToday = 0, long PromptTokens = 0, long CompletionTokens = 0, decimal EstimatedCostUsd = 0m);
+    private sealed record UserNameDto(Guid UserId = default, string DisplayName = "");
 }
 
 public sealed record DashboardStats(
@@ -132,6 +156,8 @@ public sealed record ReportsStats(
     string TotalPlaysDelta,
     string AiApprovalRate,
     string AiApprovalRateDelta,
+    string AiCostToday,
+    string AiCostTodayDelta,
     IReadOnlyList<TopTeacherDto> TopTeachers);
 
 public sealed record TopTeacherDto(string Name, int Contents);

@@ -5,4 +5,7 @@ public interface IModerationReportStore
     Task SaveAsync(ModerationReport report, CancellationToken ct = default);
     Task<ModerationReport?> GetByIdAsync(Guid id, CancellationToken ct = default);
     Task<ModerationReport?> GetByContentVersionAsync(Guid contentId, Guid versionId, CancellationToken ct = default);
+    Task<ModerationStats> GetStatsSinceAsync(DateTime sinceUtc, CancellationToken ct = default);
 }
+
+public sealed record ModerationStats(int Count, long PromptTokens, long CompletionTokens, decimal EstimatedCostUsd);

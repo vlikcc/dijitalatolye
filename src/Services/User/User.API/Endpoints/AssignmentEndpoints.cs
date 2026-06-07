@@ -91,6 +91,7 @@ public static class AssignmentEndpoints
                     ContentSlug = assignment.ContentSlug,
                     DueAtUtc = assignment.DueAtUtc,
                 }, ct);
+                DijitalAtolye.BuildingBlocks.WebHostExtensions.DomainMetrics.AssignmentAssigned.Add(1);
             }
 
             return Results.Created($"/assignments/{assignment.Id}", ToDetail(assignment, assignment.Members));

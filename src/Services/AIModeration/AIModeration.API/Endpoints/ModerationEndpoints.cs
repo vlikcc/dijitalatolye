@@ -22,6 +22,19 @@ public static class ModerationEndpoints
             return report is null ? Results.NotFound() : Results.Json(report);
         }).RequireAuthorization(Policies.EditorOrAbove);
 
+        // Admin: bugünün LLM moderasyon maliyeti/token/analiz sayısı (DashboardAggregator tüketir).
+        grp.MapGet("/admin/stats", async (IModerationReportStore store, CancellationToken ct) =>
+        {
+            var s = await store.GetStatsSinceAsync(DateTime.UtcNow.Date, ct);
+            return Results.Ok(new
+            {
+                analysesToday = s.Count,
+                promptTokens = s.PromptTokens,
+                completionTokens = s.CompletionTokens,
+                estimatedCostUsd = s.EstimatedCostUsd,
+            });
+        }).RequireAuthorization(Policies.AdminOnly);
+
         return routes;
     }
 }

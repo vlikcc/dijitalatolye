@@ -464,6 +464,10 @@ services:
       <<: *common-env
       ConnectionStrings__Audit:    Host=postgres;Port=5432;Database=audit;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=audit;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      DownstreamServices__ContentBaseUrl:    http://content:8080
+      DownstreamServices__AnalyticsBaseUrl:  http://analytics:8080
+      DownstreamServices__UserBaseUrl:       http://user:8080
+      DownstreamServices__ModerationBaseUrl: http://aimoderation:8080
     expose: ["8080"]
     <<: *app-defaults
 

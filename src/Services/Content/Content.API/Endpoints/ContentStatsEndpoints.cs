@@ -38,6 +38,7 @@ public static class ContentStatsEndpoints
                 aiApprovalRatePercent,
                 topTeachers = topTeachers.Select(t => new
                 {
+                    authorId = t.authorId,
                     name = t.authorId.ToString()[..8],
                     contents = t.count,
                 }),

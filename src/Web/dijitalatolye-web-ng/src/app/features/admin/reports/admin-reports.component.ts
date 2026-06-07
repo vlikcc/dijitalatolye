@@ -12,6 +12,8 @@ interface ReportsData {
   totalPlaysDelta: string;
   aiApprovalRate: string;
   aiApprovalRateDelta: string;
+  aiCostToday: string;
+  aiCostTodayDelta: string;
   topTeachers: { name: string; contents: number }[];
 }
 
@@ -82,6 +84,16 @@ interface ReportsData {
           </div>
           <div class="mt-3 text-2xl font-extrabold text-ink">{{ data()?.aiApprovalRate ?? '—' }}</div>
           <div class="text-xs text-dim">AI onay oranı</div>
+        </div>
+        <div class="rounded-2xl bg-surface border border-line/10 p-5">
+          <div class="flex items-center justify-between">
+            <div class="w-10 h-10 rounded-lg inline-flex items-center justify-center bg-amber-50 text-amber-700">
+              <mat-icon style="font-size:20px;width:20px;height:20px">paid</mat-icon>
+            </div>
+            <span class="text-xs font-semibold text-dim inline-flex items-center gap-0.5">{{ data()?.aiCostTodayDelta ?? '—' }}</span>
+          </div>
+          <div class="mt-3 text-2xl font-extrabold text-ink">{{ data()?.aiCostToday ?? '—' }}</div>
+          <div class="text-xs text-dim">AI maliyeti (bugün)</div>
         </div>
       </div>
 

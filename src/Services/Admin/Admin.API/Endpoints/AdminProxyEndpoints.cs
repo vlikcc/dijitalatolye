@@ -42,6 +42,8 @@ public static class AdminProxyEndpoints
                 totalPlaysDelta = stats.TotalPlaysDelta,
                 aiApprovalRate = stats.AiApprovalRate,
                 aiApprovalRateDelta = stats.AiApprovalRateDelta,
+                aiCostToday = stats.AiCostToday,
+                aiCostTodayDelta = stats.AiCostTodayDelta,
                 topTeachers = stats.TopTeachers,
             });
         });
