@@ -29,6 +29,17 @@ export interface ContentDetail extends ContentSummary {
   currentVersionId?: string | null;
   coverImageBucket?: string | null;
   coverImageKey?: string | null;
+  aiSuggestionJson?: string | null;
+}
+
+export interface AiSuggestionInput {
+  subject?: string | null;
+  gradeLevel?: number | null;
+  durationMinutes?: number | null;
+  difficulty?: string | null;
+  outcomeCodes: string[];
+  tags: string[];
+  confidence: number;
 }
 
 export interface CreateContentRequest {
@@ -43,6 +54,7 @@ export interface CreateContentRequest {
   difficulty?: string | null;
   coverImageBucket?: string | null;
   coverImageKey?: string | null;
+  aiSuggestion?: AiSuggestionInput | null;
 }
 
 export interface AddVersionRequest {

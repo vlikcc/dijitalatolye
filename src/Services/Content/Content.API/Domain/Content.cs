@@ -43,6 +43,9 @@ public sealed class Content
     public string? PublishedBucket { get; set; }
     public string? PublishedKey { get; set; }
 
+    /// <summary>İçerik oluşturulurken yakalanan AI metadata önerisi (serileştirilmiş). Editör inceleme karşılaştırması için.</summary>
+    public string? AiSuggestionJson { get; set; }
+
     public ICollection<ContentVersion> Versions { get; init; } = [];
 
     public bool CanTransitionTo(ContentState target) =>

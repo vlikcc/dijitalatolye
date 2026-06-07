@@ -37,6 +37,7 @@ public sealed class ContentDbContext : DbContext
             b.Property(c => c.State).HasConversion<string>().HasMaxLength(40);
             b.Property(c => c.OutcomeCodes).HasColumnType("text[]");
             b.Property(c => c.Tags).HasColumnType("text[]");
+            b.Property(c => c.AiSuggestionJson).HasColumnType("text");
             b.HasIndex(c => c.AuthorUserId);
             b.HasIndex(c => c.State);
             b.HasMany(c => c.Versions).WithOne()

@@ -40,6 +40,9 @@ public static class ContentEndpoints
                 Difficulty = NormalizeDifficulty(body.Difficulty),
                 CoverImageBucket = body.CoverImageBucket,
                 CoverImageKey = body.CoverImageKey,
+                AiSuggestionJson = body.AiSuggestion is null
+                    ? null
+                    : System.Text.Json.JsonSerializer.Serialize(body.AiSuggestion),
             };
             db.Contents.Add(content);
             await db.SaveChangesAsync(ct);
@@ -154,6 +157,7 @@ public static class ContentEndpoints
                 {
                     c.Id,
                     c.Title,
+                    c.Slug,
                     State = c.State.ToString(),
                     Status = c.State.ToString(),
                     Subject = c.Subject,
@@ -239,6 +243,30 @@ public static class ContentEndpoints
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         }).RequireAuthorization(Policies.TeacherOrAbove);
+
+        // Editör katalog düzeltmesi: inceleme sırasında AI önerisini kazanım/etiket vb.'ye uygulayabilir.
+        // Sahip kontrolü yok (editör başka öğretmenin içeriğini inceler); yalnızca inceleme durumlarında.
+        contents.MapPut("/{id:guid}/editor-metadata", async (
+            Guid id,
+            [FromBody] EditorMetadataRequest body,
+            ContentDbContext db,
+            CancellationToken ct) =>
+        {
+            var content = await db.Contents.FirstOrDefaultAsync(c => c.Id == id, ct);
+            if (content is null) return Results.NotFound();
+            if (content.State is not (ContentState.AIReviewing or ContentState.AIReviewed or ContentState.EditorReviewing))
+                return Results.Conflict("Sadece AI/editör inceleme durumlarında düzenlenebilir.");
+
+            if (body.OutcomeCodes is not null) content.OutcomeCodes = body.OutcomeCodes.ToList();
+            if (body.Tags is not null) content.Tags = body.Tags.ToList();
+            if (body.Subject is not null) content.Subject = body.Subject;
+            content.GradeLevel = body.GradeLevel ?? content.GradeLevel;
+            content.Difficulty = NormalizeDifficulty(body.Difficulty) ?? content.Difficulty;
+            content.UpdatedAtUtc = DateTime.UtcNow;
+
+            await db.SaveChangesAsync(ct);
+            return Results.NoContent();
+        }).RequireAuthorization(Policies.EditorOrAbove);
 
         contents.MapGet("/{id:guid}", async (Guid id, ContentDbContext db, CancellationToken ct) =>
         {
@@ -456,7 +484,18 @@ public sealed record CreateContentRequest(
     int? DurationMinutes = null,
     string? Difficulty = null,
     string? CoverImageBucket = null,
-    string? CoverImageKey = null);
+    string? CoverImageKey = null,
+    AiSuggestionInput? AiSuggestion = null);
+
+/// <summary>İçerik oluşturulurken yakalanan AI metadata önerisi (editör karşılaştırması için saklanır).</summary>
+public sealed record AiSuggestionInput(
+    string? Subject,
+    int? GradeLevel,
+    int? DurationMinutes,
+    string? Difficulty,
+    string[] OutcomeCodes,
+    string[] Tags,
+    double Confidence);
 
 public sealed record UpdateMetadataRequest(
     string? Title,
@@ -470,6 +509,13 @@ public sealed record UpdateMetadataRequest(
     string? Difficulty,
     string? CoverImageBucket,
     string? CoverImageKey);
+
+public sealed record EditorMetadataRequest(
+    string[]? OutcomeCodes,
+    string[]? Tags,
+    string? Subject,
+    int? GradeLevel,
+    string? Difficulty);
 
 public sealed record AddVersionRequest(
     string Bucket,

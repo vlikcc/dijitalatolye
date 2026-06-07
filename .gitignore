@@ -97,3 +97,11 @@ __pycache__/
 *.bak
 *.swp
 *~
+
+.dfmt/
+
+# Local agent config
+.claude/
+
+# Angular build cache
+.angular/

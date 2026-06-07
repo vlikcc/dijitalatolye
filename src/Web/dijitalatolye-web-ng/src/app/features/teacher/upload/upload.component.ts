@@ -418,6 +418,7 @@ export class UploadComponent {
     this.submitting.set(true);
     this.submitError.set(null);
 
+    const m = ext.metadata;
     const createReq: CreateContentRequest = {
       title: v.title!,
       description: v.description || null,
@@ -427,6 +428,16 @@ export class UploadComponent {
       tags: this.tags(),
       durationMinutes: v.durationMinutes ?? null,
       difficulty: v.difficulty ?? null,
+      // AI önerisini editör karşılaştırması için kalıcılaştır (öğretmenin final seçiminden bağımsız).
+      aiSuggestion: {
+        subject: m.subject,
+        gradeLevel: m.gradeLevel,
+        durationMinutes: m.durationMinutes,
+        difficulty: m.difficulty,
+        outcomeCodes: m.outcomeCodes ?? [],
+        tags: m.tags ?? [],
+        confidence: m.confidence,
+      },
     };
 
     this.api.post<{ id: string }>('/contents', createReq).subscribe({

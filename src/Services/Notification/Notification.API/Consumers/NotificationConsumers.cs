@@ -1,3 +1,4 @@
+using DijitalAtolye.BuildingBlocks.EventBus.Contracts.Assignment;
 using DijitalAtolye.BuildingBlocks.EventBus.Contracts.Content;
 using DijitalAtolye.BuildingBlocks.EventBus.Contracts.Identity;
 using DijitalAtolye.BuildingBlocks.EventBus.Contracts.Review;
@@ -179,5 +180,28 @@ public sealed class ContentPublishedConsumer : BaseNotificationConsumer, IConsum
         var msg = context.Message;
         await EmitAsync(msg.AuthorUserId, "ContentPublished", "İçeriğiniz yayında!",
             $"\"{msg.Title}\" içeriğiniz yayınlandı: {msg.PlayUrl}", msg.PlayUrl, context.CancellationToken);
+    }
+}
+
+public sealed class AssignmentCompletedConsumer : BaseNotificationConsumer, IConsumer<AssignmentCompletedV1>
+{
+    public AssignmentCompletedConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<AssignmentCompletedConsumer> logger)
+        : base(db, email, templates, hub, logger) { }
+
+    public async Task Consume(ConsumeContext<AssignmentCompletedV1> context)
+    {
+        var msg = context.Message;
+        var ct = context.CancellationToken;
+        var scoreText = msg.Score is { } s ? $" (skor: {s})" : string.Empty;
+
+        await EmitAsync(msg.TeacherUserId, "AssignmentCompleted", "Ödev tamamlandı",
+            $"{msg.StudentEmail}, \"{msg.AssignmentTitle}\" ödevini tamamladı{scoreText}.",
+            $"/teacher/assignments/{msg.AssignmentId}", ct);
+
+        if (!string.IsNullOrWhiteSpace(msg.TeacherEmail))
+        {
+            var html = $"<p>{msg.StudentEmail}, <strong>{msg.AssignmentTitle}</strong> ödevini tamamladı{scoreText}.</p>";
+            await SendEmailSafeAsync(msg.TeacherEmail, "Ödev tamamlandı", "assignment-completed", html, ct);
+        }
     }
 }

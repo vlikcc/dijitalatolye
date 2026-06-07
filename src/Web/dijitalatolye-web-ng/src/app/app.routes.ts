@@ -76,6 +76,17 @@ export const APP_ROUTES: Routes = [
         loadComponent: () => import('./features/teacher/profile/profile.component').then((m) => m.ProfileComponent),
       },
       {
+        path: 'teacher/assignments',
+        pathMatch: 'full',
+        canActivate: [roleGuard(['Teacher', 'Editor', 'Admin', 'SuperAdmin'])],
+        loadComponent: () => import('./features/teacher/assignments/assignments.component').then((m) => m.TeacherAssignmentsComponent),
+      },
+      {
+        path: 'teacher/assignments/:id',
+        canActivate: [roleGuard(['Teacher', 'Editor', 'Admin', 'SuperAdmin'])],
+        loadComponent: () => import('./features/teacher/assignments/assignment-detail.component').then((m) => m.TeacherAssignmentDetailComponent),
+      },
+      {
         path: 'editor',
         canActivate: [roleGuard(['Editor', 'Admin', 'SuperAdmin'])],
         loadComponent: () => import('./features/editor/dashboard/editor-dashboard.component').then((m) => m.EditorDashboardComponent),
@@ -98,6 +109,14 @@ export const APP_ROUTES: Routes = [
       {
         path: 'notifications',
         loadComponent: () => import('./features/notifications/notifications.component').then((m) => m.NotificationsComponent),
+      },
+      {
+        path: 'progress',
+        loadComponent: () => import('./features/student/progress/progress.component').then((m) => m.ProgressComponent),
+      },
+      {
+        path: 'assignments',
+        loadComponent: () => import('./features/student/assignments/assignments.component').then((m) => m.StudentAssignmentsComponent),
       },
       {
         path: 'admin',

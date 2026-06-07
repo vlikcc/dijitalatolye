@@ -97,7 +97,21 @@ app.MapContentStatsEndpoints();
 if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
     using var scope = app.Services.CreateScope();
-    await scope.ServiceProvider.GetRequiredService<ContentDbContext>().EnsureSchemaAsync();
+    var db = scope.ServiceProvider.GetRequiredService<ContentDbContext>();
+
+    // EnsureSchemaAsync "ya hep ya hiç" davranır: yeni kolon eklenince mevcut DB'de var olan tablolar
+    // yüzünden 42P07 ile patlar. Bu durumu yakalayıp idempotent ALTER'a bırakıyoruz.
+    try
+    {
+        await db.EnsureSchemaAsync();
+    }
+    catch (Npgsql.PostgresException ex) when (ex.SqlState == "42P07")
+    {
+        // beklenen: mevcut DB'de tablolar zaten var; eksik kolonu DDL ekleyecek.
+    }
+
+    await db.Database.ExecuteSqlRawAsync(
+        """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "AiSuggestionJson" text;""");
 }
 
 app.Run();

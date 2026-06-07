@@ -32,6 +32,8 @@ type Theme = 'light' | 'dark';
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">İçeriklerim</a>
               <a routerLink="/teacher/contents/new" routerLinkActive="!bg-accent/10 !text-accent"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Yükle</a>
+              <a routerLink="/teacher/assignments" routerLinkActive="!bg-accent/10 !text-accent"
+                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Ödevler</a>
             }
             @if (isEditor()) {
               <a routerLink="/editor" routerLinkActive="!bg-accent/10 !text-accent" [routerLinkActiveOptions]="{ exact: true }"
@@ -42,6 +44,12 @@ type Theme = 'light' | 'dark';
             @if (isAdmin()) {
               <a routerLink="/admin" routerLinkActive="!bg-accent/10 !text-accent" [routerLinkActiveOptions]="{ exact: true }"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Yönetim</a>
+            }
+            @if (isStudent()) {
+              <a routerLink="/assignments" routerLinkActive="!bg-accent/10 !text-accent"
+                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Ödevlerim</a>
+              <a routerLink="/progress" routerLinkActive="!bg-accent/10 !text-accent"
+                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">İlerlemem</a>
             }
           </nav>
 
@@ -73,6 +81,9 @@ type Theme = 'light' | 'dark';
               @if (isTeacher()) {
                 <a mat-menu-item routerLink="/teacher/profile">Profilim</a>
               }
+              @if (isStudent()) {
+                <a mat-menu-item routerLink="/progress">İlerlemem</a>
+              }
               @if (isAdmin()) {
                 <a mat-menu-item routerLink="/admin/reports">Raporlar</a>
               }
@@ -96,6 +107,7 @@ export class AppLayoutComponent {
   readonly isAdmin = this.auth.isAdmin;
   readonly isEditor = this.auth.isEditor;
   readonly isTeacher = this.auth.isTeacher;
+  readonly isStudent = this.auth.isStudent;
   readonly initial = computed(() => (this.auth.email() ?? '?').charAt(0).toUpperCase());
   readonly rolesLabel = computed(() => this.auth.roles().join(', ') || '—');
 

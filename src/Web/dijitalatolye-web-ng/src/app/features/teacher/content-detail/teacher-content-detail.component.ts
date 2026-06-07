@@ -8,6 +8,18 @@ import type { ContentDetail } from '@core/api/contracts';
 
 type ContentStatus = ContentDetail['state'];
 
+interface ContentStats {
+  totals: { views: number; plays: number; completes: number; likes: number; favorites: number; shares: number; totalDurationSeconds: number };
+  avgScore: number | null;
+}
+
+interface OutcomeStat {
+  outcomeCode: string;
+  completes: number;
+  progresses: number;
+  avgScore: number | null;
+}
+
 @Component({
   selector: 'da-teacher-content-detail',
   standalone: true,
@@ -61,6 +73,52 @@ type ContentStatus = ContentDetail['state'];
           <div class="flex justify-between gap-4 py-1"><span class="text-dim">Son güncelleme</span><span class="font-medium">{{ formatDate(content()!.updatedAtUtc) }}</span></div>
         </section>
 
+        <section class="mt-6 rounded-2xl bg-surface border border-line/10 p-6">
+          <h2 class="font-semibold text-ink inline-flex items-center gap-2 mb-4">
+            <mat-icon class="!text-brand-600" style="font-size:20px;width:20px;height:20px">insights</mat-icon>
+            İstatistikler
+          </h2>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="rounded-xl bg-panel/60 border border-line/10 p-4">
+              <p class="text-xs text-dim">Görüntülenme</p>
+              <p class="text-2xl font-extrabold text-ink mt-1">{{ stats()?.totals?.views ?? 0 }}</p>
+            </div>
+            <div class="rounded-xl bg-panel/60 border border-line/10 p-4">
+              <p class="text-xs text-dim">Oynanma</p>
+              <p class="text-2xl font-extrabold text-ink mt-1">{{ stats()?.totals?.plays ?? 0 }}</p>
+            </div>
+            <div class="rounded-xl bg-panel/60 border border-line/10 p-4">
+              <p class="text-xs text-dim">Tamamlanma</p>
+              <p class="text-2xl font-extrabold text-ink mt-1">{{ stats()?.totals?.completes ?? 0 }}</p>
+            </div>
+            <div class="rounded-xl bg-panel/60 border border-line/10 p-4">
+              <p class="text-xs text-dim">Ortalama skor</p>
+              <p class="text-2xl font-extrabold text-ink mt-1">{{ stats()?.avgScore != null ? stats()!.avgScore : '—' }}</p>
+            </div>
+          </div>
+
+          @if (outcomes().length) {
+            <div class="mt-5">
+              <p class="text-xs font-semibold uppercase tracking-wide text-dim mb-2">Kazanım kırılımı</p>
+              <div class="rounded-xl border border-line/10 divide-y divide-line/10 overflow-hidden">
+                @for (o of outcomes(); track o.outcomeCode) {
+                  <div class="px-4 py-3 flex items-center justify-between gap-4 text-sm">
+                    <span class="font-mono text-ink">{{ o.outcomeCode }}</span>
+                    <div class="flex items-center gap-4 text-dim">
+                      <span>{{ o.completes }} tamamlama</span>
+                      @if (o.progresses) { <span>{{ o.progresses }} ilerleme</span> }
+                      <span class="font-medium text-ink">{{ o.avgScore != null ? o.avgScore + ' puan' : '—' }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <p class="mt-4 text-sm text-dim">Henüz etkileşim verisi yok.</p>
+          }
+        </section>
+
         @if (actionError()) {
           <div class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{{ actionError() }}</div>
         }
@@ -92,6 +150,8 @@ export class TeacherContentDetailComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly actionError = signal<string | null>(null);
+  readonly stats = signal<ContentStats | null>(null);
+  readonly outcomes = signal<OutcomeStat[]>([]);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -100,6 +160,8 @@ export class TeacherContentDetailComponent implements OnInit {
       next: (data) => { this.content.set(data); this.loading.set(false); },
       error: () => { this.error.set(true); this.loading.set(false); },
     });
+    this.api.get<ContentStats>(`/analytics/contents/${id}/summary`).subscribe({ next: (d) => this.stats.set(d) });
+    this.api.get<{ outcomes: OutcomeStat[] }>(`/analytics/contents/${id}/outcomes`).subscribe({ next: (d) => this.outcomes.set(d?.outcomes ?? []) });
   }
 
   revise(): void {

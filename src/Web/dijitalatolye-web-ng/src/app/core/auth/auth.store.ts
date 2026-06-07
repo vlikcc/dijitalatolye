@@ -44,6 +44,7 @@ export class AuthStore {
   readonly isTeacher = computed(() => this.hasAnyRole(['Teacher', 'Editor', 'Admin', 'SuperAdmin']));
   readonly isEditor = computed(() => this.hasAnyRole(['Editor', 'Admin', 'SuperAdmin']));
   readonly isAdmin = computed(() => this.hasAnyRole(['Admin', 'SuperAdmin']));
+  readonly isStudent = computed(() => this.hasAnyRole(['Student']));
 
   constructor() {
     effect(() => {

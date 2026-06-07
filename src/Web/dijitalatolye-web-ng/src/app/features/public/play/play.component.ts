@@ -1,9 +1,18 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ApiService } from '@core/api/api.service';
+
+/** İçerik (iframe) → host arasındaki postMessage sözleşmesi. da-sdk.js bu mesajları üretir. */
+interface ContentTrackMessage {
+  app: 'dijitalatolye';
+  type: 'progress' | 'complete' | 'score';
+  outcomeCode?: string;
+  score?: number;
+  durationSeconds?: number;
+}
 
 @Component({
   selector: 'da-play',
@@ -40,7 +49,10 @@ import { ApiService } from '@core/api/api.service';
             </span>
             <span class="ml-2 font-mono text-[11px] tracking-wider text-dim truncate">{{ slug }} · izole oynatma</span>
           </div>
+          <!-- İçerik ayrı origin'de (MinIO) servis edilir; allow-same-origin localStorage kullanan
+               oyunlar için gerekli ve uygulama origin'iyle aynı olmadığı için sandbox kaçışı riski yok. -->
           <iframe
+            #frame
             [src]="playUrl"
             sandbox="allow-scripts allow-same-origin"
             class="w-full h-[70vh] min-h-[520px] bg-white"
@@ -56,15 +68,20 @@ export class PlayComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly sanitizer = inject(DomSanitizer);
 
+  @ViewChild('frame') private frame?: ElementRef<HTMLIFrameElement>;
+
   slug = '';
   playUrl: SafeResourceUrl = '';
   private startTime = Date.now();
   private contentId: string | null = null;
+  private completedFromContent = false;
+  private readonly messageHandler = (e: MessageEvent) => this.onContentMessage(e);
 
   ngOnInit(): void {
     this.slug = this.route.snapshot.paramMap.get('slug') ?? '';
     if (!this.slug) return;
     this.playUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`/api/contents/by-slug/${this.slug}/play`);
+    window.addEventListener('message', this.messageHandler);
     this.api.get<{ id: string }>(`/search/contents/${this.slug}`).subscribe({
       next: (data) => {
         this.contentId = data?.id ?? null;
@@ -76,8 +93,36 @@ export class PlayComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (!this.contentId) return;
+    window.removeEventListener('message', this.messageHandler);
+    // İçerik açıkça "complete" gönderdiyse çift sayım yapma; aksi halde eski davranış (süreyle Complete) korunur.
+    if (!this.contentId || this.completedFromContent) return;
     const durationSeconds = Math.round((Date.now() - this.startTime) / 1000);
     this.api.post('/analytics/events', { contentId: this.contentId, type: 'Complete', durationSeconds, source: 'web' }).subscribe();
+  }
+
+  /** İçerikten gelen track mesajlarını doğrulayıp Analytics'e iletir. */
+  private onContentMessage(e: MessageEvent): void {
+    // Yalnızca bizim iframe'imizden gelen, doğru marker'a sahip mesajları kabul et (origin-agnostik, güvenli).
+    if (!this.contentId) return;
+    if (e.source !== this.frame?.nativeElement.contentWindow) return;
+    const msg = e.data as ContentTrackMessage | null;
+    if (!msg || msg.app !== 'dijitalatolye') return;
+
+    let type: 'Progress' | 'Complete';
+    switch (msg.type) {
+      case 'complete': type = 'Complete'; this.completedFromContent = true; break;
+      case 'progress':
+      case 'score': type = 'Progress'; break;
+      default: return;
+    }
+
+    this.api.post('/analytics/events', {
+      contentId: this.contentId,
+      type,
+      durationSeconds: typeof msg.durationSeconds === 'number' ? Math.round(msg.durationSeconds) : undefined,
+      score: typeof msg.score === 'number' ? msg.score : undefined,
+      outcomeCode: typeof msg.outcomeCode === 'string' ? msg.outcomeCode : undefined,
+      source: 'content',
+    }).subscribe();
   }
 }
