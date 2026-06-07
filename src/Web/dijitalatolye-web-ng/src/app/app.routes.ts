@@ -82,6 +82,17 @@ export const APP_ROUTES: Routes = [
         loadComponent: () => import('./features/teacher/assignments/assignments.component').then((m) => m.TeacherAssignmentsComponent),
       },
       {
+        path: 'teacher/classes',
+        pathMatch: 'full',
+        canActivate: [roleGuard(['Teacher', 'Editor', 'Admin', 'SuperAdmin'])],
+        loadComponent: () => import('./features/teacher/classes/classes.component').then((m) => m.TeacherClassesComponent),
+      },
+      {
+        path: 'teacher/classes/:id',
+        canActivate: [roleGuard(['Teacher', 'Editor', 'Admin', 'SuperAdmin'])],
+        loadComponent: () => import('./features/teacher/classes/class-detail.component').then((m) => m.TeacherClassDetailComponent),
+      },
+      {
         path: 'teacher/assignments/:id',
         canActivate: [roleGuard(['Teacher', 'Editor', 'Admin', 'SuperAdmin'])],
         loadComponent: () => import('./features/teacher/assignments/assignment-detail.component').then((m) => m.TeacherAssignmentDetailComponent),

@@ -26,6 +26,25 @@ public static class UserEndpoints
             return profile is null ? Results.NotFound() : Results.Json(profile);
         });
 
+        // Öğretmenin sınıfına eklemek üzere kayıtlı öğrencileri arar (email/ad).
+        users.MapGet("/students", async (
+            [FromQuery] string? q,
+            UserDbContext db,
+            CancellationToken ct) =>
+        {
+            var term = (q ?? string.Empty).Trim();
+            if (term.Length < 2) return Results.Ok(Array.Empty<object>());
+            var like = $"%{term}%";
+            var students = await db.Profiles.AsNoTracking()
+                .Where(p => p.PrimaryRole == "Student"
+                    && (EF.Functions.ILike(p.Email, like) || EF.Functions.ILike(p.DisplayName, like)))
+                .OrderBy(p => p.DisplayName)
+                .Take(20)
+                .Select(p => new { userId = p.UserId, email = p.Email, displayName = p.DisplayName })
+                .ToListAsync(ct);
+            return Results.Ok(students);
+        }).RequireAuthorization(Policies.TeacherOrAbove);
+
         users.MapPut("/me", async (
             [FromBody] UpdateProfileRequest body,
             ICurrentUser current,

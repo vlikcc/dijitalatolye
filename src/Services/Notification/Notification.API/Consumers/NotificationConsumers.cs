@@ -205,3 +205,25 @@ public sealed class AssignmentCompletedConsumer : BaseNotificationConsumer, ICon
         }
     }
 }
+
+public sealed class AssignmentAssignedConsumer : BaseNotificationConsumer, IConsumer<AssignmentAssignedV1>
+{
+    public AssignmentAssignedConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<AssignmentAssignedConsumer> logger)
+        : base(db, email, templates, hub, logger) { }
+
+    public async Task Consume(ConsumeContext<AssignmentAssignedV1> context)
+    {
+        var msg = context.Message;
+        var ct = context.CancellationToken;
+        var dueText = msg.DueAtUtc is { } d ? $" Son tarih: {d:dd.MM.yyyy}." : string.Empty;
+
+        await EmitAsync(msg.StudentUserId, "AssignmentAssigned", "Yeni ödev",
+            $"\"{msg.AssignmentTitle}\" ödevi sana atandı.{dueText}", "/assignments", ct);
+
+        if (!string.IsNullOrWhiteSpace(msg.StudentEmail))
+        {
+            var html = $"<p><strong>{msg.AssignmentTitle}</strong> ödevi sana atandı.{dueText}</p>";
+            await SendEmailSafeAsync(msg.StudentEmail, "Yeni ödev atandı", "assignment-assigned", html, ct);
+        }
+    }
+}

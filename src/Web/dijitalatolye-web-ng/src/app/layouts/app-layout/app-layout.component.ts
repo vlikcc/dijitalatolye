@@ -34,6 +34,8 @@ type Theme = 'light' | 'dark';
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Yükle</a>
               <a routerLink="/teacher/assignments" routerLinkActive="!bg-accent/10 !text-accent"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Ödevler</a>
+              <a routerLink="/teacher/classes" routerLinkActive="!bg-accent/10 !text-accent"
+                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Sınıflarım</a>
             }
             @if (isEditor()) {
               <a routerLink="/editor" routerLinkActive="!bg-accent/10 !text-accent" [routerLinkActiveOptions]="{ exact: true }"

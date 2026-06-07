@@ -41,6 +41,7 @@ app.MapCollectionEndpoints();
 app.MapNotificationPreferenceEndpoints();
 app.MapUserStatsEndpoints();
 app.MapAssignmentEndpoints();
+app.MapClassEndpoints();
 
 if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
@@ -94,6 +95,28 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Databas
             ON "user"."AssignmentMembers" ("AssignmentId", "StudentUserId");
         CREATE INDEX IF NOT EXISTS "IX_AssignmentMembers_StudentUserId"
             ON "user"."AssignmentMembers" ("StudentUserId");
+        ALTER TABLE "user"."Assignments" ADD COLUMN IF NOT EXISTS "ClassId" uuid;
+        CREATE TABLE IF NOT EXISTS "user"."Classes" (
+            "Id" uuid NOT NULL,
+            "TeacherUserId" uuid NOT NULL,
+            "Name" character varying(160) NOT NULL,
+            "CreatedAtUtc" timestamp with time zone NOT NULL DEFAULT now(),
+            "UpdatedAtUtc" timestamp with time zone NOT NULL DEFAULT now(),
+            CONSTRAINT "PK_Classes" PRIMARY KEY ("Id")
+        );
+        CREATE INDEX IF NOT EXISTS "IX_Classes_TeacherUserId" ON "user"."Classes" ("TeacherUserId");
+        CREATE TABLE IF NOT EXISTS "user"."ClassMembers" (
+            "Id" uuid NOT NULL,
+            "ClassId" uuid NOT NULL,
+            "StudentUserId" uuid NOT NULL,
+            "StudentEmail" character varying(256) NOT NULL DEFAULT '',
+            "AddedAtUtc" timestamp with time zone NOT NULL DEFAULT now(),
+            CONSTRAINT "PK_ClassMembers" PRIMARY KEY ("Id"),
+            CONSTRAINT "FK_ClassMembers_Classes" FOREIGN KEY ("ClassId")
+                REFERENCES "user"."Classes" ("Id") ON DELETE CASCADE
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS "IX_ClassMembers_Class_Student"
+            ON "user"."ClassMembers" ("ClassId", "StudentUserId");
         """);
 }
 

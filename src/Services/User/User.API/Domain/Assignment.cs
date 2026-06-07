@@ -13,6 +13,7 @@ public sealed class Assignment
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public required Guid TeacherUserId { get; set; }
+    public Guid? ClassId { get; set; }
     public required Guid ContentId { get; set; }
     public string ContentTitle { get; set; } = string.Empty;
     public string? ContentSlug { get; set; }

@@ -1,7 +1,9 @@
 using System.Security.Cryptography;
 using DijitalAtolye.BuildingBlocks.Authentication;
+using DijitalAtolye.BuildingBlocks.EventBus.Contracts.Assignment;
 using DijitalAtolye.User.API.Domain;
 using DijitalAtolye.User.API.Persistence;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +23,7 @@ public static class AssignmentEndpoints
             [FromBody] CreateAssignmentRequest body,
             ICurrentUser current,
             UserDbContext db,
+            IPublishEndpoint publish,
             CancellationToken ct) =>
         {
             if (current.UserId is null) return Results.Unauthorized();
@@ -29,6 +32,7 @@ public static class AssignmentEndpoints
             var assignment = new Assignment
             {
                 TeacherUserId = current.UserId.Value,
+                ClassId = body.ClassId,
                 ContentId = body.ContentId,
                 ContentTitle = body.ContentTitle?.Trim() ?? string.Empty,
                 ContentSlug = body.ContentSlug?.Trim(),
@@ -37,9 +41,59 @@ public static class AssignmentEndpoints
                 DueAtUtc = body.DueAtUtc,
                 JoinCode = await GenerateUniqueJoinCodeAsync(db, ct),
             };
+
+            // Hedef öğrencileri çöz: sınıf üyeleri (opsiyonel alt küme) ve/veya explicit öğrenci id'leri.
+            var targets = new Dictionary<Guid, string>(); // userId -> email
+            var subset = body.StudentUserIds is { Count: > 0 } ? new HashSet<Guid>(body.StudentUserIds) : null;
+
+            if (body.ClassId is { } classId)
+            {
+                var cls = await db.Classes.Include(c => c.Members)
+                    .FirstOrDefaultAsync(c => c.Id == classId && c.TeacherUserId == current.UserId, ct);
+                if (cls is null) return Results.BadRequest("Sınıf bulunamadı.");
+                foreach (var m in cls.Members)
+                {
+                    if (subset is null || subset.Contains(m.StudentUserId))
+                        targets[m.StudentUserId] = m.StudentEmail;
+                }
+            }
+            else if (subset is not null)
+            {
+                var profiles = await db.Profiles.AsNoTracking()
+                    .Where(p => subset.Contains(p.UserId))
+                    .Select(p => new { p.UserId, p.Email })
+                    .ToListAsync(ct);
+                foreach (var p in profiles) targets[p.UserId] = p.Email;
+            }
+
+            foreach (var (uid, email) in targets)
+            {
+                assignment.Members.Add(new AssignmentMember
+                {
+                    AssignmentId = assignment.Id,
+                    StudentUserId = uid,
+                    StudentEmail = email,
+                });
+            }
+
             db.Assignments.Add(assignment);
             await db.SaveChangesAsync(ct);
-            return Results.Created($"/assignments/{assignment.Id}", ToDetail(assignment, members: []));
+
+            // Atanan her öğrenciye bildirim.
+            foreach (var (uid, email) in targets)
+            {
+                await publish.Publish(new AssignmentAssignedV1
+                {
+                    AssignmentId = assignment.Id,
+                    StudentUserId = uid,
+                    StudentEmail = email,
+                    AssignmentTitle = assignment.Title,
+                    ContentSlug = assignment.ContentSlug,
+                    DueAtUtc = assignment.DueAtUtc,
+                }, ct);
+            }
+
+            return Results.Created($"/assignments/{assignment.Id}", ToDetail(assignment, assignment.Members));
         });
 
         group.MapGet("/mine", async (ICurrentUser current, UserDbContext db, CancellationToken ct) =>
@@ -190,6 +244,8 @@ public static class AssignmentEndpoints
     }
 }
 
-public sealed record CreateAssignmentRequest(Guid ContentId, string? ContentTitle, string? ContentSlug, string? Title, string? Instructions, DateTime? DueAtUtc);
+public sealed record CreateAssignmentRequest(
+    Guid ContentId, string? ContentTitle, string? ContentSlug, string? Title, string? Instructions, DateTime? DueAtUtc,
+    Guid? ClassId = null, List<Guid>? StudentUserIds = null);
 public sealed record UpdateAssignmentRequest(string? Title, string? Instructions, DateTime? DueAtUtc, string? Status);
 public sealed record JoinAssignmentRequest(string JoinCode);

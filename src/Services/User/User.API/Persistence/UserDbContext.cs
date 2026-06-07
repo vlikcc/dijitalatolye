@@ -14,6 +14,8 @@ public sealed class UserDbContext : DbContext
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
     public DbSet<Assignment> Assignments => Set<Assignment>();
     public DbSet<AssignmentMember> AssignmentMembers => Set<AssignmentMember>();
+    public DbSet<SchoolClass> Classes => Set<SchoolClass>();
+    public DbSet<ClassMember> ClassMembers => Set<ClassMember>();
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
@@ -83,6 +85,23 @@ public sealed class UserDbContext : DbContext
             b.Property(m => m.StudentEmail).HasMaxLength(256);
             b.HasIndex(m => new { m.AssignmentId, m.StudentUserId }).IsUnique();
             b.HasIndex(m => m.StudentUserId);
+        });
+
+        modelBuilder.Entity<SchoolClass>(b =>
+        {
+            b.ToTable("Classes");
+            b.HasKey(c => c.Id);
+            b.Property(c => c.Name).HasMaxLength(160).IsRequired();
+            b.HasIndex(c => c.TeacherUserId);
+            b.HasMany(c => c.Members).WithOne().HasForeignKey(m => m.ClassId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ClassMember>(b =>
+        {
+            b.ToTable("ClassMembers");
+            b.HasKey(m => m.Id);
+            b.Property(m => m.StudentEmail).HasMaxLength(256);
+            b.HasIndex(m => new { m.ClassId, m.StudentUserId }).IsUnique();
         });
 
         modelBuilder.ApplyConfiguration(new OutboxMessageEntityConfiguration());

@@ -1,9 +1,13 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '@core/api/api.service';
+
+interface ClassRow { id: string; name: string; memberCount: number; }
+interface ClassMemberLite { studentUserId: string; studentEmail: string; }
+interface ClassDetail { id: string; name: string; members: ClassMemberLite[]; }
 
 interface AssignmentRow {
   id: string;
@@ -67,6 +71,40 @@ interface MyContent {
                 placeholder="Öğrencilere not…"
                 class="mt-1 w-full rounded-lg border border-line/20 bg-bg px-3 py-2 text-sm text-ink" />
             </label>
+
+            <label class="block md:col-span-2">
+              <span class="text-xs font-medium text-dim">Hedef sınıf</span>
+              <select [(ngModel)]="selectedClassId" name="cls" (ngModelChange)="onClassChange($event)"
+                class="mt-1 w-full rounded-lg border border-line/20 bg-bg px-3 py-2 text-sm text-ink">
+                <option value="">Sınıf seçin…</option>
+                @for (c of classes(); track c.id) {
+                  <option [value]="c.id">{{ c.name }} ({{ c.memberCount }} öğrenci)</option>
+                }
+              </select>
+            </label>
+
+            @if (selectedClassId && classMembers().length) {
+              <div class="md:col-span-2">
+                <div class="flex items-center gap-4 mb-2 text-sm">
+                  <label class="inline-flex items-center gap-1.5">
+                    <input type="radio" name="tmode" [checked]="targetMode() === 'all'" (change)="targetMode.set('all')" /> Tüm sınıf
+                  </label>
+                  <label class="inline-flex items-center gap-1.5">
+                    <input type="radio" name="tmode" [checked]="targetMode() === 'some'" (change)="targetMode.set('some')" /> Seçili öğrenciler
+                  </label>
+                </div>
+                @if (targetMode() === 'some') {
+                  <div class="border border-line/10 rounded-xl divide-y divide-line/10 max-h-48 overflow-y-auto">
+                    @for (m of classMembers(); track m.studentUserId) {
+                      <label class="px-3 py-2 flex items-center gap-2 text-sm cursor-pointer hover:bg-panel">
+                        <input type="checkbox" [checked]="isStudentSelected(m.studentUserId)" (change)="toggleStudent(m.studentUserId)" />
+                        <span class="text-ink">{{ m.studentEmail }}</span>
+                      </label>
+                    }
+                  </div>
+                }
+              </div>
+            }
           </div>
           <div class="mt-4 flex items-center gap-3">
             <button type="button" (click)="create()" [disabled]="!selectedContentId || creating()"
@@ -112,14 +150,20 @@ interface MyContent {
 })
 export class TeacherAssignmentsComponent implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly assignments = signal<AssignmentRow[]>([]);
   readonly publishedContents = signal<MyContent[]>([]);
+  readonly classes = signal<ClassRow[]>([]);
+  readonly classMembers = signal<ClassMemberLite[]>([]);
+  readonly targetMode = signal<'all' | 'some'>('all');
   readonly loading = signal(true);
   readonly creating = signal(false);
   readonly createError = signal<string | null>(null);
 
   selectedContentId = '';
+  selectedClassId = '';
+  private selectedStudentIds = new Set<string>();
   dueDate = '';
   instructions = '';
 
@@ -128,6 +172,33 @@ export class TeacherAssignmentsComponent implements OnInit {
     this.api.get<MyContent[]>('/contents/mine').subscribe({
       next: (items) => this.publishedContents.set((items ?? []).filter((c) => c.state === 'Published' || c.state === 'Approved')),
     });
+    this.api.get<ClassRow[]>('/classes/mine').subscribe({
+      next: (list) => {
+        this.classes.set(list ?? []);
+        const preset = this.route.snapshot.queryParamMap.get('classId');
+        if (preset && (list ?? []).some((c) => c.id === preset)) {
+          this.selectedClassId = preset;
+          this.onClassChange(preset);
+        }
+      },
+    });
+  }
+
+  onClassChange(classId: string): void {
+    this.selectedStudentIds.clear();
+    this.targetMode.set('all');
+    this.classMembers.set([]);
+    if (!classId) return;
+    this.api.get<ClassDetail>(`/classes/${classId}`).subscribe({
+      next: (d) => this.classMembers.set(d?.members ?? []),
+    });
+  }
+
+  isStudentSelected(id: string): boolean { return this.selectedStudentIds.has(id); }
+
+  toggleStudent(id: string): void {
+    if (this.selectedStudentIds.has(id)) this.selectedStudentIds.delete(id);
+    else this.selectedStudentIds.add(id);
   }
 
   private load(): void {
@@ -142,6 +213,9 @@ export class TeacherAssignmentsComponent implements OnInit {
     if (!content) return;
     this.creating.set(true);
     this.createError.set(null);
+    const studentUserIds = this.selectedClassId && this.targetMode() === 'some'
+      ? [...this.selectedStudentIds]
+      : null;
     this.api.post('/assignments', {
       contentId: content.id,
       contentTitle: content.title,
@@ -149,10 +223,13 @@ export class TeacherAssignmentsComponent implements OnInit {
       title: content.title,
       instructions: this.instructions || null,
       dueAtUtc: this.dueDate ? new Date(this.dueDate).toISOString() : null,
+      classId: this.selectedClassId || null,
+      studentUserIds,
     }).subscribe({
       next: () => {
         this.creating.set(false);
         this.selectedContentId = ''; this.dueDate = ''; this.instructions = '';
+        this.selectedClassId = ''; this.classMembers.set([]); this.selectedStudentIds.clear(); this.targetMode.set('all');
         this.load();
       },
       error: () => { this.creating.set(false); this.createError.set('Ödev oluşturulamadı.'); },
