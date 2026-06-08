@@ -419,6 +419,9 @@ services:
       Smtp__Password: ${SMTP_PASSWORD:-}
       Smtp__FromAddress: ${SMTP_FROM:-no-reply@dijitalatolye.local}
       Smtp__FromName: ${SMTP_FROM_NAME:-DijitalAtolye}
+      WebPush__PublicKey: ${WEBPUSH_PUBLIC_KEY:-}
+      WebPush__PrivateKey: ${WEBPUSH_PRIVATE_KEY:-}
+      WebPush__Subject: ${WEBPUSH_SUBJECT:-mailto:admin@dijitalatolye.local}
     expose: ["8080"]
     <<: *app-defaults
 

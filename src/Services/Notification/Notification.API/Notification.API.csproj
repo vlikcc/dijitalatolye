@@ -19,6 +19,7 @@
     <PackageReference Include="MassTransit" />
     <PackageReference Include="MassTransit.RabbitMQ" />
     <PackageReference Include="MailKit" />
+    <PackageReference Include="WebPush" />
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
   </ItemGroup>
 

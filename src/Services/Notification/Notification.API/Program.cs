@@ -18,8 +18,10 @@ builder.Services.AddDbContext<NotificationDbContext>(opt =>
         ?? throw new InvalidOperationException("Postgres connection string missing.")));
 
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.Configure<DijitalAtolye.Notification.API.Push.VapidOptions>(builder.Configuration.GetSection("WebPush"));
 builder.Services.AddSingleton<IHtmlTemplateRenderer, FileHtmlTemplateRenderer>();
 builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
+builder.Services.AddScoped<DijitalAtolye.Notification.API.Push.IPushSender, DijitalAtolye.Notification.API.Push.WebPushSender>();
 
 builder.Services.AddSignalR();
 builder.Services.AddScoped<ICurrentUser, CurrentUserAccessor>();
@@ -44,7 +46,32 @@ app.MapHub<NotificationsHub>("/hubs/notifications");
 if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
     using var scope = app.Services.CreateScope();
-    await scope.ServiceProvider.GetRequiredService<NotificationDbContext>().EnsureSchemaAsync();
+    var db = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
+
+    // EnsureSchemaAsync "ya hep ya hiç"; yeni PushSubscriptions tablosu eklenince mevcut DB'de 42P07 verir.
+    try
+    {
+        await db.EnsureSchemaAsync();
+    }
+    catch (Npgsql.PostgresException ex) when (ex.SqlState == "42P07")
+    {
+        // beklenen: mevcut tablolar var; eksik yeni tabloyu DDL ekleyecek.
+    }
+
+    await db.Database.ExecuteSqlRawAsync(
+        """
+        CREATE TABLE IF NOT EXISTS "notification"."PushSubscriptions" (
+            "Id" uuid NOT NULL,
+            "UserId" uuid NOT NULL,
+            "Endpoint" character varying(1000) NOT NULL,
+            "P256dh" character varying(300) NOT NULL,
+            "Auth" character varying(300) NOT NULL,
+            "CreatedAtUtc" timestamp with time zone NOT NULL DEFAULT now(),
+            CONSTRAINT "PK_PushSubscriptions" PRIMARY KEY ("Id")
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS "IX_PushSubscriptions_Endpoint" ON "notification"."PushSubscriptions" ("Endpoint");
+        CREATE INDEX IF NOT EXISTS "IX_PushSubscriptions_UserId" ON "notification"."PushSubscriptions" ("UserId");
+        """);
 }
 
 app.Run();

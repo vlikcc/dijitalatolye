@@ -19,6 +19,7 @@ builder.Services.AddDbContext<UserDbContext>(opt =>
 builder.Services.AddScoped<ICurrentUser, CurrentUserAccessor>();
 builder.Services.AddScoped<IOutboxWriter, EfCoreOutboxWriter<UserDbContext>>();
 builder.Services.AddHostedService<OutboxDispatcher<UserDbContext>>();
+builder.Services.AddHostedService<DijitalAtolye.User.API.Reminders.AssignmentReminderWorker>();
 
 builder.Services.AddDijitalAtolyeJwtAuth(builder.Configuration);
 
@@ -117,6 +118,7 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Databas
         );
         CREATE UNIQUE INDEX IF NOT EXISTS "IX_ClassMembers_Class_Student"
             ON "user"."ClassMembers" ("ClassId", "StudentUserId");
+        ALTER TABLE "user"."AssignmentMembers" ADD COLUMN IF NOT EXISTS "ReminderSentAtUtc" timestamp with time zone;
         """);
 }
 

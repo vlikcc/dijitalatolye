@@ -18,19 +18,22 @@ public abstract class BaseNotificationConsumer
     protected readonly IHtmlTemplateRenderer Templates;
     protected readonly IHubContext<NotificationsHub> Hub;
     protected readonly ILogger Logger;
+    protected readonly DijitalAtolye.Notification.API.Push.IPushSender Push;
 
     protected BaseNotificationConsumer(
         NotificationDbContext db,
         IEmailSender email,
         IHtmlTemplateRenderer templates,
         IHubContext<NotificationsHub> hub,
-        ILogger logger)
+        ILogger logger,
+        DijitalAtolye.Notification.API.Push.IPushSender push)
     {
         Db = db;
         Email = email;
         Templates = templates;
         Hub = hub;
         Logger = logger;
+        Push = push;
     }
 
     protected async Task EmitAsync(Guid userId, string type, string title, string body, string? link, CancellationToken ct)
@@ -42,6 +45,10 @@ public abstract class BaseNotificationConsumer
         Db.Notifications.Add(n);
         await Db.SaveChangesAsync(ct);
         await Hub.Clients.Group($"user-{userId}").SendAsync("notification", n, ct);
+
+        // Web push (abonelik varsa); hata bildirim akışını bozmaz.
+        try { await Push.SendToUserAsync(userId, title, body, link, type, ct); }
+        catch (Exception ex) { Logger.LogWarning(ex, "Web push emit failed for {UserId}", userId); }
     }
 
     protected async Task SendEmailSafeAsync(string toEmail, string subject, string template, string html, CancellationToken ct)
@@ -73,8 +80,9 @@ public sealed class UserRegisteredConsumer : BaseNotificationConsumer, IConsumer
         IHtmlTemplateRenderer templates,
         IHubContext<NotificationsHub> hub,
         ILogger<UserRegisteredConsumer> logger,
-        IConfiguration configuration)
-        : base(db, email, templates, hub, logger)
+        IConfiguration configuration,
+        DijitalAtolye.Notification.API.Push.IPushSender push)
+        : base(db, email, templates, hub, logger, push)
     {
         _configuration = configuration;
     }
@@ -103,8 +111,9 @@ public sealed class EmailVerificationRequestedConsumer : BaseNotificationConsume
         IHtmlTemplateRenderer templates,
         IHubContext<NotificationsHub> hub,
         ILogger<EmailVerificationRequestedConsumer> logger,
-        IConfiguration configuration)
-        : base(db, email, templates, hub, logger)
+        IConfiguration configuration,
+        DijitalAtolye.Notification.API.Push.IPushSender push)
+        : base(db, email, templates, hub, logger, push)
     {
         _configuration = configuration;
     }
@@ -134,8 +143,8 @@ public sealed class EmailVerificationRequestedConsumer : BaseNotificationConsume
 
 public sealed class ContentSubmittedConsumer : BaseNotificationConsumer, IConsumer<ContentSubmittedV1>
 {
-    public ContentSubmittedConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<ContentSubmittedConsumer> logger)
-        : base(db, email, templates, hub, logger) { }
+    public ContentSubmittedConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<ContentSubmittedConsumer> logger, DijitalAtolye.Notification.API.Push.IPushSender push)
+        : base(db, email, templates, hub, logger, push) { }
 
     public async Task Consume(ConsumeContext<ContentSubmittedV1> context)
     {
@@ -148,8 +157,8 @@ public sealed class ContentSubmittedConsumer : BaseNotificationConsumer, IConsum
 
 public sealed class EditorDecisionConsumer : BaseNotificationConsumer, IConsumer<EditorDecisionMadeV1>
 {
-    public EditorDecisionConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<EditorDecisionConsumer> logger)
-        : base(db, email, templates, hub, logger) { }
+    public EditorDecisionConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<EditorDecisionConsumer> logger, DijitalAtolye.Notification.API.Push.IPushSender push)
+        : base(db, email, templates, hub, logger, push) { }
 
     public async Task Consume(ConsumeContext<EditorDecisionMadeV1> context)
     {
@@ -172,8 +181,8 @@ public sealed class EditorDecisionConsumer : BaseNotificationConsumer, IConsumer
 
 public sealed class ContentPublishedConsumer : BaseNotificationConsumer, IConsumer<ContentPublishedV1>
 {
-    public ContentPublishedConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<ContentPublishedConsumer> logger)
-        : base(db, email, templates, hub, logger) { }
+    public ContentPublishedConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<ContentPublishedConsumer> logger, DijitalAtolye.Notification.API.Push.IPushSender push)
+        : base(db, email, templates, hub, logger, push) { }
 
     public async Task Consume(ConsumeContext<ContentPublishedV1> context)
     {
@@ -185,8 +194,8 @@ public sealed class ContentPublishedConsumer : BaseNotificationConsumer, IConsum
 
 public sealed class AssignmentCompletedConsumer : BaseNotificationConsumer, IConsumer<AssignmentCompletedV1>
 {
-    public AssignmentCompletedConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<AssignmentCompletedConsumer> logger)
-        : base(db, email, templates, hub, logger) { }
+    public AssignmentCompletedConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<AssignmentCompletedConsumer> logger, DijitalAtolye.Notification.API.Push.IPushSender push)
+        : base(db, email, templates, hub, logger, push) { }
 
     public async Task Consume(ConsumeContext<AssignmentCompletedV1> context)
     {
@@ -208,8 +217,8 @@ public sealed class AssignmentCompletedConsumer : BaseNotificationConsumer, ICon
 
 public sealed class AssignmentAssignedConsumer : BaseNotificationConsumer, IConsumer<AssignmentAssignedV1>
 {
-    public AssignmentAssignedConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<AssignmentAssignedConsumer> logger)
-        : base(db, email, templates, hub, logger) { }
+    public AssignmentAssignedConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<AssignmentAssignedConsumer> logger, DijitalAtolye.Notification.API.Push.IPushSender push)
+        : base(db, email, templates, hub, logger, push) { }
 
     public async Task Consume(ConsumeContext<AssignmentAssignedV1> context)
     {
@@ -224,6 +233,28 @@ public sealed class AssignmentAssignedConsumer : BaseNotificationConsumer, ICons
         {
             var html = $"<p><strong>{msg.AssignmentTitle}</strong> ödevi sana atandı.{dueText}</p>";
             await SendEmailSafeAsync(msg.StudentEmail, "Yeni ödev atandı", "assignment-assigned", html, ct);
+        }
+    }
+}
+
+public sealed class AssignmentReminderConsumer : BaseNotificationConsumer, IConsumer<AssignmentReminderV1>
+{
+    public AssignmentReminderConsumer(NotificationDbContext db, IEmailSender email, IHtmlTemplateRenderer templates, IHubContext<NotificationsHub> hub, ILogger<AssignmentReminderConsumer> logger, DijitalAtolye.Notification.API.Push.IPushSender push)
+        : base(db, email, templates, hub, logger, push) { }
+
+    public async Task Consume(ConsumeContext<AssignmentReminderV1> context)
+    {
+        var msg = context.Message;
+        var ct = context.CancellationToken;
+        var dueText = msg.DueAtUtc is { } d ? $" Son tarih: {d:dd.MM.yyyy HH:mm}." : string.Empty;
+
+        await EmitAsync(msg.StudentUserId, "AssignmentReminder", "Ödev son tarihi yaklaşıyor",
+            $"\"{msg.AssignmentTitle}\" ödevini henüz tamamlamadın.{dueText}", "/assignments", ct);
+
+        if (!string.IsNullOrWhiteSpace(msg.StudentEmail))
+        {
+            var html = $"<p><strong>{msg.AssignmentTitle}</strong> ödevini henüz tamamlamadın.{dueText}</p>";
+            await SendEmailSafeAsync(msg.StudentEmail, "Ödev hatırlatması", "assignment-reminder", html, ct);
         }
     }
 }

@@ -77,6 +77,7 @@
     <PackageVersion Include="Minio" Version="6.0.4" />
     <PackageVersion Include="MongoDB.Driver" Version="3.1.0" />
     <PackageVersion Include="MailKit" Version="4.10.0" />
+    <PackageVersion Include="WebPush" Version="1.0.13" />
     <PackageVersion Include="HtmlAgilityPack" Version="1.11.72" />
     <PackageVersion Include="AngleSharp" Version="1.1.2" />
     <PackageVersion Include="Jint" Version="4.1.0" />

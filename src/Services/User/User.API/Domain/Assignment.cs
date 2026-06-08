@@ -36,4 +36,6 @@ public sealed class AssignmentMember
     public DateTime JoinedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? CompletedAtUtc { get; set; }
     public int? BestScore { get; set; }
+    /// <summary>Son-tarih hatırlatması gönderildiği an (dedup; null = henüz gönderilmedi).</summary>
+    public DateTime? ReminderSentAtUtc { get; set; }
 }

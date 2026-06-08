@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal }
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '@core/api/api.service';
+import { PushService } from '@core/push/push.service';
 
 interface Notification {
   id: string;
@@ -20,7 +21,17 @@ interface Notification {
   template: `
     <div class="max-w-3xl mx-auto p-6">
       <div class="da-eyebrow mb-2">[ Bildirimler ]</div>
-      <h1 class="da-display text-2xl font-bold mb-5 text-ink">Bildirimler</h1>
+      <div class="flex items-center justify-between mb-5">
+        <h1 class="da-display text-2xl font-bold text-ink">Bildirimler</h1>
+        @if (push.supported()) {
+          <button type="button" (click)="togglePush()" [disabled]="push.busy()"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-line/15 text-sm font-medium hover:bg-accent/5 disabled:opacity-50"
+            [class.text-accent]="push.enabled()">
+            <mat-icon style="font-size:18px;width:18px;height:18px">{{ push.enabled() ? 'notifications_active' : 'notifications' }}</mat-icon>
+            {{ push.enabled() ? 'Tarayıcı bildirimleri açık' : 'Tarayıcı bildirimlerini aç' }}
+          </button>
+        }
+      </div>
       @if (loading()) { <p class="text-muted">Yükleniyor…</p> }
       @if (!loading() && items().length === 0) {
         <div class="text-center py-16 rounded-2xl border border-line/10 bg-surface">
@@ -55,6 +66,7 @@ interface Notification {
 export class NotificationsComponent implements OnInit, OnDestroy {
   private readonly api = inject(ApiService);
 
+  readonly push = inject(PushService);
   readonly items = signal<Notification[]>([]);
   readonly loading = signal(true);
   private timer?: ReturnType<typeof setInterval>;
@@ -62,6 +74,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.load();
     this.timer = setInterval(() => this.load(), 15_000);
+    void this.push.refresh();
+  }
+
+  async togglePush(): Promise<void> {
+    if (this.push.enabled()) await this.push.disable();
+    else await this.push.enable();
   }
 
   ngOnDestroy(): void { if (this.timer) clearInterval(this.timer); }

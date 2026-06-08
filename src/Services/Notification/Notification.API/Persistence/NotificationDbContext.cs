@@ -9,6 +9,7 @@ public sealed class NotificationDbContext : DbContext
 
     public DbSet<InAppNotification> Notifications => Set<InAppNotification>();
     public DbSet<EmailLog> EmailLogs => Set<EmailLog>();
+    public DbSet<PushSubscriptionEntity> PushSubscriptions => Set<PushSubscriptionEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +33,16 @@ public sealed class NotificationDbContext : DbContext
             b.Property(e => e.Template).HasMaxLength(120).IsRequired();
             b.Property(e => e.Error).HasMaxLength(2000);
             b.HasIndex(e => e.ToEmail);
+        });
+        modelBuilder.Entity<PushSubscriptionEntity>(b =>
+        {
+            b.ToTable("PushSubscriptions");
+            b.HasKey(s => s.Id);
+            b.Property(s => s.Endpoint).HasMaxLength(1000).IsRequired();
+            b.Property(s => s.P256dh).HasMaxLength(300).IsRequired();
+            b.Property(s => s.Auth).HasMaxLength(300).IsRequired();
+            b.HasIndex(s => s.Endpoint).IsUnique();
+            b.HasIndex(s => s.UserId);
         });
     }
 }
