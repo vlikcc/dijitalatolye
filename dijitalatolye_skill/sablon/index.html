@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Mobil cihazlar için yakınlaştırmayı önleyen standart viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Eğitsel Oyun Başlangıç Şablonu</title>
+
+    <style>
+        /* ==========================================================================
+           0. YEREL TİPOGRAFİ (Outfit) - TAMAMEN OFFLINE / CDN'SİZ
+           Font dosyaları font/ klasöründen göreceli olarak yüklenir.
+           outfit-latin-ext.woff2 Türkçe karakterleri (ğ, ş, İ, vb.) içerir.
+           ========================================================================== */
+        @font-face {
+            font-family: 'Outfit';
+            font-style: normal;
+            font-weight: 300 800;
+            font-display: swap;
+            src: url('font/outfit-latin.woff2') format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        @font-face {
+            font-family: 'Outfit';
+            font-style: normal;
+            font-weight: 300 800;
+            font-display: swap;
+            src: url('font/outfit-latin-ext.woff2') format('woff2');
+            unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+        }
+
+        /* ==========================================================================
+           1. GENEL TASARIM SİSTEMİ & RENK PALETİ
+           ========================================================================== */
+        :root {
+            /* Koyu Tema Değişkenleri (Varsayılan) */
+            --renk-arka-plan: #0f172a;
+            /* Koyu Slate mavi arka plan */
+            --renk-kart: #1e293b;
+            /* Kartlar için daha açık slate */
+            --renk-metin: #f8fafc;
+            /* Parlak beyaz metin */
+            --renk-metin-ikincil: #94a3b8;
+            /* Gri metin */
+            --renk-sinir: #334155;
+            /* Koyu sınır çizgisi */
+            --renk-golge: rgba(0, 0, 0, 0.4);
+
+            /* Premium gradyanlar */
+            --gradyan-ana: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            /* İndigo -> Mor */
+            --gradyan-buton-hover: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+            --gradyan-dogru: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            /* Yeşil tonlar */
+            --gradyan-yanlis: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            /* Kırmızı tonlar */
+            --gradyan-altin: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            /* Yıldızlar için altın sarısı */
+
+            --font-aile: 'Outfit', sans-serif;
+        }
+
+        /* Açık Tema Değişkenleri */
+        body.light-theme {
+            --renk-arka-plan: #f1f5f9;
+            /* Açık gri arka plan */
+            --renk-kart: #ffffff;
+            /* Saf beyaz kartlar */
+            --renk-metin: #0f172a;
+            /* Koyu slate metin */
+            --renk-metin-ikincil: #475569;
+            /* Koyu gri metin */
+            --renk-sinir: #cbd5e1;
+            /* Açık sınır çizgisi */
+            --renk-golge: rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            /* Metin seçimini engeller, oyun akıcılığını artırır */
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: var(--renk-arka-plan);
+            font-family: var(--font-aile);
+            color: var(--renk-metin);
+            overflow: hidden;
+            /* Scrollbarları kesinlikle gizler */
+            width: 100vw;
+            height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* ==========================================================================
+           2. LETTERBOX - EKRAN ÖLÇEKLENDİRME KAPLARI
+           ========================================================================== */
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        /* Sabit 16:9 oyun alanı (1280x720). JS ile transform: scale() uygulanacak. */
+        #game-canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1280px;
+            height: 720px;
+            background-color: var(--renk-arka-plan);
+            transform: translate(-50%, -50%);
+            transform-origin: center center;
+            box-shadow: 0 25px 50px -12px var(--renk-golge);
+            overflow: hidden;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* ==========================================================================
+           3. EKRAN DURUMLARI (Home, Game, Result)
+           ========================================================================== */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ==========================================================================
+           4. ORTAK BİLEŞENLER (Butonlar, Kartlar vb.)
+           ========================================================================== */
+        .btn {
+            background: var(--gradyan-ana);
+            color: var(--renk-metin);
+            border: none;
+            border-radius: 12px;
+            padding: 16px 32px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn:hover {
+            background: var(--gradyan-buton-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 20px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Üst Kontrol Çubuğu (Ses, Tema ve Diğer Kontroller) */
+        .header-bar {
+            position: absolute;
+            top: 20px;
+            left: 40px;
+            right: 40px;
+            display: flex;
+            justify-content: space-between;
+            /* Sol ve sağ grupları ayırır */
+            align-items: center;
+            z-index: 10;
+        }
+
+        .controls-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .controls-group-right {
+            margin-left: auto;
+        }
+
+        .icon-btn {
+            background-color: var(--renk-kart);
+            border: 2px solid var(--renk-sinir);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s, border-color 0.2s, color 0.2s;
+            color: var(--renk-metin);
+            box-shadow: 0 4px 6px -1px var(--renk-golge);
+        }
+
+        .icon-btn:hover {
+            background-color: var(--renk-arka-plan);
+            transform: scale(1.1);
+            color: #fff;
+        }
+
+        body.light-theme .icon-btn:hover {
+            background-color: var(--renk-kart);
+            color: var(--renk-metin);
+        }
+
+        /* ==========================================================================
+           5. GİRİŞ/ANA SAYFA EKRANI TASARIMI
+           ========================================================================== */
+        #screen-home {
+            background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, var(--renk-arka-plan) 100%);
+            transition: background 0.3s ease;
+        }
+
+        body.light-theme #screen-home {
+            background: radial-gradient(circle at 50% 50%, #e0e7ff 0%, var(--renk-arka-plan) 100%);
+        }
+
+        .game-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .home-card {
+            background-color: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 24px;
+            max-width: 650px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 25px -5px var(--renk-golge);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        body.light-theme .home-card {
+            background-color: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #c084fc;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .info-text {
+            color: var(--renk-metin-ikincil);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        /* Giriş Sayfası Cihaz Uyumlu Rozetler Konteyneri */
+        .home-badges-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .home-badge {
+            background-color: var(--renk-kart);
+            border: 2px solid var(--renk-sinir);
+            border-radius: 12px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--renk-metin);
+            box-shadow: 0 4px 6px var(--renk-golge);
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .home-badge:hover {
+            transform: translateY(-3px);
+            border-color: #818cf8;
+            color: #818cf8;
+        }
+
+        body.light-theme .home-badge {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ==========================================================================
+           6. OYUN EKRANI VE ÖRNEK MEKANİK (Drag & Drop / Click Fallback)
+           ========================================================================== */
+        #screen-game {
+            justify-content: space-between;
+            padding: 90px 40px 40px 40px;
+            /* Üst çubuk için boşluk */
+        }
+
+        .game-stats {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background-color: var(--renk-kart);
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid var(--renk-sinir);
+            margin-bottom: 20px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .stat-box {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Örnek Oyun Alanı */
+        .board {
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 40px;
+        }
+
+        /* Taşınabilir Ögeler Alanı */
+        .items-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            width: 250px;
+        }
+
+        /* Sürüklenebilir/Tıklanabilir Öge */
+        .interactive-item {
+            width: 100px;
+            height: 100px;
+            background: var(--gradyan-ana);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: grab;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            touch-action: none;
+            /* Mobil tarayıcılarda kaydırmayı önler */
+            position: relative;
+            z-index: 5;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .interactive-item:hover {
+            transform: scale(1.05);
+        }
+
+        /* Klavye ile gezinmede odak halkası (erişilebilirlik - WCAG) */
+        .interactive-item:focus-visible,
+        .drop-target:focus-visible,
+        .btn:focus-visible,
+        .icon-btn:focus-visible {
+            outline: 3px solid #f59e0b;
+            outline-offset: 3px;
+        }
+
+        .interactive-item.selected {
+            border: 4px solid #f59e0b;
+            /* Altın sarısı seçim halkası (Tıkla-Taşı için) */
+            animation: pulse-border 1.5s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+            }
+        }
+
+        /* Hedef Bölgesi (Kutusu) */
+        .drop-target {
+            width: 220px;
+            height: 220px;
+            border: 3px dashed var(--renk-sinir);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            background-color: var(--renk-kart);
+            opacity: 0.85;
+            transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .drop-target.hovered {
+            background-color: rgba(99, 102, 241, 0.15);
+            border-color: #818cf8;
+            opacity: 1;
+        }
+
+        .drop-target.target-red {
+            border-color: #ef4444;
+        }
+
+        .drop-target.target-red.hovered {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .drop-target.target-green {
+            border-color: #10b981;
+        }
+
+        .drop-target.target-green.hovered {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+
+        .target-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* ==========================================================================
+           7. GERİ BİLDİRİM POP-OUT MODALLARI
+           ========================================================================== */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .feedback-modal {
+            background-color: var(--renk-kart);
+            border: 2px solid var(--renk-sinir);
+            border-radius: 28px;
+            padding: 40px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px var(--renk-golge);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s, border-color 0.3s;
+        }
+
+        .modal-overlay.active .feedback-modal {
+            transform: scale(1);
+        }
+
+        /* Doğru Geri Bildirim Başlığı */
+        .feedback-modal.correct-style .feedback-icon {
+            background: var(--gradyan-dogru);
+            color: #fff;
+        }
+
+        .feedback-modal.correct-style .feedback-title {
+            color: #10b981;
+        }
+
+        /* Yanlış Geri Bildirim Başlığı */
+        .feedback-modal.incorrect-style .feedback-icon {
+            background: var(--gradyan-yanlis);
+            color: #fff;
+        }
+
+        .feedback-modal.incorrect-style .feedback-title {
+            color: #ef4444;
+        }
+
+        .feedback-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0 auto 20px auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+
+        .feedback-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .feedback-text {
+            color: var(--renk-metin-ikincil);
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        /* ==========================================================================
+           8. SONUÇ EKRANI EKRANI VE YILDIZ ANİMASYONLARI
+           ========================================================================== */
+        #screen-result {
+            background: radial-gradient(circle at 50% 50%, #2e1065 0%, var(--renk-arka-plan) 100%);
+            transition: background 0.3s ease;
+        }
+
+        body.light-theme #screen-result {
+            background: radial-gradient(circle at 50% 50%, #f3e8ff 0%, var(--renk-arka-plan) 100%);
+        }
+
+        .result-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .stars-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .star {
+            width: 70px;
+            height: 70px;
+            fill: var(--renk-sinir);
+            /* Başlangıçta pasif renk */
+            transition: fill 0.3s;
+            transform: scale(0);
+        }
+
+        .screen.active .star.active {
+            fill: #f59e0b;
+            /* Aktif altın rengi */
+            animation: bounce-star 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Yıldızlar sırayla fırlayarak açılsın */
+        .screen.active .star.active:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .screen.active .star.active:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .screen.active .star.active:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes bounce-star {
+            0% {
+                transform: scale(0) rotate(-45deg);
+            }
+
+            70% {
+                transform: scale(1.2) rotate(10deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .score-info {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 40px;
+            color: var(--renk-metin);
+        }
+
+        /* ==========================================================================
+           9. MOBİL YATAY EKRAN UYARI KATMANI
+           ========================================================================== */
+        #landscape-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--renk-arka-plan);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 30px;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        /* CSS medya sorgusu ile sadece portre (dikey) modda uyarının görünmesini sağlıyoruz */
+        @media (max-width: 1024px) and (orientation: portrait) {
+            #landscape-warning {
+                opacity: 1;
+                pointer-events: auto;
+            }
+        }
+
+        .phone-rotate-icon {
+            width: 80px;
+            height: 80px;
+            animation: rotate-phone 2s infinite ease-in-out;
+            fill: #818cf8;
+        }
+
+        @keyframes rotate-phone {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            50% {
+                transform: rotate(-90deg);
+            }
+
+            100% {
+                transform: rotate(0deg);
+            }
+        }
+
+        .warning-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .warning-text {
+            color: var(--renk-metin-ikincil);
+            max-width: 320px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Oyun İçi Yönlendirme Butonları Alanı */
+        .game-navigation {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+            margin-top: 15px;
+            z-index: 10;
+        }
+
+        .btn-nav {
+            padding: 10px 20px !important;
+            font-size: 1rem !important;
+            border-radius: 10px !important;
+            box-shadow: 0 4px 6px -1px var(--renk-golge) !important;
+        }
+
+        .btn-nav span {
+            display: inline-block;
+        }
+
+        .btn-secondary {
+            background: var(--renk-kart) !important;
+            border: 1px solid var(--renk-sinir) !important;
+            color: var(--renk-metin) !important;
+        }
+
+        .btn-secondary:hover {
+            background: var(--renk-arka-plan) !important;
+            border-color: #818cf8 !important;
+            color: #fff !important;
+        }
+
+        .btn-danger {
+            background: var(--gradyan-yanlis) !important;
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3) !important;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+            box-shadow: 0 6px 8px -1px rgba(239, 68, 68, 0.4) !important;
+        }
+
+        /* Ana Sayfa Logo Stili */
+        .game-logo {
+            max-height: 120px;
+            margin-bottom: 20px;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 16px var(--renk-golge));
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .game-logo:hover {
+            transform: scale(1.08);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game-container">
+        <div id="game-canvas">
+
+            <!-- ÜST KONTROL ÇUBUĞU -->
+            <div class="header-bar">
+                <!-- Sol Grup: Yönlendirme Düğmeleri -->
+                <div class="controls-group" id="header-nav-group" style="display: none;">
+                    <!-- Ana Sayfa Butonu -->
+                    <button id="btn-home" class="icon-btn" onclick="goHome()" title="Ana Sayfa" aria-label="Ana Sayfa">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                    </button>
+                    <!-- Geri Dön Butonu -->
+                    <button id="btn-back" class="icon-btn" onclick="goBack()" title="Geri Dön" aria-label="Geri Dön">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="controls-group controls-group-right">
+                    <!-- Tema Değiştirme Butonu -->
+                    <button id="btn-theme-toggle" class="icon-btn" onclick="toggleTheme()" aria-label="Temayı Değiştir">
+                        <!-- Güneş İkonu (Varsayılan Koyu moddayken gösterilir) -->
+                        <svg id="icon-sun" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </svg>
+                        <!-- Ay İkonu (Açık temaya geçince gösterilecek) -->
+                        <svg id="icon-moon" style="display:none;" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                    </button>
+                    <!-- Ses Kontrol Düğmesi -->
+                    <button id="btn-audio-toggle" class="icon-btn" onclick="toggleAudio()" aria-label="Sesi Aç/Kapat">
+                        <!-- Ses Açık İkonu (Varsayılan) -->
+                        <svg id="icon-sound-on" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                        </svg>
+                        <!-- Ses Kapalı İkonu (Gizli) -->
+                        <svg id="icon-sound-off" style="display:none;" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                            <line x1="23" y1="9" x2="17" y2="15" />
+                            <line x1="17" y1="9" x2="23" y2="15" />
+                        </svg>
+                    </button>
+                    <!-- Arka Plan Müzik Kontrol Düğmesi (ses/arka_plan_muzik.mp3 eklendiğinde çalışır) -->
+                    <button id="btn-music-toggle" class="icon-btn" onclick="toggleMusic()" aria-label="Müziği Aç/Kapat">
+                        <!-- Müzik Açık İkonu (Varsayılan) -->
+                        <svg id="icon-music-on" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18V5l12-2v13"></path>
+                            <circle cx="6" cy="18" r="3"></circle>
+                            <circle cx="18" cy="16" r="3"></circle>
+                        </svg>
+                        <!-- Müzik Kapalı İkonu (Gizli) -->
+                        <svg id="icon-music-off" style="display:none;" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="M9 18V5l12-2v13"></path>
+                            <circle cx="6" cy="18" r="3"></circle>
+                            <circle cx="18" cy="16" r="3"></circle>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                    </button>
+                    <!-- Tam Ekran Kontrol Düğmesi -->
+                    <button id="btn-fullscreen-toggle" class="icon-btn" onclick="toggleFullscreen()" aria-label="Tam Ekranı Aç/Kapat">
+                        <!-- Tam Ekran İkonu -->
+                        <svg id="icon-fullscreen" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                        </svg>
+                        <!-- Tam Ekrandan Çıkış İkonu (Gizli) -->
+                        <svg id="icon-exit-fullscreen" style="display:none;" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="M4 14h6v6m10-6h-6v6M4 10h6V4m10 6h-6V4" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==========================================================================
+               GİRİŞ / ANA SAYFA EKRANI
+               ========================================================================== -->
+            <div id="screen-home" class="screen active">
+                <img src="gorsel/dark-mod-logo.png" id="img-logo" alt="Logo" class="game-logo">
+                <h1 class="game-title">Meyve Eşleştirmece</h1>
+
+                <div class="home-card">
+                    <h2 class="info-title">Nasıl Oynanır?</h2>
+                    <p class="info-text">
+                        Görsel kartları doğru renkteki kutulara sürükleyip bırakın. Dilerseniz önce karta tıklayıp
+                        ardından doğru kutuya tıklayarak da taşıyabilirsiniz.
+                    </p>
+                    <h2 class="info-title" style="color: #10b981;">Kazanımlar</h2>
+                    <p class="info-text" style="margin-bottom: 0;">
+                        Renkleri eşleştirme, motor becerileri ve görsel ayrıştırma yeteneğini destekler.
+                    </p>
+                </div>
+
+                <!-- Cihaz Uyumluluk Rozetleri (Belirgin ve Farklı) -->
+                <div class="home-badges-container">
+                    <!-- Akıllı Tahta Rozeti -->
+                    <div class="home-badge" title="Etkileşimli Tahta Uyumlu">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="13" rx="1" />
+                            <path d="M5 16l-2 5M19 16l2 5M9 21h6" />
+                            <line x1="2" y1="13" x2="22" y2="13" />
+                            <path d="M7 7h10M7 10h5" stroke-dasharray="1 1" />
+                        </svg>
+                    </div>
+                    <!-- Bilgisayar ve Tablet Rozeti -->
+                    <div class="home-badge" title="Bilgisayar ve Tablet Uyumlu">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="12" height="9" rx="1" />
+                            <path d="M5 12v3M3 15h6" />
+                            <rect x="12" y="7" width="9" height="13" rx="1.5" fill="var(--renk-kart)" />
+                            <line x1="15" y1="17" x2="18" y2="17" />
+                        </svg>
+                    </div>
+                    <!-- Telefon Rozeti -->
+                    <div class="home-badge" title="Telefon Uyumlu">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="6" y="2" width="12" height="20" rx="2" />
+                            <line x1="11" y1="18" x2="13" y2="18" />
+                            <circle cx="12" cy="4" r="0.5" fill="currentColor" />
+                        </svg>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="startGame()">
+                    Oyunu Başlat
+                    <!-- Başlat İkonu -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- ==========================================================================
+               OYUN EKRANI (CORE LOOP)
+               ========================================================================== -->
+            <div id="screen-game" class="screen">
+                <div class="game-stats">
+                    <div class="stat-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                            <path
+                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                        <span>Skor: <span id="label-score">0</span></span>
+                    </div>
+                    <div class="stat-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        <span>Kalan Hak: <span id="label-lives">3</span></span>
+                    </div>
+                </div>
+
+                <div class="board">
+                    <!-- Taşınabilir Ögeler -->
+                    <div class="items-area">
+                        <!-- Çift etkileşimli nesne 1 (Elma) - klavye ile de seçilebilir -->
+                        <div id="item-apple" class="interactive-item" draggable="true" data-color="red"
+                            tabindex="0" role="button" aria-label="Elma, kırmızı meyve. Seçmek için Enter'a basın.">
+                            🍎 ELMA
+                        </div>
+                        <!-- Çift etkileşimli nesne 2 (Armut) - klavye ile de seçilebilir -->
+                        <div id="item-pear" class="interactive-item" draggable="true" data-color="green"
+                            tabindex="0" role="button" aria-label="Armut, yeşil meyve. Seçmek için Enter'a basın.">
+                            🍏 ARMUT
+                        </div>
+                    </div>
+
+                    <!-- Kırmızı Kutu Hedefi - klavye ile de hedeflenebilir -->
+                    <div class="drop-target target-red" data-accept="red"
+                        tabindex="0" role="button" aria-label="Kırmızı kutu. Seçili meyveyi buraya bırakmak için Enter'a basın.">
+                        <span class="target-title" style="color: #ef4444;">🔴 KIRMIZI KUTU</span>
+                        <p style="font-size: 0.8rem; color: var(--renk-metin-ikincil);">Kırmızı meyveleri buraya taşıyın
+                        </p>
+                    </div>
+
+                    <!-- Yeşil Kutu Hedefi - klavye ile de hedeflenebilir -->
+                    <div class="drop-target target-green" data-accept="green"
+                        tabindex="0" role="button" aria-label="Yeşil kutu. Seçili meyveyi buraya bırakmak için Enter'a basın.">
+                        <span class="target-title" style="color: #10b981;">🟢 YEŞİL KUTU</span>
+                        <p style="font-size: 0.8rem; color: var(--renk-metin-ikincil);">Yeşil meyveleri buraya taşıyın
+                        </p>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- ==========================================================================
+               GERİ BİLDİRİM MODALLARI (Pop-out Uyarı pencereleri)
+               ========================================================================== -->
+            <div id="modal-feedback" class="modal-overlay" role="alertdialog" aria-modal="true"
+                aria-labelledby="feedback-header" aria-describedby="feedback-msg">
+                <div id="modal-content" class="feedback-modal" aria-live="assertive">
+                    <div class="feedback-icon" id="feedback-symbol">✓</div>
+                    <h2 class="feedback-title" id="feedback-header">DOĞRU!</h2>
+                    <p class="feedback-text" id="feedback-msg">Doğru eşleştirme yaptınız.</p>
+                    <button class="btn" id="btn-feedback-next" onclick="closeFeedback()">Devam Et</button>
+                </div>
+            </div>
+
+            <!-- ==========================================================================
+               SONUÇ EKRANI EKRANI
+               ========================================================================== -->
+            <div id="screen-result" class="screen">
+                <h2 class="result-title">Oyun Bitti!</h2>
+
+                <!-- Yıldız Derecelendirme Animasyonu alanı -->
+                <div class="stars-container">
+                    <svg class="star" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                    <svg class="star" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                    <svg class="star" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                </div>
+
+                <div class="score-info">
+                    Toplam Skorunuz: <span id="label-final-score" style="color: #c084fc;">0</span>
+                </div>
+
+                <button class="btn" onclick="restartGame()">
+                    Tekrar Oyna
+                    <!-- Yenile İkonu -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                    </svg>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MOBİL YATAY UYARI KATMANI -->
+    <div id="landscape-warning">
+        <svg class="phone-rotate-icon" viewBox="0 0 24 24">
+            <path
+                d="M17 2H7c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 18c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm5-3H7V5h10v12z" />
+        </svg>
+        <h2 class="warning-title">Yatay Mod Gerekli</h2>
+        <p class="warning-text">Lütfen en iyi oyun deneyimi için cihazınızı yatay (landscape) konuma getirin.</p>
+    </div>
+
+    <!-- ==========================================================================
+       10. SCRIPT - OYUN MANTIĞI & ETKİLEŞİM YÖNETİCİSİ
+       ========================================================================== -->
+    <script>
+        /* ==========================================================================
+           İÇERİK İZLEME SDK'sı (DijitalAtolye) - YEREL GÖMÜLÜ SÜRÜM
+           ==========================================================================
+           Oyun, platformda izole bir iframe içinde çalışır. Öğrencinin ne öğrendiğini
+           (ilerleme, tamamlama, skor) platforma bildirmek için postMessage köprüsü
+           kullanılır. Bu gömülü sürüm tamamen offline çalışır: iframe dışında
+           (örn. dosyayı doğrudan açınca) sessizce devre dışı kalır, hata vermez.
+           Kullanım:
+             DijitalAtolye.progress({ outcomeCode: 'M.5.1.1', score: 40 });
+             DijitalAtolye.complete({ outcomeCode: 'M.5.1.1', score: 90, durationSeconds: 120 });
+        */
+        (function (w) {
+            'use strict';
+            function gonder(type, opts) {
+                opts = opts || {};
+                var veri = {
+                    app: 'dijitalatolye', // Host tarafından doğrulanan zorunlu işaretçi
+                    type: type,
+                    outcomeCode: opts.outcomeCode,
+                    score: typeof opts.score === 'number' ? opts.score : undefined,
+                    durationSeconds: typeof opts.durationSeconds === 'number' ? opts.durationSeconds : undefined
+                };
+                try {
+                    // Yalnızca bir üst pencere (host) varsa gönderilir
+                    if (w.parent && w.parent !== w) {
+                        w.parent.postMessage(veri, '*');
+                    }
+                } catch (e) {
+                    // iframe dışında / parent yoksa sessizce yut
+                }
+            }
+            w.DijitalAtolye = {
+                track: function (type, opts) { gonder(type, opts); },
+                progress: function (opts) { gonder('progress', opts); },
+                complete: function (opts) { gonder('complete', opts); },
+                score: function (opts) { gonder('score', opts); }
+            };
+        })(window);
+
+        /* MEB Kazanım Kodu: Oyunu üretirken/güncellerken bu oyunun hedeflediği
+           kazanım koduyla güncelleyin (örn. 'M.5.1.1'). En fazla 32 karakter. */
+        const KAZANIM_KODU = 'GENEL.0.0';
+
+        /* Oyun Durumu Nesnesi */
+        const OYUN_DURUMU = {
+            skor: 0,
+            kalan_hak: 3,
+            ses_acik: true,
+            muzik_acik: true, // Arka plan müzik açık/kapalı durumu
+            secili_oge_id: null, // Tıkla-Taşı etkileşimi için aktif seçili öge kimliği
+            baslangic_zamani: 0 // Oyun başlangıç zaman damgası (süre hesabı için)
+        };
+
+        // Yerel ses kaynakları (Klasörden çekilir. Dosyalar mevcut olunca çalışacaktır.)
+        const SESLER = {
+            dogru: new Audio('ses/dogru.wav'), // Kullanıcı isteği: wav formatı
+            yanlis: new Audio('ses/yanlis.wav') // Kullanıcı isteği: wav formatı
+        };
+
+        // Arka plan müziği (opsiyonel). ses/arka_plan_muzik.mp3 dosyası eklenirse
+        // müzik düğmesi bu sesi açıp kapatır. Dosya yoksa düğme sessizce işlevsizdir.
+        const ARKA_PLAN_MUZIK = new Audio('ses/arka_plan_muzik.mp3');
+        ARKA_PLAN_MUZIK.loop = true;
+        ARKA_PLAN_MUZIK.volume = 0.4;
+
+        /* ==========================================================================
+           EKRAN GEÇİŞLERİ VE BAŞLANGIÇ AYARLARI
+           ========================================================================== */
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+
+            // Sol üst gezinme butonlarını yönet
+            const btnHome = document.getElementById('btn-home');
+            const btnBack = document.getElementById('btn-back');
+            const navGroup = document.getElementById('header-nav-group');
+
+            if (navGroup && btnHome && btnBack) {
+                if (screenId === 'screen-home') {
+                    navGroup.style.display = 'none';
+                } else if (screenId === 'screen-game') {
+                    navGroup.style.display = 'flex';
+                    btnHome.style.display = 'flex';
+                    btnBack.style.display = 'flex';
+                } else if (screenId === 'screen-result') {
+                    navGroup.style.display = 'flex';
+                    btnHome.style.display = 'flex';
+                    btnBack.style.display = 'none';
+                }
+            }
+        }
+
+        // Ana sayfaya dönme işlevi
+        function goHome() {
+            playSound('tiklama');
+            if (OYUN_DURUMU.secili_oge_id) {
+                const item = document.getElementById(OYUN_DURUMU.secili_oge_id);
+                if (item) item.classList.remove('selected');
+                OYUN_DURUMU.secili_oge_id = null;
+            }
+            switchScreen('screen-home');
+        }
+
+        // Geri dönme işlevi (oyun ekranından ana sayfaya döndürür)
+        function goBack() {
+            playSound('tiklama');
+            if (OYUN_DURUMU.secili_oge_id) {
+                const item = document.getElementById(OYUN_DURUMU.secili_oge_id);
+                if (item) item.classList.remove('selected');
+                OYUN_DURUMU.secili_oge_id = null;
+            }
+            switchScreen('screen-home');
+        }
+
+        function playSound(soundKey) {
+            if (OYUN_DURUMU.ses_acik && SESLER[soundKey]) {
+                // Sesi sıfırlayıp baştan çal (üst üste tıklamalarda gecikmeyi önler)
+                SESLER[soundKey].currentTime = 0;
+                // Yerel dosya bulunamadığında hata vermemesi için catch bloğu
+                SESLER[soundKey].play().catch(err => console.log("Ses oynatılamadı (Varlık dosyası bulunamadı):", err.message));
+            }
+        }
+
+        function toggleAudio() {
+            OYUN_DURUMU.ses_acik = !OYUN_DURUMU.ses_acik;
+            const iconOn = document.getElementById('icon-sound-on');
+            const iconOff = document.getElementById('icon-sound-off');
+
+            if (OYUN_DURUMU.ses_acik) {
+                iconOn.style.display = 'block';
+                iconOff.style.display = 'none';
+            } else {
+                iconOn.style.display = 'none';
+                iconOff.style.display = 'block';
+            }
+            playSound('tiklama');
+        }
+
+        /* Arka Plan Müzik Kontrol Düğmesi İşlevselliği */
+        function toggleMusic() {
+            OYUN_DURUMU.muzik_acik = !OYUN_DURUMU.muzik_acik;
+            const iconOn = document.getElementById('icon-music-on');
+            const iconOff = document.getElementById('icon-music-off');
+
+            if (iconOn && iconOff) {
+                if (OYUN_DURUMU.muzik_acik) {
+                    iconOn.style.display = 'block';
+                    iconOff.style.display = 'none';
+                } else {
+                    iconOn.style.display = 'none';
+                    iconOff.style.display = 'block';
+                }
+            }
+
+            // Müziği gerçekten aç/kapat (dosya yoksa play() sessizce başarısız olur)
+            if (OYUN_DURUMU.muzik_acik) {
+                ARKA_PLAN_MUZIK.play().catch(err => console.log("Müzik oynatılamadı (dosya bulunamadı):", err.message));
+            } else {
+                ARKA_PLAN_MUZIK.pause();
+            }
+            playSound('tiklama');
+        }
+
+        /* Tam Ekran Kontrolü İşlevselliği */
+        function toggleFullscreen() {
+            playSound('tiklama');
+            const doc = window.document;
+            const docEl = doc.documentElement;
+
+            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                if (requestFullScreen) {
+                    requestFullScreen.call(docEl).catch(err => {
+                        console.error(`Tam ekran moduna geçilemedi: ${err.message}`);
+                    });
+                }
+            } else {
+                if (cancelFullScreen) {
+                    cancelFullScreen.call(doc);
+                }
+            }
+        }
+
+        function updateFullscreenIcons() {
+            const doc = window.document;
+            const isFullscreen = doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullScreenElement || doc.msFullscreenElement;
+            
+            const iconFullscreen = document.getElementById('icon-fullscreen');
+            const iconExitFullscreen = document.getElementById('icon-exit-fullscreen');
+            
+            if (iconFullscreen && iconExitFullscreen) {
+                if (isFullscreen) {
+                    iconFullscreen.style.display = 'none';
+                    iconExitFullscreen.style.display = 'block';
+                } else {
+                    iconFullscreen.style.display = 'block';
+                    iconExitFullscreen.style.display = 'none';
+                }
+            }
+        }
+
+        document.addEventListener('fullscreenchange', updateFullscreenIcons);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenIcons);
+        document.addEventListener('mozfullscreenchange', updateFullscreenIcons);
+        document.addEventListener('MSFullscreenChange', updateFullscreenIcons);
+
+        function toggleTheme() {
+            playSound('tiklama');
+            const body = document.body;
+            const sunIcon = document.getElementById('icon-sun');
+            const moonIcon = document.getElementById('icon-moon');
+            const logoImg = document.getElementById('img-logo');
+
+            if (body.classList.contains('light-theme')) {
+                body.classList.remove('light-theme');
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+                localStorage.setItem('oyun-tema', 'dark');
+                if (logoImg) logoImg.src = 'gorsel/dark-mod-logo.png';
+            } else {
+                body.classList.add('light-theme');
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+                localStorage.setItem('oyun-tema', 'light');
+                if (logoImg) logoImg.src = 'gorsel/light-mod-logo.png';
+            }
+        }
+
+        function startGame() {
+            playSound('tiklama');
+            // Müzik açıksa oyun başlarken arka plan müziğini başlat
+            if (OYUN_DURUMU.muzik_acik) {
+                ARKA_PLAN_MUZIK.play().catch(() => { /* dosya yoksa sessizce geç */ });
+            }
+
+            OYUN_DURUMU.skor = 0;
+            OYUN_DURUMU.kalan_hak = 3;
+            OYUN_DURUMU.baslangic_zamani = Date.now(); // Süre hesabı için başlangıç anı
+            document.getElementById('label-score').innerText = OYUN_DURUMU.skor;
+            document.getElementById('label-lives').innerText = OYUN_DURUMU.kalan_hak;
+
+            // Öğeleri görünür kıl
+            document.getElementById('item-apple').style.visibility = 'visible';
+            document.getElementById('item-pear').style.visibility = 'visible';
+
+            switchScreen('screen-game');
+        }
+
+        function restartGame() {
+            playSound('tiklama');
+            // Yıldızları temizle
+            document.querySelectorAll('.star').forEach(star => star.classList.remove('active'));
+            switchScreen('screen-home');
+        }
+
+        /* ==========================================================================
+           ETKİLEŞİM YÖNETİCİSİ (SÜRÜKLE-BIRAK & TIKLA-TAŞI İKİLİ MEKANİĞİ)
+           ========================================================================== */
+        const draggables = document.querySelectorAll('.interactive-item');
+        const dropTargets = document.querySelectorAll('.drop-target');
+
+        // A. Sürükle Bırak Olay Tanımlamaları
+        draggables.forEach(draggable => {
+            draggable.addEventListener('dragstart', (e) => {
+                draggable.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', draggable.id);
+            });
+
+            draggable.addEventListener('dragend', () => {
+                draggable.classList.remove('dragging');
+            });
+
+            // B. Tıkla - Taşı (Click-to-Move Fallback) Etkinliği
+            const ogeyiSec = (e) => {
+                e.stopPropagation();
+                playSound('tiklama');
+
+                // Eğer zaten seçiliyse seçimi kaldır
+                if (OYUN_DURUMU.secili_oge_id === draggable.id) {
+                    draggable.classList.remove('selected');
+                    OYUN_DURUMU.secili_oge_id = null;
+                } else {
+                    // Önceki seçimi kaldır
+                    draggables.forEach(d => d.classList.remove('selected'));
+
+                    // Yeni ögeyi seç
+                    draggable.classList.add('selected');
+                    OYUN_DURUMU.secili_oge_id = draggable.id;
+                }
+            };
+            draggable.addEventListener('click', ogeyiSec);
+
+            // C. Klavye Desteği (Erişilebilirlik): Enter veya Boşluk ile seçim
+            draggable.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    ogeyiSec(e);
+                }
+            });
+        });
+
+        // Hedef alanlar için sürükle/tıklama yöneticileri
+        dropTargets.forEach(target => {
+            target.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                target.classList.add('hovered');
+            });
+
+            target.addEventListener('dragleave', () => {
+                target.classList.remove('hovered');
+            });
+
+            target.addEventListener('drop', (e) => {
+                e.preventDefault();
+                target.classList.remove('hovered');
+                const itemId = e.dataTransfer.getData('text/plain');
+                const draggedItem = document.getElementById(itemId);
+
+                if (draggedItem) {
+                    processMatching(draggedItem, target);
+                }
+            });
+
+            // Tıkla-Taşı Hedef Tıklama Etkinliği
+            const hedefeBirak = () => {
+                if (OYUN_DURUMU.secili_oge_id) {
+                    const selectedItem = document.getElementById(OYUN_DURUMU.secili_oge_id);
+                    if (selectedItem) {
+                        selectedItem.classList.remove('selected');
+                        OYUN_DURUMU.secili_oge_id = null;
+                        processMatching(selectedItem, target);
+                    }
+                }
+            };
+            target.addEventListener('click', hedefeBirak);
+
+            // Klavye Desteği (Erişilebilirlik): Enter veya Boşluk ile bırakma
+            target.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    hedefeBirak();
+                }
+            });
+        });
+
+        // Sayfa boşluğuna tıklandığında seçimi temizleme (UX kolaylığı)
+        document.getElementById('screen-game').addEventListener('click', () => {
+            if (OYUN_DURUMU.secili_oge_id) {
+                const item = document.getElementById(OYUN_DURUMU.secili_oge_id);
+                if (item) item.classList.remove('selected');
+                OYUN_DURUMU.secili_oge_id = null;
+            }
+        });
+
+        /* ==========================================================================
+           EŞLEŞTİRME KONTROLÜ VE PEDAGOJİK GERİ BİLDİRİM
+           ========================================================================== */
+        function processMatching(item, target) {
+            const itemColor = item.getAttribute('data-color');
+            const targetAcceptColor = target.getAttribute('data-accept');
+
+            if (itemColor === targetAcceptColor) {
+                // 1. DOĞRU DURUM
+                OYUN_DURUMU.skor += 50;
+                document.getElementById('label-score').innerText = OYUN_DURUMU.skor;
+                item.style.visibility = 'hidden'; // Eşleşen ögeyi gizle
+
+                // Platforma ara ilerleme bildir (öğrenci doğru adım attı)
+                DijitalAtolye.progress({ outcomeCode: KAZANIM_KODU, score: OYUN_DURUMU.skor });
+
+                showFeedbackModal(true, "Harika! Doğru Eşleştirme.", `${item.innerText} doğru şekilde ${target.querySelector('.target-title').innerText} içine yerleştirildi.`);
+            } else {
+                // 2. YANLIŞ DURUM
+                OYUN_DURUMU.kalan_hak -= 1;
+                document.getElementById('label-lives').innerText = OYUN_DURUMU.kalan_hak;
+
+                // Kılavuza uygun yönlendirici açıklama
+                let dogruKutuAdi = (itemColor === 'red') ? "Kırmızı Kutu" : "Yeşil Kutu";
+                showFeedbackModal(false, "Tekrar Dene", `Doğrusu <b>${dogruKutuAdi}</b> olmalıydı. Çünkü ${item.innerText} rengi ile ${target.querySelector('.target-title').innerText} rengi eşleşmemektedir.`);
+            }
+        }
+
+        function showFeedbackModal(isCorrect, title, message) {
+            const modal = document.getElementById('modal-feedback');
+            const modalContent = document.getElementById('modal-content');
+            const symbol = document.getElementById('feedback-symbol');
+            const header = document.getElementById('feedback-header');
+            const msg = document.getElementById('feedback-msg');
+
+            // Sınıfları temizle
+            modalContent.className = 'feedback-modal';
+
+            if (isCorrect) {
+                modalContent.classList.add('correct-style');
+                symbol.innerText = "✓";
+                header.innerText = title;
+                msg.innerHTML = message;
+                playSound('dogru');
+            } else {
+                modalContent.classList.add('incorrect-style');
+                symbol.innerText = "✗";
+                header.innerText = title;
+                msg.innerHTML = message;
+                playSound('yanlis');
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeFeedback() {
+            document.getElementById('modal-feedback').classList.remove('active');
+            playSound('tiklama');
+            checkGameEnd();
+        }
+
+        function checkGameEnd() {
+            const appleVisible = document.getElementById('item-apple').style.visibility !== 'hidden';
+            const pearVisible = document.getElementById('item-pear').style.visibility !== 'hidden';
+
+            // Haklar bitti mi veya tüm ögeler doğru yerleşti mi?
+            if (OYUN_DURUMU.kalan_hak <= 0 || (!appleVisible && !pearVisible)) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            document.getElementById('label-final-score').innerText = OYUN_DURUMU.skor;
+            const stars = document.querySelectorAll('.star');
+
+            // Yıldız derecelendirme mantığı (Pedagojik ödül sistemi)
+            let activeStars = 0;
+            if (OYUN_DURUMU.kalan_hak === 3 && OYUN_DURUMU.skor === 100) {
+                activeStars = 3;
+            } else if (OYUN_DURUMU.skor >= 50 && OYUN_DURUMU.kalan_hak >= 1) {
+                activeStars = 2;
+            } else if (OYUN_DURUMU.skor > 0) {
+                activeStars = 1;
+            }
+
+            // Yıldızları gecikmeli olarak aktif et
+            for (let i = 0; i < activeStars; i++) {
+                stars[i].classList.add('active');
+            }
+
+            // Platforma tamamlama olayını bildir (final skor + süre).
+            // Skoru 0-100 aralığına ölçeklendiriyoruz (host bu aralığı bekler).
+            const gecenSaniye = OYUN_DURUMU.baslangic_zamani
+                ? Math.round((Date.now() - OYUN_DURUMU.baslangic_zamani) / 1000)
+                : undefined;
+            const normalizeSkor = Math.max(0, Math.min(100, OYUN_DURUMU.skor));
+            DijitalAtolye.complete({
+                outcomeCode: KAZANIM_KODU,
+                score: normalizeSkor,
+                durationSeconds: gecenSaniye
+            });
+
+            switchScreen('screen-result');
+        }
+
+        /* ==========================================================================
+           LETTERBOX RESIZE (EN-BOY KORUYUCU EK HESAPLAYICI)
+           ========================================================================== */
+        function resizeGame() {
+            const canvas = document.getElementById('game-canvas');
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+
+            const targetRatio = 1280 / 720;
+            const currentRatio = windowWidth / windowHeight;
+
+            let scale;
+            if (currentRatio > targetRatio) {
+                scale = windowHeight / 720;
+            } else {
+                scale = windowWidth / 1280;
+            }
+
+            // Piksel titremesini ve kaymayı önleyen matris ölçekleme
+            canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        }
+
+        window.addEventListener('resize', resizeGame);
+        window.addEventListener('load', () => {
+            resizeGame();
+
+            // Sayfa yüklendiğinde kayıtlı temayı kontrol et
+            const kayitliTema = localStorage.getItem('oyun-tema');
+            if (kayitliTema === 'light') {
+                document.body.classList.add('light-theme');
+                document.getElementById('icon-sun').style.display = 'none';
+                document.getElementById('icon-moon').style.display = 'block';
+                const logoImg = document.getElementById('img-logo');
+                if (logoImg) logoImg.src = 'gorsel/light-mod-logo.png';
+            }
+
+            // Sayfa yüklendiğinde varsayılan ekran durumunu ayarla
+            switchScreen('screen-home');
+        });
+    </script>
+</body>
+
+</html>

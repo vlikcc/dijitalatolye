@@ -67,6 +67,24 @@ public static class CatalogEndpoints
             return Results.Ok(outcomes);
         });
 
+        // Verilen kazanım kodları için kod+açıklama çözümlemesi (yükleme sihirbazında seçili kazanımları
+        // açıklamayla göstermek, AI ön-dolumu/manuel girişler dahil).
+        catalog.MapGet("/outcomes/by-codes", async (
+            [FromQuery] string? codes,
+            CatalogDbContext db,
+            CancellationToken ct) =>
+        {
+            var list = (codes ?? string.Empty)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct().Take(100).ToList();
+            if (list.Count == 0) return Results.Ok(Array.Empty<object>());
+            var outcomes = await db.Outcomes.AsNoTracking()
+                .Where(o => list.Contains(o.Code))
+                .Select(o => new { o.Code, o.Description })
+                .ToListAsync(ct);
+            return Results.Ok(outcomes);
+        });
+
         // Cascading: subject → outcomes (Faz F)
         catalog.MapGet("/subjects/{subjectId:guid}/outcomes", async (
             Guid subjectId,

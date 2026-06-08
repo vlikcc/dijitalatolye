@@ -171,7 +171,7 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
                 <mat-chip-grid #outcomeGrid>
                   @for (code of outcomeCodes(); track code) {
                     <mat-chip-row (removed)="removeOutcome(code)">
-                      {{ code }}
+                      <span class="font-semibold">{{ code }}</span>@if (descOf(code)) {<span class="text-dim"> — {{ descOf(code) }}</span>}
                       <button matChipRemove><mat-icon>cancel</mat-icon></button>
                     </mat-chip-row>
                   }
@@ -262,7 +262,23 @@ export class UploadComponent {
 
   readonly tags = signal<string[]>([]);
   readonly outcomeCodes = signal<string[]>([]);
+  readonly outcomeDescriptions = signal<Record<string, string>>({});
   outcomeQuery = '';
+
+  descOf(code: string): string { return this.outcomeDescriptions()[code] ?? ''; }
+
+  /** Açıklaması bilinmeyen kazanım kodları için Catalog'tan kod→açıklama çözer (AI ön-dolum/manuel giriş). */
+  private resolveOutcomeDescriptions(): void {
+    const missing = this.outcomeCodes().filter((c) => !this.outcomeDescriptions()[c]);
+    if (missing.length === 0) return;
+    this.api.get<CatalogOutcome[]>('/catalog/outcomes/by-codes', { codes: missing.join(',') }).subscribe({
+      next: (list) => {
+        const map = { ...this.outcomeDescriptions() };
+        for (const o of list ?? []) map[o.code] = o.description;
+        this.outcomeDescriptions.set(map);
+      },
+    });
+  }
 
   // Outcome autocomplete: Catalog.API'den arama
   private readonly outcomeQuery$ = signal(this.outcomeQuery);
@@ -353,6 +369,7 @@ export class UploadComponent {
     if (m.difficulty) filled.add('difficulty');
     this.tags.set([...m.tags]);
     this.outcomeCodes.set([...m.outcomeCodes]);
+    if (m.outcomeCodes.length > 0) this.resolveOutcomeDescriptions();
     if (m.tags.length > 0) filled.add('tags');
     if (m.outcomeCodes.length > 0) filled.add('outcomeCodes');
 
@@ -399,6 +416,7 @@ export class UploadComponent {
     if (v && !this.outcomeCodes().includes(v)) {
       this.outcomeCodes.set([...this.outcomeCodes(), v]);
       this.markManual('outcomeCodes');
+      this.resolveOutcomeDescriptions();
     }
     e.chipInput?.clear();
     this.outcomeQuery = '';
@@ -409,6 +427,9 @@ export class UploadComponent {
     if (v && !this.outcomeCodes().includes(v)) {
       this.outcomeCodes.set([...this.outcomeCodes(), v]);
       this.markManual('outcomeCodes');
+      // Açıklamayı seçilen seçenekten yakala (anında göster).
+      const opt = this.outcomeOptions().find((o) => o.code === v);
+      if (opt) this.outcomeDescriptions.set({ ...this.outcomeDescriptions(), [v]: opt.description });
     }
     this.outcomeQuery = '';
     this.outcomeQuery$.set('');
