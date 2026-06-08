@@ -18,10 +18,17 @@
 		X-Frame-Options "SAMEORIGIN"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "geolocation=(), microphone=(), camera=()"
-		# Angular build: inline critical CSS + deferred stylesheet onload + Google Fonts
-		Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self' 'unsafe-inline'; connect-src 'self' wss: https:; frame-ancestors 'self'"
 		-Server
 	}
+
+	# CSP path'e gore ayrilir. Global blokta CSP YOK; cunku iki "header" ayni yaniti set ederse
+	# global olan kazaniyor. Bunun yerine birbirini dislayan iki matcher kullaniyoruz (cakisma yok):
+	#   - /cdn disi (SPA/API): standart CSP.
+	#   - /cdn (untrusted ogretmen icerigi): siki CSP, connect-src none => disari veri sizmaz.
+	# postMessage CSP disidir; iframe sandbox allow-same-origin icermez (asil izolasyon katmani).
+	@notcdn not path /cdn/*
+	header @notcdn Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self' 'unsafe-inline'; connect-src 'self' wss: https:; frame-ancestors 'self'"
+	header /cdn/* Content-Security-Policy "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; frame-ancestors 'self'"
 
 	# API
 	handle /api/* {
@@ -52,10 +59,8 @@
 	# MinIO presigned URL imzasi 'Host: minio:9000' ile hesaplanir; Caddy bu Host
 	# header'i icerideki MinIO'ya aynen iletmek zorunda yoksa 403 SignatureDoesNotMatch.
 	handle_path /cdn/* {
-		# NOT: Untrusted icerik icin daha siki bir CSP (connect-src none) istenirdi; ancak global
-		# header bloku CSP'yi eziyor. Asil izolasyon iframe sandbox'inda allow-same-origin OLMAMASIYLA
-		# saglanir (opaque origin: app localStorage/cookie/DOM ve same-origin API erisimi yok).
-		# Takip isi: global CSP'yi per-route'a tasiyip /cdn icin connect-src none uygulamak.
+		# CSP yukarida site seviyesindeki "header /cdn/*" ile sikilastirilir (connect-src none).
+		# Izolasyonun asil katmani: iframe sandbox allow-same-origin icermez (opaque origin).
 		reverse_proxy minio:9000 {
 			header_up Host minio:9000
 		}
