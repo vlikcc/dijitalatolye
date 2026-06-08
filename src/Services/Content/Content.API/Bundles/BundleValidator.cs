@@ -89,7 +89,9 @@ public sealed class BundleValidator
             if (!AllowedExtensions.Contains(ext))
                 throw new BundleValidationException($"İzin verilmeyen dosya türü: {entry.FullName}");
 
-            if (string.Equals(entry.Name, ManifestFileName, StringComparison.OrdinalIgnoreCase) && manifestEntry is null)
+            // Birden fazla manifest.json olursa kök-en-yakın olanı (en kısa yol) seç.
+            if (string.Equals(entry.Name, ManifestFileName, StringComparison.OrdinalIgnoreCase)
+                && (manifestEntry is null || entry.FullName.Length < manifestEntry.FullName.Length))
                 manifestEntry = entry;
             fileCount++;
         }
@@ -122,16 +124,36 @@ public sealed class BundleValidator
             throw new BundleValidationException("manifest.version zorunludur.");
 
         var entryPath = manifest.Entry.Replace('\\', '/').TrimStart('/');
-        var entryExists = archive.Entries.Any(e => string.Equals(e.FullName.Replace('\\', '/'), entryPath, StringComparison.OrdinalIgnoreCase));
+
+        // entry, manifest.json'a GÖRELİ verilir. ZIP bir klasör sarmalıyla oluşturulmuşsa
+        // (ör. "GizemliGol/manifest.json" + "GizemliGol/index.html") manifest'in dizin prefix'ini
+        // entry'ye uygulayıp gerçek yolu çözeriz. BundleExtractor da bu tam yolu kullanır.
+        var manifestFull = manifestEntry.FullName.Replace('\\', '/');
+        var manifestDir = manifestFull.Length > manifestEntry.Name.Length
+            ? manifestFull[..^manifestEntry.Name.Length]   // "GizemliGol/" ya da ""
+            : string.Empty;
+
+        var resolvedEntry = manifestDir + entryPath;
+        var entryExists = archive.Entries.Any(e => string.Equals(e.FullName.Replace('\\', '/'), resolvedEntry, StringComparison.OrdinalIgnoreCase));
+
+        // Geriye dönük: entry zaten tam yol (prefix dahil) olarak verilmişse onu da kabul et.
+        if (!entryExists && archive.Entries.Any(e => string.Equals(e.FullName.Replace('\\', '/'), entryPath, StringComparison.OrdinalIgnoreCase)))
+        {
+            resolvedEntry = entryPath;
+            entryExists = true;
+        }
+
         if (!entryExists) throw new BundleValidationException($"manifest.entry dosyası ZIP içinde bulunamadı: {entryPath}");
 
-        if (!string.IsNullOrWhiteSpace(declaredEntry) && !string.Equals(declaredEntry, entryPath, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(declaredEntry)
+            && !string.Equals(declaredEntry, entryPath, StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(declaredEntry, resolvedEntry, StringComparison.OrdinalIgnoreCase))
             throw new BundleValidationException($"Beyan edilen entry ({declaredEntry}) manifest entry ile eşleşmiyor ({entryPath}).");
 
         return new BundleValidationResult(
             Sha256: sha,
             SizeBytes: size,
-            ManifestEntry: entryPath,
+            ManifestEntry: resolvedEntry,
             ManifestJson: manifestJson,
             ManifestTitle: manifest.Title,
             ManifestVersion: manifest.Version,
