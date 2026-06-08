@@ -35,11 +35,14 @@ public sealed class ContentDbContext : DbContext
             b.Property(c => c.PublishedBucket).HasMaxLength(120);
             b.Property(c => c.PublishedKey).HasMaxLength(500);
             b.Property(c => c.State).HasConversion<string>().HasMaxLength(40);
+            b.Property(c => c.Type).HasConversion<string>().HasMaxLength(20).HasDefaultValue(ContentType.Game);
             b.Property(c => c.OutcomeCodes).HasColumnType("text[]");
             b.Property(c => c.Tags).HasColumnType("text[]");
             b.Property(c => c.AiSuggestionJson).HasColumnType("text");
+            b.Property(c => c.AutoRejectReason).HasColumnType("text");
             b.HasIndex(c => c.AuthorUserId);
             b.HasIndex(c => c.State);
+            b.HasIndex(c => c.Type);
             b.HasMany(c => c.Versions).WithOne()
                 .HasForeignKey(v => v.ContentId).OnDelete(DeleteBehavior.Cascade);
         });
@@ -52,6 +55,8 @@ public sealed class ContentDbContext : DbContext
             b.Property(v => v.StorageKey).HasMaxLength(500).IsRequired();
             b.Property(v => v.ManifestEntry).HasMaxLength(200).IsRequired();
             b.Property(v => v.Sha256).HasMaxLength(128);
+            b.Property(v => v.GuardFileId).HasMaxLength(64);
+            b.Property(v => v.GuardScanStatus).HasMaxLength(40);
             b.HasIndex(v => new { v.ContentId, v.VersionNumber }).IsUnique();
         });
 

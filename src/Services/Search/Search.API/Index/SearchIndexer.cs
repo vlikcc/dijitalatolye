@@ -121,6 +121,7 @@ public sealed class ElasticSearchIndexer : ISearchIndexer
             .Mappings(m => m
                 .Properties<ContentSearchDocument>(p => p
                     .Keyword(k => k.Slug)
+                    .Keyword(k => k.Type!)
                     .Text(t => t.Title, td => td.Analyzer(TurkishAnalyzer))
                     .Text(t => t.Description!, td => td.Analyzer(TurkishAnalyzer))
                     .Keyword(k => k.Subject!)

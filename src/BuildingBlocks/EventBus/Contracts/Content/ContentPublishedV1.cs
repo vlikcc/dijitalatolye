@@ -14,6 +14,8 @@ public sealed record ContentPublishedV1 : IntegrationEvent
     public required string Title { get; init; }
     public required string? Description { get; init; }
     public required string PlayUrl { get; init; }
+    /// <summary>İçerik türü: Game | DigitalContent | EBook.</summary>
+    public string Type { get; init; } = "Game";
     public required IReadOnlyCollection<string> OutcomeCodes { get; init; }
     public required IReadOnlyCollection<string> Tags { get; init; }
     public required int? GradeLevel { get; init; }

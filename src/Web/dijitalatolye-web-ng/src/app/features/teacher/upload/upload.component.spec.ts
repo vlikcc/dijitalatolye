@@ -4,19 +4,30 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { UploadComponent } from './upload.component';
-import { AiExtractResponse } from '@core/api/contracts';
+import { AiExtractResponse, BundleUploadResponse, ContentProcessingStatusResponse, MetadataExtractResponse } from '@core/api/contracts';
 
-describe('UploadComponent (AI destekli upload)', () => {
+describe('UploadComponent (Guard-önce upload)', () => {
   let fixture: ComponentFixture<UploadComponent>;
   let component: UploadComponent;
   let http: HttpTestingController;
 
-  const sampleExtract: AiExtractResponse = {
+  const sampleUpload: BundleUploadResponse = {
+    contentId: 'content-123',
+    versionId: 'v1',
     bucket: 'dijitalatolye-content',
     key: 'u/abc/bundle.zip',
     manifestEntry: 'index.html',
     fileSizeBytes: 12345,
     sha256: 'deadbeef',
+    guardScanStatus: null,
+  };
+
+  const sampleMetadata: MetadataExtractResponse = {
+    bucket: sampleUpload.bucket,
+    key: sampleUpload.key,
+    manifestEntry: sampleUpload.manifestEntry,
+    fileSizeBytes: sampleUpload.fileSizeBytes,
+    sha256: sampleUpload.sha256,
     filesScanned: 3,
     metadata: {
       title: 'Doğal Sayılar',
@@ -34,6 +45,14 @@ describe('UploadComponent (AI destekli upload)', () => {
     },
   };
 
+  const guardClean: ContentProcessingStatusResponse = {
+    contentId: 'content-123',
+    state: 'Draft',
+    guardScanStatus: 'clean',
+    guardRejected: false,
+    canExtractMetadata: true,
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [UploadComponent],
@@ -48,9 +67,25 @@ describe('UploadComponent (AI destekli upload)', () => {
     component = fixture.componentInstance;
     http = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
+    http.expectOne('/api/catalog/subjects').flush([]);
   });
 
-  afterEach(() => http.verify());
+  afterEach(() => {
+    for (const req of http.match(() => true)) {
+      const url = req.request.url;
+      if (url.includes('/catalog/outcomes/by-codes')) {
+        req.flush([{ code: 'M.5.1.1.1', description: 'Doğal sayıları okur' }]);
+      } else if (url.includes('/catalog/outcomes')) {
+        req.flush([
+          { code: 'M.5.1.1.1', description: 'Doğal sayıları okur' },
+          { code: 'M.5.1.1.2', description: 'Basamak değerini anlar' },
+        ]);
+      } else if (url.includes('/catalog/subjects')) {
+        req.flush([]);
+      }
+    }
+    http.verify();
+  });
 
   it('idle fazıyla başlar', () => {
     expect(component.phase()).toBe('idle');
@@ -64,71 +99,45 @@ describe('UploadComponent (AI destekli upload)', () => {
     expect(component.uploadError()).toContain('Sadece');
   });
 
-  it('50 MB üstü dosya reddedilir', () => {
-    const big = new File([new Uint8Array(51 * 1024 * 1024)], 'big.zip', { type: 'application/zip' });
-    (component as any).handleFile(big);
-    expect(component.uploadError()).toContain('50 MB');
-  });
-
-  it('geçerli ZIP yüklendiğinde extracting → form fazına geçer', () => {
+  it('geçerli ZIP: upload → guard poll → metadata → form', fakeAsync(() => {
     const f = new File(['zipbytes'], 'bundle.zip', { type: 'application/zip' });
     (component as any).handleFile(f);
 
+    expect(component.phase()).toBe('uploading');
+    http.expectOne('/api/contents/bundle-upload').flush(sampleUpload);
+    tick();
+
+    expect(component.phase()).toBe('guardScanning');
+    http.expectOne('/api/contents/content-123/processing-status').flush(guardClean);
+    tick();
+
     expect(component.phase()).toBe('extracting');
-    const req = http.expectOne('/api/contents/ai-extract');
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body instanceof FormData).toBeTrue();
-    req.flush(sampleExtract);
+    http.expectOne('/api/contents/content-123/metadata-extract').flush(sampleMetadata);
+    tick();
 
     expect(component.phase()).toBe('form');
-    expect(component.extraction()?.key).toBe('u/abc/bundle.zip');
     expect(component.form.value.title).toBe('Doğal Sayılar');
-    expect(component.form.value.subject).toBe('Matematik');
-    expect(component.outcomeCodes()).toEqual(['M.5.1.1.1']);
-    expect(component.tags()).toEqual(['matematik', 'doğal sayılar']);
-    expect(component.confidencePct()).toBe(82);
-  });
+    expect(component.draftContentId()).toBe('content-123');
+  }));
 
-  it('AI fill sonrası rozet "AI Önerisi" gösterir; manuel edit sonrası "Manuel"e döner', () => {
+  it('submit akışı: metadata PUT → submit', fakeAsync(() => {
     const f = new File(['z'], 'b.zip');
     (component as any).handleFile(f);
-    http.expectOne('/api/contents/ai-extract').flush(sampleExtract);
-
-    expect(component.badgeLabel('title')).toBe('AI Önerisi');
-    component.markManual('title');
-    expect(component.badgeLabel('title')).toBe('Manuel');
-  });
-
-  it('extract başarısız olursa idle fazına geri döner ve hata gösterir', () => {
-    const f = new File(['z'], 'b.zip');
-    (component as any).handleFile(f);
-    http.expectOne('/api/contents/ai-extract')
-      .flush({ error: 'Sadece .zip, .html veya .htm yüklenebilir.' }, { status: 400, statusText: 'Bad Request' });
-
-    expect(component.phase()).toBe('idle');
-    expect(component.uploadError()).toContain('Sadece');
-  });
-
-  it('submit akışı: create → version → submit zinciri sırayla çağrılır', fakeAsync(() => {
-    const f = new File(['z'], 'b.zip');
-    (component as any).handleFile(f);
-    http.expectOne('/api/contents/ai-extract').flush(sampleExtract);
+    http.expectOne('/api/contents/bundle-upload').flush(sampleUpload);
+    tick();
+    http.expectOne('/api/contents/content-123/processing-status').flush(guardClean);
+    tick();
+    http.expectOne('/api/contents/content-123/metadata-extract').flush(sampleMetadata);
+    tick();
 
     const router = TestBed.inject(Router);
     const navSpy = spyOn(router, 'navigate').and.resolveTo(true);
 
     component.onSubmit();
 
-    const create = http.expectOne('/api/contents');
-    expect(create.request.method).toBe('POST');
-    expect(create.request.body.title).toBe('Doğal Sayılar');
-    create.flush({ id: 'content-123' });
-    tick();
-
-    const version = http.expectOne('/api/contents/content-123/versions');
-    expect(version.request.body.bucket).toBe('dijitalatolye-content');
-    expect(version.request.body.key).toBe('u/abc/bundle.zip');
-    version.flush({ id: 'v1' });
+    const meta = http.expectOne('/api/contents/content-123/metadata');
+    expect(meta.request.method).toBe('PUT');
+    meta.flush(null);
     tick();
 
     const submit = http.expectOne('/api/contents/content-123/submit');
@@ -139,16 +148,59 @@ describe('UploadComponent (AI destekli upload)', () => {
     expect(component.submitting()).toBeFalse();
   }));
 
-  it('reset() formu ve faz state\'ini temizler', () => {
+  it('Guard reddi idle fazına döner', fakeAsync(() => {
     const f = new File(['z'], 'b.zip');
     (component as any).handleFile(f);
-    http.expectOne('/api/contents/ai-extract').flush(sampleExtract);
-    expect(component.phase()).toBe('form');
+    http.expectOne('/api/contents/bundle-upload').flush(sampleUpload);
+    tick();
 
-    component.reset();
+    http.expectOne('/api/contents/content-123/processing-status').flush({
+      ...guardClean,
+      guardScanStatus: 'policy_rejected',
+      guardRejected: true,
+      canExtractMetadata: false,
+    });
+    tick();
+
     expect(component.phase()).toBe('idle');
-    expect(component.extraction()).toBeNull();
-    expect(component.tags()).toEqual([]);
-    expect(component.outcomeCodes()).toEqual([]);
-  });
+    expect(component.uploadError()).toContain('Guard');
+  }));
+
+  it('ders ve sınıf seçilince katalog kazanımları yüklenir', fakeAsync(() => {
+    const f = new File(['z'], 'b.zip');
+    (component as any).handleFile(f);
+    http.expectOne('/api/contents/bundle-upload').flush(sampleUpload);
+    tick();
+    http.expectOne('/api/contents/content-123/processing-status').flush(guardClean);
+    tick();
+    http.expectOne('/api/contents/content-123/metadata-extract').flush(sampleMetadata);
+    tick();
+
+    expect(component.canBrowseOutcomes()).toBeTrue();
+    expect(component.isAiSuggestedOutcome('M.5.1.1.1')).toBeTrue();
+
+    const byCodesReq = http.expectOne((r) => r.url.includes('/catalog/outcomes/by-codes'));
+    byCodesReq.flush([{ code: 'M.5.1.1.1', description: 'Doğal sayıları okur' }]);
+    tick();
+
+    const catalogReq = http.expectOne((r) =>
+      r.url.includes('/catalog/outcomes') &&
+      !r.url.includes('by-codes') &&
+      r.params.get('subject') === 'Matematik' &&
+      r.params.get('grade') === '5',
+    );
+    catalogReq.flush([
+      { code: 'M.5.1.1.1', description: 'Doğal sayıları okur' },
+      { code: 'M.5.1.1.2', description: 'Basamak değerini anlar' },
+    ]);
+    tick();
+
+    expect(component.selectedCatalogCount()).toBe(1);
+    component.toggleOutcomeCatalog();
+    expect(component.outcomeCatalogExpanded()).toBeTrue();
+
+    component.toggleOutcome({ code: 'M.5.1.1.2', description: 'Basamak değerini anlar' });
+    expect(component.outcomeCodes()).toEqual(['M.5.1.1.1', 'M.5.1.1.2']);
+    expect(component.isOutcomeSelected('M.5.1.1.2')).toBeTrue();
+  }));
 });

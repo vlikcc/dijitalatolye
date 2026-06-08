@@ -110,7 +110,7 @@ export class TeacherDashboardComponent implements OnInit {
   readonly loading = signal(true);
 
   readonly publishedCount = computed(() => this.contents().filter((c) => this.isPublished(c.state)).length);
-  readonly pendingCount = computed(() => this.contents().filter((c) => ['Submitted', 'AIReviewing', 'AIReviewed', 'EditorReviewing'].includes(c.state)).length);
+  readonly pendingCount = computed(() => this.contents().filter((c) => ['GuardScanning', 'Submitted', 'AIReviewing', 'AIReviewed', 'EditorReviewing'].includes(c.state)).length);
   readonly draftCount = computed(() => this.contents().filter((c) => ['Draft', 'RevisionRequested'].includes(c.state)).length);
 
   ngOnInit(): void {

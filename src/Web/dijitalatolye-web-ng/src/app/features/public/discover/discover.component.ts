@@ -1,9 +1,17 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/api/api.service';
+import { ContentType } from '@core/api/contracts';
+
+/** Tür → sayfa metinleri. type yoksa (tüm türler) genel "Keşfet" gösterilir. */
+const TYPE_META: Record<ContentType, { eyebrow: string; subtitle: string }> = {
+  Game: { eyebrow: 'Oyunlar', subtitle: 'Editör onaylı, güvenli ve kazanım odaklı eğitsel oyunlar.' },
+  DigitalContent: { eyebrow: 'Dijital İçerikler', subtitle: 'Kazanım-tabanlı, editör onaylı dijital öğrenme içerikleri.' },
+  EBook: { eyebrow: 'e-Kitaplar', subtitle: 'Editör onaylı e-kitaplar; bir kısmı kazanım odaklıdır.' },
+};
 
 interface SearchItem {
   id: string;
@@ -31,11 +39,11 @@ interface SearchResponse {
   template: `
     <div class="da-science-bg min-h-screen">
       <div class="max-w-7xl mx-auto px-4 pt-12 pb-6">
-        <div class="da-eyebrow mb-3">[ Oyunlar ] Keşfet</div>
+        <div class="da-eyebrow mb-3">[ {{ eyebrow() }} ] Keşfet</div>
         <h1 class="da-display text-4xl md:text-5xl font-bold text-ink">
           İlgini çeken <span class="da-serif text-accent">içeriği</span> bul.
         </h1>
-        <p class="mt-2 text-muted max-w-xl">Editör onaylı, güvenli ve kazanım odaklı eğitsel oyunlar.</p>
+        <p class="mt-2 text-muted max-w-xl">{{ subtitle() }}</p>
       </div>
 
       <div class="max-w-7xl mx-auto px-4 pb-16 flex flex-col md:flex-row gap-8">
@@ -167,6 +175,15 @@ export class DiscoverComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly q = signal('');
+  readonly contentType = signal<ContentType | null>(null);
+  readonly eyebrow = computed(() => {
+    const t = this.contentType();
+    return t ? TYPE_META[t].eyebrow : 'Tüm İçerikler';
+  });
+  readonly subtitle = computed(() => {
+    const t = this.contentType();
+    return t ? TYPE_META[t].subtitle : 'Editör onaylı, güvenli ve kazanım odaklı eğitsel içerikler.';
+  });
   readonly subject = signal<string | null>(null);
   readonly grade = signal<string | null>(null);
   readonly tag = signal<string | null>(null);
@@ -190,6 +207,8 @@ export class DiscoverComponent implements OnInit {
   iconFor(i: number): string { return this.icons[i % this.icons.length]; }
 
   ngOnInit(): void {
+    // Tür route data'dan gelir (/games, /digital, /ebooks); yoksa tüm türler (/discover).
+    this.contentType.set((this.route.snapshot.data['type'] as ContentType) ?? null);
     this.route.queryParamMap.subscribe((p) => {
       this.q.set(p.get('q') ?? '');
       this.subject.set(p.get('subject'));
@@ -218,6 +237,7 @@ export class DiscoverComponent implements OnInit {
     this.loading.set(true);
     this.api.get<SearchResponse>('/search/contents', {
       q: this.q() || undefined,
+      type: this.contentType() || undefined,
       subject: this.subject() || undefined,
       gradeLevel: this.grade() || undefined,
       tag: this.tag() || undefined,

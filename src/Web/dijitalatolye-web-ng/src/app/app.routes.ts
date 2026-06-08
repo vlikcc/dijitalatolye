@@ -16,6 +16,9 @@ export const APP_ROUTES: Routes = [
       { path: 'forgot-password', loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then((m) => m.ForgotPasswordComponent) },
       { path: 'reset-password', loadComponent: () => import('./features/auth/reset-password/reset-password.component').then((m) => m.ResetPasswordComponent) },
       { path: 'discover', loadComponent: () => import('./features/public/discover/discover.component').then((m) => m.DiscoverComponent) },
+      { path: 'games', data: { type: 'Game' }, loadComponent: () => import('./features/public/discover/discover.component').then((m) => m.DiscoverComponent) },
+      { path: 'digital', data: { type: 'DigitalContent' }, loadComponent: () => import('./features/public/discover/discover.component').then((m) => m.DiscoverComponent) },
+      { path: 'ebooks', data: { type: 'EBook' }, loadComponent: () => import('./features/public/discover/discover.component').then((m) => m.DiscoverComponent) },
       { path: 'category/:subject', loadComponent: () => import('./features/public/category/category.component').then((m) => m.CategoryComponent) },
       { path: 'contents/:slug', loadComponent: () => import('./features/public/content-detail/content-detail.component').then((m) => m.ContentDetailComponent) },
       {

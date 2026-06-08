@@ -6,13 +6,17 @@ export interface RegisterRequest { email: string; password: string; displayName:
 export interface AuthTokens { accessToken: string; refreshToken: string; email?: string; roles?: string[]; }
 
 export type ContentState =
-  | 'Draft' | 'Submitted' | 'AIReviewing' | 'AIReviewed'
+  | 'Draft' | 'GuardScanning' | 'Submitted' | 'AIReviewing' | 'AIReviewed'
   | 'EditorReviewing' | 'Approved' | 'Rejected' | 'AutoRejected'
   | 'RevisionRequested' | 'Published' | 'Unpublished';
+
+/** İçerik türü ayrımı: Oyun · Dijital İçerik · e-Kitap. */
+export type ContentType = 'Game' | 'DigitalContent' | 'EBook';
 
 export interface ContentSummary {
   id: string;
   title: string;
+  type?: ContentType;
   state: ContentState;
   subject?: string | null;
   gradeLevel?: number | null;
@@ -22,6 +26,7 @@ export interface ContentSummary {
 
 export interface ContentDetail extends ContentSummary {
   description?: string | null;
+  autoRejectReason?: string | null;
   difficulty?: string | null;
   durationMinutes?: number | null;
   outcomeCodes: string[];
@@ -44,6 +49,7 @@ export interface AiSuggestionInput {
 
 export interface CreateContentRequest {
   title: string;
+  type?: ContentType;
   description?: string | null;
   subject: string;
   gradeLevel?: number | null;
@@ -65,6 +71,49 @@ export interface AddVersionRequest {
   fileSizeBytes: number;
   sha256?: string | null;
   changeLog?: string | null;
+}
+
+export interface UpdateMetadataRequest {
+  title?: string | null;
+  type?: ContentType | null;
+  description?: string | null;
+  subject?: string | null;
+  gradeLevel?: number | null;
+  outcomeCodes?: string[];
+  tags?: string[];
+  durationMinutes?: number | null;
+  difficulty?: string | null;
+  aiSuggestion?: AiSuggestionInput | null;
+}
+
+export interface BundleUploadResponse {
+  contentId: string;
+  versionId: string;
+  bucket: string;
+  key: string;
+  manifestEntry: string;
+  fileSizeBytes: number;
+  sha256: string;
+  guardScanStatus: string | null;
+  type: ContentType;
+}
+
+export interface ContentProcessingStatusResponse {
+  contentId: string;
+  state: string;
+  guardScanStatus: string | null;
+  guardRejected: boolean;
+  canExtractMetadata: boolean;
+}
+
+export interface MetadataExtractResponse {
+  bucket: string;
+  key: string;
+  manifestEntry: string;
+  fileSizeBytes: number;
+  sha256: string;
+  metadata: AiExtractedMetadataDto;
+  filesScanned: number;
 }
 
 export interface AiExtractedMetadataDto {

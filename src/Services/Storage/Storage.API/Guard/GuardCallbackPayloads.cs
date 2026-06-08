@@ -28,17 +28,16 @@ public sealed record GuardApprovedFileMetadata(
     [property: JsonPropertyName("mime")] string? Mime);
 
 /// <summary>
-/// Storage.API, Guard'a yolladığı her isteğin <c>source_content_id</c>'sine
-/// <c>{ContentId}|{VersionId}|{Bucket}|{Key}</c> formatında kimlik + MinIO konumunu gömer.
-/// Guard bu değeri opak string olarak geri yansıttığı için ana site DB sorgusu olmadan
-/// callback'leri doğru içeriğe eşleyebilir.
+/// Guard'a gönderilen <c>source_content_id</c> (max 128 karakter):
+/// <c>{ContentId}|{VersionId}</c>. MinIO konumu <see cref="IGuardUploadRegistry"/> içinde tutulur.
+/// Geriye dönük: callback'lerde 4 parçalı eski format hâlâ okunur.
 /// </summary>
 public static class GuardSourceContentId
 {
     private const char Separator = '|';
 
-    public static string Encode(Guid contentId, Guid versionId, string bucket, string key)
-        => string.Join(Separator, contentId.ToString("N"), versionId.ToString("N"), bucket, key);
+    public static string Encode(Guid contentId, Guid versionId)
+        => string.Join(Separator, contentId.ToString("N"), versionId.ToString("N"));
 
     public static bool TryDecode(string value, out Guid contentId, out Guid versionId, out string bucket, out string key)
     {

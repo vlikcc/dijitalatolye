@@ -65,7 +65,7 @@ test.describe('AI destekli upload akışı', () => {
     await page.waitForURL(/\/teacher\/contents$/, { timeout: 30_000 });
 
     // 8) Listede yeni içerik göründü mü
-    await expect(page.getByText(/Submitted|Gönderildi|İncelemede/i).first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/GuardScanning|Güvenlik taraması|Submitted|Gönderildi|İncelemede/i).first()).toBeVisible({ timeout: 15_000 });
   });
 });
 

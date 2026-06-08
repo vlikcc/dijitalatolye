@@ -16,6 +16,7 @@ public static class SearchEndpoints
 
         g.MapGet("/contents", async (
             string? q,
+            string? type,
             string? subject,
             int? gradeLevel,
             string? outcome,
@@ -30,7 +31,7 @@ public static class SearchEndpoints
             var from = (page - 1) * pageSize;
 
             var mustQueries = BuildMustQueries(q);
-            var filters = BuildFilters(subject, gradeLevel, outcome, tag);
+            var filters = BuildFilters(type, subject, gradeLevel, outcome, tag);
 
             var resp = await client.SearchAsync<ContentSearchDocument>(s => s
                 .Index(ElasticSearchIndexer.IndexName)
@@ -43,6 +44,7 @@ public static class SearchEndpoints
                     if (filters.Count > 0) b.Filter(filters.ToArray());
                 }))
                 .Aggregations(a => a
+                    .Add("types", agg => agg.Terms(t => t.Field(f => f.Type).Size(5)))
                     .Add("subjects", agg => agg.Terms(t => t.Field(f => f.Subject).Size(20)))
                     .Add("gradeLevels", agg => agg.Terms(t => t.Field(f => f.GradeLevel).Size(12)))
                     .Add("tags", agg => agg.Terms(t => t.Field(f => f.Tags).Size(30))))
@@ -151,12 +153,15 @@ public static class SearchEndpoints
     }
 
     private static List<Action<QueryDescriptor<ContentSearchDocument>>> BuildFilters(
+        string? type,
         string? subject,
         int? gradeLevel,
         string? outcome,
         string? tag)
     {
         var filters = new List<Action<QueryDescriptor<ContentSearchDocument>>>();
+        if (!string.IsNullOrWhiteSpace(type))
+            filters.Add(qd => qd.Term(t => t.Field(f => f.Type).Value(type!)));
         if (!string.IsNullOrWhiteSpace(subject))
             filters.Add(qd => qd.Term(t => t.Field(f => f.Subject).Value(subject!)));
         if (gradeLevel is not null)
@@ -175,6 +180,7 @@ public static class SearchEndpoints
         {
             return new
             {
+                types = Array.Empty<object>(),
                 subject = Array.Empty<object>(),
                 gradeLevel = Array.Empty<object>(),
                 tags = Array.Empty<object>(),
@@ -183,6 +189,7 @@ public static class SearchEndpoints
 
         return new
         {
+            types = ExtractTerms(aggregations, "types"),
             subject = ExtractTerms(aggregations, "subjects"),
             gradeLevel = ExtractTerms(aggregations, "gradeLevels"),
             tags = ExtractTerms(aggregations, "tags"),

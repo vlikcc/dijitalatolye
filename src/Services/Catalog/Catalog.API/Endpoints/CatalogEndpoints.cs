@@ -28,10 +28,11 @@ public static class CatalogEndpoints
 
         // İsim/sınıf numarasıyla filtreli düz kazanım listesi (AI metadata extraction için).
         // subject: Subject.Code veya Subject.Name (case-insensitive). grade: Grade.Id (1-12).
-        // Hiçbir parametre verilmezse tüm kazanımları döner (üst sınır ile).
+        // search: kod veya açıklamada kısmi eşleşme (case-insensitive).
         catalog.MapGet("/outcomes", async (
             [FromQuery] string? subject,
             [FromQuery] int? grade,
+            [FromQuery] string? search,
             [FromQuery] int? limit,
             CatalogDbContext db,
             CancellationToken ct) =>
@@ -57,8 +58,17 @@ public static class CatalogEndpoints
             var unitIds = await unitsQuery.Select(u => u.Id).ToListAsync(ct);
             if (unitIds.Count == 0) return Results.Ok(Array.Empty<object>());
 
-            var outcomes = await db.Outcomes.AsNoTracking()
-                .Where(o => unitIds.Contains(o.UnitId))
+            var outcomesQuery = db.Outcomes.AsNoTracking()
+                .Where(o => unitIds.Contains(o.UnitId));
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var pattern = $"%{search.Trim()}%";
+                outcomesQuery = outcomesQuery.Where(o =>
+                    EF.Functions.ILike(o.Code, pattern) || EF.Functions.ILike(o.Description, pattern));
+            }
+
+            var outcomes = await outcomesQuery
                 .OrderBy(o => o.Code)
                 .Take(max)
                 .Select(o => new { o.Code, o.Description })

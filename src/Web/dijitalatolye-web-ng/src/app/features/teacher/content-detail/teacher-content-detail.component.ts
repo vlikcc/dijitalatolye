@@ -119,6 +119,18 @@ interface OutcomeStat {
           }
         </section>
 
+        @if (content()!.state === 'AutoRejected') {
+          <div class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+            <div class="flex items-start gap-2.5">
+              <mat-icon class="!text-rose-600 mt-0.5" style="font-size:20px;width:20px;height:20px">gpp_bad</mat-icon>
+              <div>
+                <p class="text-sm font-semibold text-rose-800">İçerik otomatik olarak reddedildi</p>
+                <p class="text-sm text-rose-700 mt-0.5">{{ content()!.autoRejectReason || 'Red gerekçesi sistem tarafından kaydedilmedi.' }}</p>
+              </div>
+            </div>
+          </div>
+        }
+
         @if (actionError()) {
           <div class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{{ actionError() }}</div>
         }
@@ -176,7 +188,7 @@ export class TeacherContentDetailComponent implements OnInit {
 
   statusLabel(status: ContentStatus): string {
     const map: Record<string, string> = {
-      Draft: 'Taslak', Submitted: 'Gönderildi', AIReviewing: 'AI inceliyor', AIReviewed: 'AI tamamlandı',
+      Draft: 'Taslak', GuardScanning: 'Güvenlik taraması', Submitted: 'Gönderildi', AIReviewing: 'AI inceliyor', AIReviewed: 'AI tamamlandı',
       EditorReviewing: 'Editörde', Approved: 'Onaylandı', Published: 'Yayında', Rejected: 'Reddedildi',
       RevisionRequested: 'Revizyon istendi', AutoRejected: 'Otomatik reddedildi', Unpublished: 'Yayından kaldırıldı',
     };

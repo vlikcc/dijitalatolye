@@ -4,20 +4,34 @@ import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '@core/api/api.service';
+import { ContentType } from '@core/api/contracts';
 
 type ContentStatus =
-  | 'Draft' | 'Submitted' | 'AIReviewing' | 'AIReviewed' | 'EditorReviewing'
+  | 'Draft' | 'GuardScanning' | 'Submitted' | 'AIReviewing' | 'AIReviewed' | 'EditorReviewing'
   | 'Approved' | 'Rejected' | 'RevisionRequested' | 'AutoRejected'
   | 'Published' | 'Unpublished';
 
 interface ContentItem {
   id: string;
   title: string;
+  type?: ContentType;
   status: ContentStatus;
+  autoRejectReason?: string | null;
   updatedAt: string;
   grade?: string;
   subject?: string;
 }
+
+const TYPE_FILTERS: ReadonlyArray<{ value: ContentType | null; label: string }> = [
+  { value: null, label: 'Tümü' },
+  { value: 'Game', label: 'Oyun' },
+  { value: 'DigitalContent', label: 'Dijital İçerik' },
+  { value: 'EBook', label: 'e-Kitap' },
+];
+
+const TYPE_LABELS: Record<ContentType, string> = {
+  Game: 'Oyun', DigitalContent: 'Dijital İçerik', EBook: 'e-Kitap',
+};
 
 @Component({
   selector: 'da-my-contents',
@@ -35,6 +49,17 @@ interface ContentItem {
         <mat-icon style="font-size:16px;width:16px;height:16px">add</mat-icon> Yeni içerik
       </a>
     </header>
+
+    <div class="flex flex-wrap items-center gap-2 mb-5">
+      @for (f of typeFilters; track f.label) {
+        <button type="button" (click)="setTypeFilter(f.value)"
+          [class]="f.value === typeFilter()
+            ? 'px-3 py-1.5 rounded-full text-sm font-semibold bg-brand-600 text-white'
+            : 'px-3 py-1.5 rounded-full text-sm font-medium bg-panel text-muted hover:text-ink'">
+          {{ f.label }}
+        </button>
+      }
+    </div>
 
     @if (loading()) {
       <div class="rounded-2xl bg-surface border border-line/10 p-12 flex flex-col items-center text-dim">
@@ -67,6 +92,7 @@ interface ContentItem {
           <thead class="bg-panel text-muted text-left">
             <tr>
               <th class="px-4 py-3 font-semibold">Başlık</th>
+              <th class="px-4 py-3 font-semibold">Tür</th>
               <th class="px-4 py-3 font-semibold">Sınıf / Ders</th>
               <th class="px-4 py-3 font-semibold">Durum</th>
               <th class="px-4 py-3 font-semibold">Son güncelleme</th>
@@ -77,12 +103,16 @@ interface ContentItem {
             @for (c of items(); track c.id) {
               <tr class="hover:bg-brand-50/40">
                 <td class="px-4 py-3 font-medium text-ink">{{ c.title }}</td>
+                <td class="px-4 py-3 text-muted">{{ typeLabel(c.type) }}</td>
                 <td class="px-4 py-3 text-muted">{{ c.grade ?? '—' }} {{ c.subject ? '• ' + c.subject : '' }}</td>
                 <td class="px-4 py-3">
-                  <span [class]="badgeClass(c.status)">
+                  <span [class]="badgeClass(c.status)" [title]="c.status === 'AutoRejected' ? (c.autoRejectReason || '') : ''">
                     <mat-icon style="font-size:14px;width:14px;height:14px">{{ badgeIcon(c.status) }}</mat-icon>
                     {{ badgeLabel(c.status) }}
                   </span>
+                  @if (c.status === 'AutoRejected' && c.autoRejectReason) {
+                    <p class="mt-1 text-xs text-rose-700 max-w-xs">{{ c.autoRejectReason }}</p>
+                  }
                 </td>
                 <td class="px-4 py-3 text-muted">{{ formatDate(c.updatedAt) }}</td>
                 <td class="px-4 py-3 text-right">
@@ -110,13 +140,23 @@ export class MyContentsComponent implements OnInit {
   readonly items = signal<ContentItem[]>([]);
   readonly loading = signal(true);
   readonly error = signal(false);
+  readonly typeFilter = signal<ContentType | null>(null);
+  readonly typeFilters = TYPE_FILTERS;
 
   ngOnInit(): void { this.load(); }
+
+  setTypeFilter(value: ContentType | null): void {
+    if (this.typeFilter() === value) return;
+    this.typeFilter.set(value);
+    this.load();
+  }
+
+  typeLabel(t?: ContentType): string { return t ? TYPE_LABELS[t] : '—'; }
 
   private load(): void {
     this.loading.set(true);
     this.error.set(false);
-    this.api.get<ContentItem[]>('/contents/mine').subscribe({
+    this.api.get<ContentItem[]>('/contents/mine', { type: this.typeFilter() || undefined }).subscribe({
       next: (data) => { this.items.set(data); this.loading.set(false); },
       error: () => { this.error.set(true); this.loading.set(false); },
     });
@@ -133,6 +173,7 @@ export class MyContentsComponent implements OnInit {
     const base = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ';
     switch (s) {
       case 'Draft': case 'Unpublished': return base + 'bg-panel text-muted';
+      case 'GuardScanning': return base + 'bg-sky-50 text-sky-700';
       case 'Submitted': return base + 'bg-brand-50 text-brand-700';
       case 'AIReviewing': case 'AIReviewed': return base + 'bg-violet-50 text-violet-700';
       case 'EditorReviewing': case 'RevisionRequested': return base + 'bg-amber-50 text-amber-700';
@@ -144,7 +185,7 @@ export class MyContentsComponent implements OnInit {
 
   badgeLabel(s: ContentStatus): string {
     return {
-      Draft: 'Taslak', Submitted: 'Gönderildi', AIReviewing: 'AI inceliyor', AIReviewed: 'AI tamamlandı',
+      Draft: 'Taslak', GuardScanning: 'Güvenlik taraması', Submitted: 'Gönderildi', AIReviewing: 'AI inceliyor', AIReviewed: 'AI tamamlandı',
       EditorReviewing: 'Editörde', Approved: 'Onaylandı', Published: 'Yayında', Rejected: 'Reddedildi',
       RevisionRequested: 'Revizyon istendi', AutoRejected: 'Otomatik reddedildi', Unpublished: 'Yayından kaldırıldı',
     }[s] ?? String(s);
@@ -154,7 +195,7 @@ export class MyContentsComponent implements OnInit {
     if (['Approved', 'Published', 'AIReviewed'].includes(s)) return 'check_circle';
     if (['Rejected', 'AutoRejected'].includes(s)) return 'cancel';
     if (['RevisionRequested'].includes(s)) return 'warning';
-    if (['AIReviewing', 'EditorReviewing', 'Submitted'].includes(s)) return 'schedule';
+    if (['AIReviewing', 'EditorReviewing', 'Submitted', 'GuardScanning'].includes(s)) return 'schedule';
     return 'description';
   }
 

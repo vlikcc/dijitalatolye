@@ -13,15 +13,18 @@ public sealed class GuardVettingConsumer : IConsumer<FileUploadedV1>
 {
     private readonly IObjectStorage _storage;
     private readonly IFileVettingService _vetting;
+    private readonly IGuardScanStatusSync _scanSync;
     private readonly ILogger<GuardVettingConsumer> _logger;
 
     public GuardVettingConsumer(
         IObjectStorage storage,
         IFileVettingService vetting,
+        IGuardScanStatusSync scanSync,
         ILogger<GuardVettingConsumer> logger)
     {
         _storage = storage;
         _vetting = vetting;
+        _scanSync = scanSync;
         _logger = logger;
     }
 
@@ -50,5 +53,7 @@ public sealed class GuardVettingConsumer : IConsumer<FileUploadedV1>
         _logger.LogInformation(
             "Guard vetting kabul edildi: GuardFileId={GuardFileId} Status={Status} ContentId={ContentId}",
             response.Id, response.Status, msg.ContentId);
+
+        _scanSync.ScheduleSync(msg.ContentId, msg.VersionId, response.Id);
     }
 }

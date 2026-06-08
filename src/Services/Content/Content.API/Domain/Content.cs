@@ -8,6 +8,9 @@ public sealed class Content
 
     public required string Title { get; set; }
 
+    /// <summary>İçerik türü: Oyun, Dijital İçerik veya e-Kitap.</summary>
+    public ContentType Type { get; set; } = ContentType.Game;
+
     public string? Description { get; set; }
 
     public string? Slug { get; set; }
@@ -21,6 +24,9 @@ public sealed class Content
     public List<string> Tags { get; set; } = [];
 
     public ContentState State { get; set; } = ContentState.Draft;
+
+    /// <summary>Otomatik red (Guard taraması veya AI moderasyonu) gerekçesi; panelde gösterilir. AutoRejected dışındaki durumlarda null.</summary>
+    public string? AutoRejectReason { get; set; }
 
     public Guid? CurrentVersionId { get; set; }
 
@@ -51,13 +57,16 @@ public sealed class Content
     public bool CanTransitionTo(ContentState target) =>
         (State, target) switch
         {
+            // Submit: Guard temiz değilse önce tarama beklenir; temizse doğrudan Submitted.
+            (ContentState.Draft, ContentState.GuardScanning) => true,
             (ContentState.Draft, ContentState.Submitted) => true,
+            (ContentState.GuardScanning, ContentState.Submitted) => true,
             (ContentState.Submitted, ContentState.AIReviewing) => true,
             (ContentState.AIReviewing, ContentState.AIReviewed) => true,
             (ContentState.AIReviewed, ContentState.EditorReviewing) => true,
-            // Guard reddi paralel akışta herhangi bir pre-publish state'te gelebilir;
-            // README §"İçerik ve güvenlik akışı" gereği rejection state'i her zaman uygulanmalı.
+            // Guard reddi pre-publish state'lerde AutoRejected yapılır.
             (ContentState.Draft, ContentState.AutoRejected) => true,
+            (ContentState.GuardScanning, ContentState.AutoRejected) => true,
             (ContentState.Submitted, ContentState.AutoRejected) => true,
             (ContentState.AIReviewing, ContentState.AutoRejected) => true,
             (ContentState.AIReviewed, ContentState.AutoRejected) => true,
@@ -88,6 +97,17 @@ public sealed class Content
     }
 }
 
+/// <summary>İçerik türü ayrımı. Üçü de aynı bundle/moderasyon akışından geçer.</summary>
+public enum ContentType
+{
+    /// <summary>Satranç, mangala, zeka oyunları vb. Kazanım opsiyonel.</summary>
+    Game = 0,
+    /// <summary>Kazanım-tabanlı dijital içerik. En az bir kazanım zorunlu.</summary>
+    DigitalContent = 1,
+    /// <summary>e-Kitap. Kazanım opsiyonel.</summary>
+    EBook = 2,
+}
+
 public enum ContentState
 {
     Draft = 0,
@@ -101,4 +121,6 @@ public enum ContentState
     AutoRejected = 8,
     Published = 9,
     Unpublished = 10,
+    /// <summary>Öğretmen gönderdi; Guard taraması tamamlanana kadar AI moderasyonu bekler.</summary>
+    GuardScanning = 11,
 }

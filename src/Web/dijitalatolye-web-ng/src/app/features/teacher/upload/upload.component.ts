@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,19 +6,19 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule, MatChipInputEvent } from '@angular/material/chips';
-import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSliderModule } from '@angular/material/slider';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { debounceTime, switchMap, of } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { switchMap, of, timer, Subscription, startWith } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ApiService } from '@core/api/api.service';
 import {
-  AiExtractResponse, CatalogOutcome, CatalogSubject,
-  CreateContentRequest, AddVersionRequest,
+  AiExtractResponse, BundleUploadResponse, CatalogOutcome, CatalogSubject,
+  ContentProcessingStatusResponse, ContentType, MetadataExtractResponse,
+  UpdateMetadataRequest,
 } from '@core/api/contracts';
 
 type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMinutes' | 'difficulty' | 'tags' | 'outcomeCodes';
@@ -29,7 +29,7 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
     MatIconModule, MatProgressBarModule, MatProgressSpinnerModule,
-    MatChipsModule, MatAutocompleteModule, MatFormFieldModule,
+    MatChipsModule, MatFormFieldModule,
     MatInputModule, MatSelectModule, MatButtonToggleModule, MatSliderModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,12 +38,37 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
       <header class="mb-6">
         <h1 class="text-2xl font-extrabold text-ink">İçerik Yükle</h1>
         <p class="text-sm text-muted mt-1">
-          ZIP veya HTML bundle'ınızı yükleyin; AI sizin için başlık, ders, sınıf, süre, kazanım ve etiketleri otomatik doldursun.
+          ZIP veya HTML bundle'ınızı yükleyin. Önce güvenlik taraması (Guard), ardından AI metadata önerisi oluşturulur.
         </p>
       </header>
 
+      <!-- İÇERİK TÜRÜ -->
+      @if (phase() === 'idle') {
+        <div class="mb-5">
+          <label class="text-xs font-semibold text-muted mb-2 block">İçerik türü</label>
+          <mat-button-toggle-group [value]="selectedType()" (change)="selectedType.set($event.value)" aria-label="İçerik türü">
+            <mat-button-toggle value="Game">
+              <mat-icon style="font-size:16px;width:16px;height:16px">sports_esports</mat-icon> Oyun
+            </mat-button-toggle>
+            <mat-button-toggle value="DigitalContent">
+              <mat-icon style="font-size:16px;width:16px;height:16px">widgets</mat-icon> Dijital İçerik
+            </mat-button-toggle>
+            <mat-button-toggle value="EBook">
+              <mat-icon style="font-size:16px;width:16px;height:16px">menu_book</mat-icon> e-Kitap
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+          <p class="text-xs text-dim mt-2">
+            @if (selectedType() === 'DigitalContent') {
+              Dijital içerik kazanım-tabanlıdır: göndermeden önce en az bir kazanım seçmeniz gerekir.
+            } @else {
+              Bu tür için kazanım seçimi opsiyoneldir.
+            }
+          </p>
+        </div>
+      }
+
       <!-- DROPZONE -->
-      @if (phase() === 'idle' || phase() === 'extracting') {
+      @if (phase() === 'idle' || phase() === 'uploading' || phase() === 'guardScanning' || phase() === 'extracting') {
         <div class="rounded-2xl border-2 border-dashed bg-surface p-12 text-center transition"
              [class.border-brand-400]="dragOver()"
              [class.bg-brand-50]="dragOver()"
@@ -64,12 +89,32 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
           </button>
           <input #fileInput type="file" hidden accept=".zip,.html,.htm" (change)="onFileSelected($event)" />
 
+          @if (phase() === 'uploading') {
+            <div class="mt-8 max-w-md mx-auto">
+              <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
+              <p class="mt-3 text-sm text-brand-700 font-medium inline-flex items-center gap-2">
+                <mat-icon style="font-size:16px;width:16px;height:16px">cloud_upload</mat-icon>
+                Dosya yükleniyor…
+              </p>
+            </div>
+          }
+
+          @if (phase() === 'guardScanning') {
+            <div class="mt-8 max-w-md mx-auto">
+              <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
+              <p class="mt-3 text-sm text-brand-700 font-medium inline-flex items-center gap-2">
+                <mat-icon style="font-size:16px;width:16px;height:16px">shield</mat-icon>
+                Guard güvenlik taraması… (birkaç saniye sürebilir)
+              </p>
+            </div>
+          }
+
           @if (phase() === 'extracting') {
             <div class="mt-8 max-w-md mx-auto">
               <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
               <p class="mt-3 text-sm text-brand-700 font-medium inline-flex items-center gap-2">
                 <mat-icon style="font-size:16px;width:16px;height:16px">auto_awesome</mat-icon>
-                AI içeriği analiz ediyor… (5-30 sn)
+                Guard temiz — AI metadata önerisi hazırlanıyor…
               </p>
             </div>
           }
@@ -123,7 +168,7 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
                 <label class="text-xs font-semibold text-muted flex items-center gap-2">
                   Ders <span [class]="badgeClass('subject')">{{ badgeLabel('subject') }}</span>
                 </label>
-                <select formControlName="subject" (change)="markManual('subject')"
+                <select formControlName="subject" (change)="onSubjectOrGradeChange(); markManual('subject')"
                   class="w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none">
                   <option value="">Seçiniz…</option>
                   @for (s of subjects(); track s) { <option [value]="s">{{ s }}</option> }
@@ -133,7 +178,7 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
                 <label class="text-xs font-semibold text-muted flex items-center gap-2">
                   Sınıf <span [class]="badgeClass('gradeLevel')">{{ badgeLabel('gradeLevel') }}</span>
                 </label>
-                <select formControlName="gradeLevel" (change)="markManual('gradeLevel')"
+                <select formControlName="gradeLevel" (change)="onSubjectOrGradeChange(); markManual('gradeLevel')"
                   class="w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none">
                   <option [ngValue]="null">Seçiniz…</option>
                   @for (g of grades; track g) { <option [ngValue]="g">{{ g }}. Sınıf</option> }
@@ -163,31 +208,79 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
             </div>
 
             <!-- Kazanım kodları -->
-            <div class="space-y-1">
+            <div class="space-y-2">
               <label class="text-xs font-semibold text-muted flex items-center gap-2">
                 Kazanım kodları (MEB) <span [class]="badgeClass('outcomeCodes')">{{ badgeLabel('outcomeCodes') }}</span>
               </label>
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-chip-grid #outcomeGrid>
+
+              @if (outcomeCodes().length === 0) {
+                <p class="text-xs text-dim">Henüz kazanım seçilmedi. AI önerisi gelirse burada görünür; aşağıdaki listeden ekleyebilirsiniz.</p>
+              } @else {
+                <div class="flex flex-wrap gap-2">
                   @for (code of outcomeCodes(); track code) {
-                    <mat-chip-row (removed)="removeOutcome(code)">
-                      <span class="font-semibold">{{ code }}</span>@if (descOf(code)) {<span class="text-dim"> — {{ descOf(code) }}</span>}
-                      <button matChipRemove><mat-icon>cancel</mat-icon></button>
-                    </mat-chip-row>
+                    <span class="inline-flex items-center gap-1.5 pl-2.5 pr-1 py-1 rounded-lg text-sm border"
+                      [class.border-violet-200]="isAiSuggestedOutcome(code)"
+                      [class.bg-violet-50]="isAiSuggestedOutcome(code)"
+                      [class.border-line/15]="!isAiSuggestedOutcome(code)"
+                      [class.bg-panel/60]="!isAiSuggestedOutcome(code)">
+                      @if (isAiSuggestedOutcome(code)) {
+                        <span class="text-[10px] font-semibold uppercase tracking-wide text-violet-700">AI</span>
+                      }
+                      <span class="font-semibold text-ink">{{ code }}</span>
+                      @if (descOf(code)) {
+                        <span class="text-dim hidden sm:inline">— {{ descOf(code) }}</span>
+                      }
+                      <button type="button" (click)="removeOutcome(code)"
+                        class="p-0.5 rounded hover:bg-black/5 text-dim hover:text-ink" aria-label="Kaldır">
+                        <mat-icon style="font-size:16px;width:16px;height:16px">close</mat-icon>
+                      </button>
+                    </span>
                   }
-                </mat-chip-grid>
-                <input placeholder="Kazanım ara veya kod gir…"
-                  [(ngModel)]="outcomeQuery" [ngModelOptions]="{ standalone: true }"
-                  [matAutocomplete]="outcomeAuto"
-                  [matChipInputFor]="outcomeGrid"
-                  [matChipInputSeparatorKeyCodes]="separatorKeys"
-                  (matChipInputTokenEnd)="addOutcomeFromInput($event)" />
-              </mat-form-field>
-              <mat-autocomplete #outcomeAuto="matAutocomplete" (optionSelected)="addOutcomeFromAutocomplete($event)">
-                @for (o of outcomeOptions(); track o.code) {
-                  <mat-option [value]="o.code"><b>{{ o.code }}</b> — {{ o.description }}</mat-option>
-                }
-              </mat-autocomplete>
+                </div>
+              }
+
+              @if (!canBrowseOutcomes()) {
+                <p class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                  Katalog listesi için önce <strong>ders</strong> ve <strong>sınıf</strong> seçin.
+                </p>
+              } @else {
+                <div class="rounded-lg border border-line/10 bg-panel/30 overflow-hidden">
+                  <button type="button" (click)="toggleOutcomeCatalog()"
+                    class="w-full flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-ink hover:bg-brand-50/60 transition">
+                    <mat-icon class="!text-brand-600" style="font-size:18px;width:18px;height:18px">
+                      {{ outcomeCatalogExpanded() ? 'expand_less' : 'expand_more' }}
+                    </mat-icon>
+                    <span class="flex-1 text-left">{{ outcomeCatalogTitle() }}</span>
+                    @if (outcomesLoading()) {
+                      <mat-spinner diameter="16"></mat-spinner>
+                    } @else {
+                      <span class="text-xs text-dim">{{ selectedCatalogCount() }}/{{ catalogOutcomes().length }} seçili</span>
+                    }
+                  </button>
+
+                  @if (outcomeCatalogExpanded()) {
+                    <div class="border-t border-line/10 max-h-64 overflow-y-auto">
+                      @if (outcomesLoading()) {
+                        <p class="text-xs text-dim px-3 py-3">Kazanımlar yükleniyor…</p>
+                      } @else if (catalogOutcomes().length === 0) {
+                        <p class="text-xs text-dim px-3 py-3">Bu ders ve sınıf için kazanım bulunamadı.</p>
+                      } @else {
+                        @for (o of catalogOutcomes(); track o.code) {
+                          <label class="flex items-start gap-3 px-3 py-2.5 cursor-pointer hover:bg-brand-50/50 border-b border-line/5 last:border-0">
+                            <input type="checkbox" class="mt-0.5 rounded border-line/30 text-brand-600 focus:ring-brand-400"
+                              [checked]="isOutcomeSelected(o.code)"
+                              (change)="toggleOutcome(o)" />
+                            <span class="text-sm leading-snug">
+                              <span class="font-semibold text-ink">{{ o.code }}</span>
+                              <span class="text-dim"> — {{ o.description }}</span>
+                            </span>
+                          </label>
+                        }
+                      }
+                    </div>
+                  }
+                </div>
+              }
             </div>
 
             <!-- Etiketler -->
@@ -242,14 +335,18 @@ export class UploadComponent {
   readonly grades = Array.from({ length: 12 }, (_, i) => i + 1);
   readonly separatorKeys = [ENTER, COMMA];
 
-  readonly phase = signal<'idle' | 'extracting' | 'form'>('idle');
+  readonly phase = signal<'idle' | 'uploading' | 'guardScanning' | 'extracting' | 'form'>('idle');
+  readonly selectedType = signal<ContentType>('Game');
   readonly dragOver = signal(false);
   readonly extraction = signal<AiExtractResponse | null>(null);
+  readonly draftContentId = signal<string | null>(null);
   readonly uploadError = signal<string | null>(null);
   readonly submitError = signal<string | null>(null);
   readonly submitting = signal(false);
   readonly aiFilled = signal<Set<AiField>>(new Set());
   readonly manualEdited = signal<Set<AiField>>(new Set());
+
+  private guardPollSub: Subscription | null = null;
 
   readonly form = this.fb.group({
     title: ['', Validators.required],
@@ -263,11 +360,77 @@ export class UploadComponent {
   readonly tags = signal<string[]>([]);
   readonly outcomeCodes = signal<string[]>([]);
   readonly outcomeDescriptions = signal<Record<string, string>>({});
-  outcomeQuery = '';
+  readonly aiOutcomeCodes = signal<Set<string>>(new Set());
+  readonly catalogOutcomes = signal<CatalogOutcome[]>([]);
+  readonly outcomesLoading = signal(false);
+  readonly outcomeCatalogExpanded = signal(false);
+
+  private readonly formValues = toSignal(
+    this.form.valueChanges.pipe(startWith(this.form.value)),
+    { initialValue: this.form.value },
+  );
+
+  readonly canBrowseOutcomes = computed(() => {
+    const formVal = this.formValues();
+    const subject = (formVal?.subject ?? '').trim();
+    const grade = formVal?.gradeLevel;
+    return Boolean(subject && grade != null);
+  });
+
+  readonly outcomeCatalogTitle = computed(() => {
+    const formVal = this.formValues();
+    const subject = (formVal?.subject ?? '').trim();
+    const grade = formVal?.gradeLevel;
+    if (!subject || grade == null) return 'Katalogdan kazanım seç';
+    return `${subject} · ${grade}. Sınıf kazanımları`;
+  });
+
+  readonly selectedCatalogCount = computed(() => {
+    const codes = new Set(this.outcomeCodes());
+    return this.catalogOutcomes().filter((o) => codes.has(o.code)).length;
+  });
+
+  readonly confidencePct = computed(() => {
+    const c = this.extraction()?.metadata.confidence ?? 0;
+    return Math.round(c * 100);
+  });
+
+  constructor() {
+    this.form.valueChanges.pipe(
+      startWith(this.form.value),
+      switchMap((formVal) => {
+        const subject = (formVal.subject ?? '').trim();
+        const grade = formVal.gradeLevel;
+        if (!subject || grade == null) {
+          this.outcomesLoading.set(false);
+          return of([] as CatalogOutcome[]);
+        }
+        this.outcomesLoading.set(true);
+        return this.api.get<CatalogOutcome[]>('/catalog/outcomes', { subject, grade, limit: 500 });
+      }),
+    ).subscribe({
+      next: (list) => {
+        this.catalogOutcomes.set(list ?? []);
+        this.outcomesLoading.set(false);
+      },
+      error: () => {
+        this.catalogOutcomes.set([]);
+        this.outcomesLoading.set(false);
+      },
+    });
+
+    // Dersleri katalogdan yükle (16 MEB dersi); hata halinde fallback liste kalır.
+    this.api.get<CatalogSubject[]>('/catalog/subjects').subscribe({
+      next: (list) => {
+        const names = (list ?? []).map((s) => s.name).filter(Boolean);
+        if (names.length) this.subjects.set(names);
+      },
+    });
+  }
 
   descOf(code: string): string { return this.outcomeDescriptions()[code] ?? ''; }
 
-  /** Açıklaması bilinmeyen kazanım kodları için Catalog'tan kod→açıklama çözer (AI ön-dolum/manuel giriş). */
+  /** Açıklaması bilinmeyen kazanım kodları için Catalog'tan kod→açıklama çözer (AI ön-dolum). */
   private resolveOutcomeDescriptions(): void {
     const missing = this.outcomeCodes().filter((c) => !this.outcomeDescriptions()[c]);
     if (missing.length === 0) return;
@@ -280,34 +443,35 @@ export class UploadComponent {
     });
   }
 
-  // Outcome autocomplete: Catalog.API'den arama
-  private readonly outcomeQuery$ = signal(this.outcomeQuery);
-  readonly outcomeOptions = signal<CatalogOutcome[]>([]);
+  onSubjectOrGradeChange(): void {
+    this.outcomeCatalogExpanded.set(false);
+  }
 
-  readonly confidencePct = computed(() => {
-    const c = this.extraction()?.metadata.confidence ?? 0;
-    return Math.round(c * 100);
-  });
+  toggleOutcomeCatalog(): void {
+    this.outcomeCatalogExpanded.update((v) => !v);
+  }
 
-  constructor() {
-    // Outcome autocomplete: form'dan subject/grade okuyup catalog'a sorgu
-    toObservable(this.outcomeQuery$).pipe(
-      debounceTime(300),
-      switchMap((q) => {
-        const subject = this.form.value.subject || undefined;
-        const grade = this.form.value.gradeLevel ?? undefined;
-        if (!subject && !grade && !q) return of([] as CatalogOutcome[]);
-        return this.api.get<CatalogOutcome[]>('/catalog/outcomes', { subject, grade, limit: 50 });
-      }),
-    ).subscribe({ next: (list) => this.outcomeOptions.set(list) });
+  isOutcomeSelected(code: string): boolean {
+    return this.outcomeCodes().includes(code);
+  }
 
-    // Dersleri katalogdan yükle (16 MEB dersi); hata halinde fallback liste kalır.
-    this.api.get<CatalogSubject[]>('/catalog/subjects').subscribe({
-      next: (list) => {
-        const names = (list ?? []).map((s) => s.name).filter(Boolean);
-        if (names.length) this.subjects.set(names);
-      },
-    });
+  isAiSuggestedOutcome(code: string): boolean {
+    return this.aiOutcomeCodes().has(code);
+  }
+
+  toggleOutcome(o: CatalogOutcome): void {
+    if (this.isOutcomeSelected(o.code)) {
+      this.removeOutcome(o.code);
+    } else {
+      this.addOutcomeWithDescription(o);
+    }
+  }
+
+  private addOutcomeWithDescription(o: CatalogOutcome): void {
+    if (this.outcomeCodes().includes(o.code)) return;
+    this.outcomeCodes.set([...this.outcomeCodes(), o.code]);
+    this.outcomeDescriptions.set({ ...this.outcomeDescriptions(), [o.code]: o.description });
+    this.markManual('outcomeCodes');
   }
 
   onFileSelected(e: Event): void {
@@ -324,6 +488,7 @@ export class UploadComponent {
 
   private handleFile(file: File): void {
     this.uploadError.set(null);
+    this.stopGuardPolling();
     const ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
     if (!['.zip', '.html', '.htm'].includes(ext)) {
       this.uploadError.set('Sadece .zip, .html veya .htm yüklenebilir.');
@@ -334,18 +499,98 @@ export class UploadComponent {
       return;
     }
 
-    this.phase.set('extracting');
+    this.phase.set('uploading');
     const fd = new FormData();
     fd.append('file', file);
+    fd.append('type', this.selectedType());
 
-    this.api.postFormData<AiExtractResponse>('/contents/ai-extract', fd).subscribe({
-      next: (resp) => this.applyExtraction(resp),
+    this.api.postFormData<BundleUploadResponse>('/contents/bundle-upload', fd).subscribe({
+      next: (uploaded) => {
+        this.draftContentId.set(uploaded.contentId);
+        this.extraction.set({
+          bucket: uploaded.bucket,
+          key: uploaded.key,
+          manifestEntry: uploaded.manifestEntry,
+          fileSizeBytes: uploaded.fileSizeBytes,
+          sha256: uploaded.sha256,
+          metadata: {
+            title: null,
+            description: null,
+            subject: null,
+            gradeLevel: null,
+            durationMinutes: null,
+            difficulty: null,
+            outcomeCodes: [],
+            tags: [],
+            confidence: 0,
+            candidateOutcomeCount: 0,
+          },
+          filesScanned: 0,
+        });
+        this.phase.set('guardScanning');
+        this.startGuardPolling(uploaded.contentId);
+      },
       error: (err) => {
         const r = (err as { error?: { error?: string; detail?: string } })?.error;
-        this.uploadError.set(r?.error ?? r?.detail ?? 'AI çıkarımı başarısız oldu. Lütfen tekrar deneyin.');
+        this.uploadError.set(r?.error ?? r?.detail ?? 'Dosya yüklenemedi. Lütfen tekrar deneyin.');
         this.phase.set('idle');
       },
     });
+  }
+
+  private startGuardPolling(contentId: string): void {
+    this.stopGuardPolling();
+    this.guardPollSub = timer(0, 2000).pipe(
+      switchMap(() => this.api.get<ContentProcessingStatusResponse>(`/contents/${contentId}/processing-status`)),
+    ).subscribe({
+      next: (status) => {
+        if (status.guardRejected) {
+          this.uploadError.set('Dosya Guard güvenlik taramasından geçemedi. Lütfen farklı bir bundle yükleyin.');
+          this.phase.set('idle');
+          this.stopGuardPolling();
+          return;
+        }
+        if (status.canExtractMetadata) {
+          this.stopGuardPolling();
+          this.runMetadataExtract(contentId);
+        }
+      },
+      error: () => {
+        this.uploadError.set('Guard tarama durumu alınamadı.');
+        this.phase.set('idle');
+        this.stopGuardPolling();
+      },
+    });
+  }
+
+  private runMetadataExtract(contentId: string): void {
+    this.phase.set('extracting');
+    this.api.post<MetadataExtractResponse>(`/contents/${contentId}/metadata-extract`, {}).subscribe({
+      next: (resp) => {
+        const base = this.extraction();
+        if (!base) return;
+        this.extraction.set({
+          ...base,
+          metadata: resp.metadata,
+          filesScanned: resp.filesScanned,
+        });
+        this.applyExtraction({
+          ...base,
+          metadata: resp.metadata,
+          filesScanned: resp.filesScanned,
+        });
+      },
+      error: (err) => {
+        const r = (err as { error?: { error?: string; detail?: string } })?.error;
+        this.uploadError.set(r?.error ?? r?.detail ?? 'AI metadata çıkarımı başarısız.');
+        this.phase.set('idle');
+      },
+    });
+  }
+
+  private stopGuardPolling(): void {
+    this.guardPollSub?.unsubscribe();
+    this.guardPollSub = null;
   }
 
   private applyExtraction(resp: AiExtractResponse): void {
@@ -369,6 +614,7 @@ export class UploadComponent {
     if (m.difficulty) filled.add('difficulty');
     this.tags.set([...m.tags]);
     this.outcomeCodes.set([...m.outcomeCodes]);
+    this.aiOutcomeCodes.set(new Set(m.outcomeCodes));
     if (m.outcomeCodes.length > 0) this.resolveOutcomeDescriptions();
     if (m.tags.length > 0) filled.add('tags');
     if (m.outcomeCodes.length > 0) filled.add('outcomeCodes');
@@ -411,46 +657,28 @@ export class UploadComponent {
   }
 
   // ---- Outcomes ----
-  addOutcomeFromInput(e: MatChipInputEvent): void {
-    const v = (e.value || '').trim();
-    if (v && !this.outcomeCodes().includes(v)) {
-      this.outcomeCodes.set([...this.outcomeCodes(), v]);
-      this.markManual('outcomeCodes');
-      this.resolveOutcomeDescriptions();
-    }
-    e.chipInput?.clear();
-    this.outcomeQuery = '';
-    this.outcomeQuery$.set('');
-  }
-  addOutcomeFromAutocomplete(e: MatAutocompleteSelectedEvent): void {
-    const v = e.option.value as string;
-    if (v && !this.outcomeCodes().includes(v)) {
-      this.outcomeCodes.set([...this.outcomeCodes(), v]);
-      this.markManual('outcomeCodes');
-      // Açıklamayı seçilen seçenekten yakala (anında göster).
-      const opt = this.outcomeOptions().find((o) => o.code === v);
-      if (opt) this.outcomeDescriptions.set({ ...this.outcomeDescriptions(), [v]: opt.description });
-    }
-    this.outcomeQuery = '';
-    this.outcomeQuery$.set('');
-  }
   removeOutcome(code: string): void {
     this.outcomeCodes.set(this.outcomeCodes().filter((x) => x !== code));
     this.markManual('outcomeCodes');
   }
-  @ViewChild('outcomeAuto') outcomeAuto?: ElementRef;
 
   // ---- Submit ----
   onSubmit(): void {
-    if (this.form.invalid || !this.extraction()) return;
+    if (this.form.invalid || !this.extraction() || !this.draftContentId()) return;
+    if (this.selectedType() === 'DigitalContent' && this.outcomeCodes().length === 0) {
+      this.submitError.set('Dijital içerik için en az bir kazanım seçilmelidir.');
+      return;
+    }
     const ext = this.extraction()!;
     const v = this.form.value;
+    const contentId = this.draftContentId()!;
     this.submitting.set(true);
     this.submitError.set(null);
 
     const m = ext.metadata;
-    const createReq: CreateContentRequest = {
+    const metadataReq: UpdateMetadataRequest = {
       title: v.title!,
+      type: this.selectedType(),
       description: v.description || null,
       subject: v.subject!,
       gradeLevel: v.gradeLevel ?? null,
@@ -458,7 +686,6 @@ export class UploadComponent {
       tags: this.tags(),
       durationMinutes: v.durationMinutes ?? null,
       difficulty: v.difficulty ?? null,
-      // AI önerisini editör karşılaştırması için kalıcılaştır (öğretmenin final seçiminden bağımsız).
       aiSuggestion: {
         subject: m.subject,
         gradeLevel: m.gradeLevel,
@@ -470,25 +697,12 @@ export class UploadComponent {
       },
     };
 
-    this.api.post<{ id: string }>('/contents', createReq).subscribe({
-      next: (created) => {
-        const versionReq: AddVersionRequest = {
-          bucket: ext.bucket,
-          key: ext.key,
-          manifestEntry: ext.manifestEntry,
-          fileSizeBytes: ext.fileSizeBytes,
-          sha256: ext.sha256,
-          changeLog: 'İlk versiyon (AI destekli upload)',
-        };
-        this.api.post(`/contents/${created.id}/versions`, versionReq).subscribe({
+    this.api.put(`/contents/${contentId}/metadata`, metadataReq).subscribe({
+      next: () => {
+        this.api.post(`/contents/${contentId}/submit`, {}).subscribe({
           next: () => {
-            this.api.post(`/contents/${created.id}/submit`, {}).subscribe({
-              next: () => {
-                this.submitting.set(false);
-                this.router.navigate(['/teacher/contents']);
-              },
-              error: (e) => this.handleSubmitError(e),
-            });
+            this.submitting.set(false);
+            this.router.navigate(['/teacher/contents']);
           },
           error: (e) => this.handleSubmitError(e),
         });
@@ -504,11 +718,18 @@ export class UploadComponent {
   }
 
   reset(): void {
+    this.stopGuardPolling();
     this.phase.set('idle');
+    this.selectedType.set('Game');
     this.extraction.set(null);
+    this.draftContentId.set(null);
     this.form.reset({ difficulty: 'Medium' });
     this.tags.set([]);
     this.outcomeCodes.set([]);
+    this.outcomeDescriptions.set({});
+    this.aiOutcomeCodes.set(new Set());
+    this.catalogOutcomes.set([]);
+    this.outcomeCatalogExpanded.set(false);
     this.aiFilled.set(new Set());
     this.manualEdited.set(new Set());
     this.uploadError.set(null);

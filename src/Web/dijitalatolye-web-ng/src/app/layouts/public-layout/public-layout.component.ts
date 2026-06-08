@@ -21,8 +21,9 @@ type Theme = 'light' | 'dark';
             Dijital Atölye · Oyunla Öğrenme Platformu
           </span>
           <span class="inline-flex items-center gap-5">
-            <a routerLink="/discover" class="hover:text-accent transition-colors">Oyunlar</a>
-            <a routerLink="/about" class="hover:text-accent transition-colors">Hakkımızda</a>
+            <a routerLink="/games" class="hover:text-accent transition-colors">Oyunlar</a>
+            <a routerLink="/digital" class="hover:text-accent transition-colors">Dijital İçerikler</a>
+            <a routerLink="/ebooks" class="hover:text-accent transition-colors">e-Kitaplar</a>
             <span class="text-accent">v1 · Türkiye</span>
           </span>
         </div>
@@ -39,8 +40,9 @@ type Theme = 'light' | 'dark';
           </a>
 
           <nav class="hidden md:flex items-center gap-7 text-sm">
-            <a routerLink="/discover" routerLinkActive="text-accent" class="text-muted hover:text-accent transition-colors font-medium">Oyunlar</a>
-            <a routerLink="/discover" [queryParams]="{ sort: 'popular' }" class="text-muted hover:text-accent transition-colors font-medium">Popüler</a>
+            <a routerLink="/games" routerLinkActive="text-accent" class="text-muted hover:text-accent transition-colors font-medium">Oyunlar</a>
+            <a routerLink="/digital" routerLinkActive="text-accent" class="text-muted hover:text-accent transition-colors font-medium">Dijital İçerikler</a>
+            <a routerLink="/ebooks" routerLinkActive="text-accent" class="text-muted hover:text-accent transition-colors font-medium">e-Kitaplar</a>
             <a routerLink="/about" routerLinkActive="text-accent" class="text-muted hover:text-accent transition-colors font-medium">Hakkımızda</a>
           </nav>
 
@@ -86,8 +88,9 @@ type Theme = 'light' | 'dark';
           <div>
             <h4 class="font-display font-semibold text-ink mb-4">Keşfet</h4>
             <ul class="space-y-2.5">
-              <li><a routerLink="/discover" class="hover:text-accent transition-colors">Tüm Oyunlar</a></li>
-              <li><a routerLink="/discover" class="hover:text-accent transition-colors">Kategoriler</a></li>
+              <li><a routerLink="/games" class="hover:text-accent transition-colors">Oyunlar</a></li>
+              <li><a routerLink="/digital" class="hover:text-accent transition-colors">Dijital İçerikler</a></li>
+              <li><a routerLink="/ebooks" class="hover:text-accent transition-colors">e-Kitaplar</a></li>
               <li><a routerLink="/teacher/contents/new" class="hover:text-accent transition-colors">İçerik Yükle</a></li>
               <li><a routerLink="/register" class="hover:text-accent transition-colors">Ücretsiz Hesap</a></li>
               <li><a routerLink="/about" class="hover:text-accent transition-colors">Hakkımızda</a></li>

@@ -26,4 +26,12 @@ public sealed class ContentVersion
     public Guid CreatedByUserId { get; init; }
 
     public string? ChangeLog { get; set; }
+
+    /// <summary>Guard'ın atadığı dosya kimliği (scan-callback).</summary>
+    public string? GuardFileId { get; set; }
+
+    /// <summary>Guard tarama durumu — <c>pending_scan</c>, <c>scanning</c>, <c>clean</c>, vb.</summary>
+    public string? GuardScanStatus { get; set; }
+
+    public DateTime? GuardScannedAtUtc { get; set; }
 }

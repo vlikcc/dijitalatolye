@@ -43,6 +43,8 @@ x-guard-env: &guard-env
 x-guard-volumes: &guard-volumes
   - guard-data:/var/lib/guard
   - ./guard/settings_compose_local.py:/app/config/settings/compose_local.py:ro
+  # HTML oyun dosyaları (.html/.htm) ve ZIP içi statik asset uzantıları
+  - ./guard/policy_constants_compose.py:/app/apps/files/policy_constants.py:ro
 
 services:
   guard-postgres:
@@ -93,9 +95,18 @@ services:
     image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
     container_name: guard-migrate
     restart: "no"
-    command: ["bootstrap"]
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        guard-entrypoint bootstrap
+        python manage.py shell < /patch/patch_policy_extensions.py
     environment: *guard-env
-    volumes: *guard-volumes
+    volumes:
+      - guard-data:/var/lib/guard
+      - ./guard/settings_compose_local.py:/app/config/settings/compose_local.py:ro
+      - ./guard/policy_constants_compose.py:/app/apps/files/policy_constants.py:ro
+      - ./guard/patch_policy_extensions.py:/patch/patch_policy_extensions.py:ro
     depends_on:
       guard-postgres:
         condition: service_healthy

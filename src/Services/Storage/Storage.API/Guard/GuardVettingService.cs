@@ -20,11 +20,18 @@ public sealed record VettingSubmission(
 public sealed class GuardVettingService : IFileVettingService
 {
     private readonly IGuardClient _client;
+    private readonly IGuardUploadRegistry _registry;
 
-    public GuardVettingService(IGuardClient client) => _client = client;
+    public GuardVettingService(IGuardClient client, IGuardUploadRegistry registry)
+    {
+        _client = client;
+        _registry = registry;
+    }
 
     public async Task<GuardUploadResponse> SubmitAsync(VettingSubmission submission, CancellationToken ct = default)
     {
+        _registry.Register(submission.ContentId, submission.VersionId, submission.Bucket, submission.Key);
+
         var sha256 = await ComputeSha256HexAsync(submission.Content, ct);
         if (submission.Content.CanSeek)
         {
@@ -35,7 +42,7 @@ public sealed class GuardVettingService : IFileVettingService
             submission.Content,
             submission.OriginalFileName,
             sha256,
-            GuardSourceContentId.Encode(submission.ContentId, submission.VersionId, submission.Bucket, submission.Key),
+            GuardSourceContentId.Encode(submission.ContentId, submission.VersionId),
             submission.UploadedByExternalId), ct);
     }
 

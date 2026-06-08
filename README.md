@@ -136,11 +136,15 @@ E2E: [`tests/e2e/`](tests/e2e/)
 
 ## İçerik ve güvenlik akışı (özet)
 
-1. Öğretmen ZIP/HTML yükler → Content.API AI ile metadata önerir → MinIO'ya kaydedilir.
-2. `FileUploadedV1` → Storage.API dosyayı **Guard**'a iletir (HMAC imzalı multipart).
-3. Guard tarar; durum callback'leri → `GuardScanUpdatedV1` → Content durumu güncellenir.
-4. Admin onayı sonrası Guard dosyayı Storage.API'ye teslim eder → MinIO → `GuardFileDeliveredV1`.
-5. Paralel: AI moderasyon → editör incelemesi → yayın → Search indeksleme.
+1. Öğretmen ZIP/HTML yükler → **Guard taraması** başlar (`POST /contents/bundle-upload` → MinIO + versiyon + `FileUploadedV1`).
+2. Guard **temiz** (`clean`) olunca → **AI metadata önerisi** (`POST /contents/{id}/metadata-extract`, DeepSeek).
+3. Öğretmen formu onaylar → `PUT /contents/{id}/metadata` + `POST /contents/{id}/submit`.
+4. Submit sırasında Guard zaten temizse → `Submitted` + `ContentSubmittedV1` → **AI moderasyonu** başlar.
+5. Guard callback'leri (`GuardScanUpdatedV1`) versiyon kaydına yazılır:
+   - **Red** (`clamav_infected`, `policy_rejected`, …) → `AutoRejected`
+   - **Temiz** (`clean`) + `GuardScanning` → `Submitted` + `ContentSubmittedV1` → **AI moderasyonu başlar**
+5. Admin onayı sonrası Guard dosyayı Storage.API'ye teslim eder → MinIO → `GuardFileDeliveredV1`.
+6. AI moderasyon → editör incelemesi → yayın → Search indeksleme.
 
 ## Repo Yapısı
 

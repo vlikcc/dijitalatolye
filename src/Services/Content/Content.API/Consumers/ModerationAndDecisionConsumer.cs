@@ -48,6 +48,7 @@ public sealed class AIModerationCompletedConsumer : IConsumer<AIModerationComple
 
         if (msg.Decision == ModerationDecision.AutoReject)
         {
+            content.AutoRejectReason = BuildAiRejectReason(msg.CriticalFlags, msg.Score);
             content.TransitionTo(ContentState.AutoRejected);
         }
         else if (content.State == ContentState.AIReviewed)
@@ -56,6 +57,16 @@ public sealed class AIModerationCompletedConsumer : IConsumer<AIModerationComple
         }
 
         await _db.SaveChangesAsync(context.CancellationToken);
+    }
+
+    /// <summary>AI moderasyon kritik bayraklarını + skoru panelde gösterilecek Türkçe özete çevirir.</summary>
+    private static string BuildAiRejectReason(IReadOnlyCollection<string> criticalFlags, int score)
+    {
+        var flags = criticalFlags?.Where(f => !string.IsNullOrWhiteSpace(f)).ToArray() ?? Array.Empty<string>();
+        var baseMsg = "AI moderasyonu içeriği uygun bulmadı";
+        return flags.Length == 0
+            ? $"{baseMsg} (risk skoru: {score})"
+            : $"{baseMsg}: {string.Join("; ", flags)} (risk skoru: {score})";
     }
 }
 
@@ -115,6 +126,7 @@ public sealed class EditorDecisionMadeConsumer : IConsumer<EditorDecisionMadeV1>
                             Title = content.Title,
                             Description = content.Description,
                             PlayUrl = $"/play/{content.Slug}",
+                            Type = content.Type.ToString(),
                             OutcomeCodes = content.OutcomeCodes.AsReadOnly(),
                             Tags = content.Tags.AsReadOnly(),
                             GradeLevel = content.GradeLevel,

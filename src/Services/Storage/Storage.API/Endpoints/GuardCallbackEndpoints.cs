@@ -20,9 +20,7 @@ public static class GuardCallbackEndpoints
     {
         var group = routes.MapGroup("/api/internal").WithTags("Guard");
 
-        group.MapPost("/scan-callback", HandleScanCallback);
         group.MapPost("/scan-callback/", HandleScanCallback);
-        group.MapPost("/approved-files", HandleApprovedFile).DisableAntiforgery();
         group.MapPost("/approved-files/", HandleApprovedFile).DisableAntiforgery();
 
         return routes;
@@ -78,6 +76,7 @@ public static class GuardCallbackEndpoints
         HttpRequest request,
         IPublishEndpoint publisher,
         IObjectStorage storage,
+        IGuardUploadRegistry uploadRegistry,
         GuardSignatureService signer,
         IOptions<GuardOptions> options,
         ILogger<GuardSignatureService> logger,
@@ -117,7 +116,10 @@ public static class GuardCallbackEndpoints
 
         if (string.IsNullOrWhiteSpace(bucket) || string.IsNullOrWhiteSpace(key))
         {
-            return Results.BadRequest(new { error = "source_content_id MinIO konumu içermiyor." });
+            if (!uploadRegistry.TryGet(contentId, versionId, out bucket, out key))
+            {
+                return Results.BadRequest(new { error = "MinIO konumu bulunamadı; içerik yeniden Guard'a gönderilmeli." });
+            }
         }
 
         await using var fileStream = file.OpenReadStream();

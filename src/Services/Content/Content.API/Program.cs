@@ -112,6 +112,16 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Databas
 
     await db.Database.ExecuteSqlRawAsync(
         """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "AiSuggestionJson" text;""");
+    await db.Database.ExecuteSqlRawAsync(
+        """ALTER TABLE content."ContentVersions" ADD COLUMN IF NOT EXISTS "GuardFileId" character varying(64);""");
+    await db.Database.ExecuteSqlRawAsync(
+        """ALTER TABLE content."ContentVersions" ADD COLUMN IF NOT EXISTS "GuardScanStatus" character varying(40);""");
+    await db.Database.ExecuteSqlRawAsync(
+        """ALTER TABLE content."ContentVersions" ADD COLUMN IF NOT EXISTS "GuardScannedAtUtc" timestamp with time zone;""");
+    await db.Database.ExecuteSqlRawAsync(
+        """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "Type" character varying(20) NOT NULL DEFAULT 'Game';""");
+    await db.Database.ExecuteSqlRawAsync(
+        """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "AutoRejectReason" text;""");
 }
 
 app.Run();

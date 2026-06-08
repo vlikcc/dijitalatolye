@@ -54,6 +54,14 @@ builder.Services.AddHttpClient<IGuardClient, GuardClient>((sp, client) =>
     client.BaseAddress = new Uri(opts.BaseUrl.TrimEnd('/') + "/");
     client.Timeout = Timeout.InfiniteTimeSpan;
 });
+builder.Services.AddSingleton<IGuardUploadRegistry, InMemoryGuardUploadRegistry>();
+builder.Services.AddSingleton<IGuardScanStatusSync, GuardScanStatusSync>();
+builder.Services.AddHttpClient(nameof(GuardScanStatusSync), (sp, client) =>
+{
+    var opts = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<GuardOptions>>().Value;
+    client.BaseAddress = new Uri(opts.BaseUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 builder.Services.AddScoped<IFileVettingService, GuardVettingService>();
 
 builder.Services.AddScoped<ICurrentUser, CurrentUserAccessor>();

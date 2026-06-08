@@ -21,6 +21,7 @@ public sealed class ContentPublishedSearchConsumer : IConsumer<ContentPublishedV
             Title = m.Title,
             Description = m.Description,
             Slug = m.Slug,
+            Type = m.Type,
             Subject = m.Subject,
             GradeLevel = m.GradeLevel,
             OutcomeCodes = m.OutcomeCodes,
