@@ -106,7 +106,7 @@ interface ReportsData {
             </h2>
             <span class="text-xs text-dim">Son 30 gün</span>
           </div>
-          <div class="h-64 rounded-xl bg-gradient-to-br from-brand-50 to-accent-50 border border-brand-100 flex items-center justify-center text-dim text-sm">
+          <div class="h-64 rounded-xl da-dream-bg border border-line/15 flex items-center justify-center text-dim text-sm">
             Grafik verisi henüz bağlanmadı (Prometheus / Reports endpoint).
           </div>
         </div>

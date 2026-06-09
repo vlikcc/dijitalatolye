@@ -15,9 +15,11 @@ public sealed class Content
 
     public string? Slug { get; set; }
 
-    public string Subject { get; set; } = string.Empty;
+    /// <summary>İçeriğin ilişkili dersler (ör. Matematik, Türkçe).</summary>
+    public List<string> Subjects { get; set; } = [];
 
-    public int? GradeLevel { get; set; }
+    /// <summary>İçeriğin ilişkili sınıf seviyeleri (1–12).</summary>
+    public List<int> GradeLevels { get; set; } = [];
 
     public List<string> OutcomeCodes { get; set; } = [];
 

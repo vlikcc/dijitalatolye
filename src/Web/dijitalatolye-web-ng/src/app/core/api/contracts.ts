@@ -18,10 +18,21 @@ export interface ContentSummary {
   title: string;
   type?: ContentType;
   state: ContentState;
-  subject?: string | null;
-  gradeLevel?: number | null;
+  subjects?: string[];
+  gradeLevels?: number[];
   createdAtUtc: string;
   updatedAtUtc: string;
+}
+
+/** Ders listesini görüntüleme metnine çevirir. */
+export function formatContentSubjects(subjects?: string[] | null): string {
+  return subjects?.length ? subjects.join(', ') : '—';
+}
+
+/** Sınıf seviyelerini görüntüleme metnine çevirir. */
+export function formatContentGradeLevels(gradeLevels?: number[] | null): string {
+  if (!gradeLevels?.length) return 'Tüm Seviyeler';
+  return gradeLevels.map((g) => `${g}. Sınıf`).join(', ');
 }
 
 export interface ContentDetail extends ContentSummary {
@@ -51,8 +62,8 @@ export interface CreateContentRequest {
   title: string;
   type?: ContentType;
   description?: string | null;
-  subject: string;
-  gradeLevel?: number | null;
+  subjects: string[];
+  gradeLevels: number[];
   outcomeCodes: string[];
   tags: string[];
   targetAge?: number | null;
@@ -77,8 +88,8 @@ export interface UpdateMetadataRequest {
   title?: string | null;
   type?: ContentType | null;
   description?: string | null;
-  subject?: string | null;
-  gradeLevel?: number | null;
+  subjects?: string[];
+  gradeLevels?: number[];
   outcomeCodes?: string[];
   tags?: string[];
   durationMinutes?: number | null;

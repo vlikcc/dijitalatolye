@@ -129,8 +129,8 @@ public sealed class EditorDecisionMadeConsumer : IConsumer<EditorDecisionMadeV1>
                             Type = content.Type.ToString(),
                             OutcomeCodes = content.OutcomeCodes.AsReadOnly(),
                             Tags = content.Tags.AsReadOnly(),
-                            GradeLevel = content.GradeLevel,
-                            Subject = content.Subject,
+                            GradeLevels = content.GradeLevels.AsReadOnly(),
+                            Subjects = content.Subjects.AsReadOnly(),
                             PublishedAt = content.PublishedAtUtc!.Value,
                         }, ct: context.CancellationToken);
                         DijitalAtolye.BuildingBlocks.WebHostExtensions.DomainMetrics.ContentPublished.Add(1);

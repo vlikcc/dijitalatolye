@@ -20,12 +20,13 @@ import { CommonModule } from '@angular/common';
           class="text-2xl leading-none transition"
           [class.cursor-default]="readOnly"
           [class.text-amber-400]="i <= effectiveValue()"
-          [class.text-slate-200]="i > effectiveValue()">
+          [class.text-line]="i > effectiveValue()"
+          [class.opacity-30]="i > effectiveValue()">
           ★
         </button>
       }
       @if (showValue) {
-        <span class="ml-1 text-xs text-slate-500">{{ valueSignal().toFixed(1) }}</span>
+        <span class="ml-1 text-xs text-dim">{{ valueSignal().toFixed(1) }}</span>
       }
     </div>
   `,

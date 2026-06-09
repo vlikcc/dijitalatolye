@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '@core/api/api.service';
-import { ContentState } from '@core/api/contracts';
+import { ContentState, formatContentGradeLevels, formatContentSubjects } from '@core/api/contracts';
 
 interface ContentItem {
   id: string;
   title: string;
   state: ContentState;
-  subject: string;
-  gradeLevel: number;
+  subjects?: string[];
+  gradeLevels?: number[];
   updatedAtUtc: string;
 }
 
@@ -30,7 +30,7 @@ interface ContentItem {
             <p class="text-sm text-muted mt-1">İçeriklerinize ait güncel durum özeti.</p>
           </div>
           <a routerLink="/teacher/contents/new"
-             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-md shadow-brand-600/20">
+             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold shadow-md shadow-brand-600/20">
             <mat-icon style="font-size:20px;width:20px;height:20px">add_circle</mat-icon>
             Yeni İçerik Yükle
           </a>
@@ -83,7 +83,7 @@ interface ContentItem {
                   <div>
                     <h3 class="font-semibold text-ink">{{ c.title }}</h3>
                     <div class="text-xs text-dim mt-1 flex gap-2">
-                      <span>{{ c.subject }}</span><span>•</span><span>{{ c.gradeLevel }}. Sınıf</span>
+                      <span>{{ formatContentSubjects(c.subjects) }}</span><span>•</span><span>{{ formatContentGradeLevels(c.gradeLevels) }}</span>
                     </div>
                   </div>
                   <div class="flex items-center gap-4">
@@ -105,6 +105,9 @@ interface ContentItem {
 })
 export class TeacherDashboardComponent implements OnInit {
   private readonly api = inject(ApiService);
+
+  readonly formatContentSubjects = formatContentSubjects;
+  readonly formatContentGradeLevels = formatContentGradeLevels;
 
   readonly contents = signal<ContentItem[]>([]);
   readonly loading = signal(true);

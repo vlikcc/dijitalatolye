@@ -20,7 +20,7 @@ interface ContentTrackMessage {
   imports: [CommonModule, RouterLink, MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="da-science-bg min-h-screen">
+    <div class="da-dream-bg min-h-screen">
       <section class="max-w-6xl mx-auto px-4 py-8">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
@@ -57,7 +57,7 @@ interface ContentTrackMessage {
             #frame
             [src]="playUrl"
             sandbox="allow-scripts"
-            class="w-full h-[70vh] min-h-[520px] bg-white"
+            class="w-full h-[70vh] min-h-[520px] bg-surface"
             title="play">
           </iframe>
         </div>

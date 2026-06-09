@@ -39,7 +39,7 @@ interface StudentAssignment {
           <input type="text" [(ngModel)]="joinCode" name="code" maxlength="12" placeholder="Katılım kodu (örn. ABC123)"
             class="rounded-lg border border-line/20 bg-bg px-3 py-2 text-sm text-ink font-mono uppercase w-56" />
           <button type="button" (click)="join()" [disabled]="!joinCode || joining()"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 disabled:opacity-50">
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold disabled:opacity-50">
             Katıl
           </button>
           @if (joinError()) { <span class="text-sm text-rose-700">{{ joinError() }}</span> }
@@ -71,7 +71,7 @@ interface StudentAssignment {
                     </span>
                   } @else if (a.contentSlug) {
                     <a [routerLink]="['/play', a.contentSlug]"
-                      class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700">
+                      class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg da-grad text-white text-sm font-semibold">
                       <mat-icon style="font-size:16px;width:16px;height:16px">play_arrow</mat-icon> Başla
                     </a>
                   }

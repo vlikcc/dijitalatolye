@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ApiService } from '@core/api/api.service';
+import { formatContentGradeLevels, formatContentSubjects } from '@core/api/contracts';
 
 interface LlmRow { label: string; value: string | null; depth: number; header: boolean; }
 
@@ -25,7 +26,7 @@ interface ModerationReport {
 }
 
 interface ContentMeta {
-  id: string; subject?: string | null; gradeLevel?: number | null; difficulty?: string | null;
+  id: string; subjects?: string[]; gradeLevels?: number[]; difficulty?: string | null;
   outcomeCodes: string[]; tags: string[]; aiSuggestionJson?: string | null;
 }
 
@@ -130,7 +131,7 @@ type Decision = 'Approved' | 'Rejected' | 'RevisionRequested';
                   </div>
                   @if (outcomesDiffer()) {
                     <button (click)="applyOutcomes()" [disabled]="busy()"
-                      class="mt-2 text-xs px-2 py-1 rounded bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-60">Kazanımları uygula</button>
+                      class="mt-2 text-xs px-2 py-1 rounded da-grad text-white disabled:opacity-60">Kazanımları uygula</button>
                   }
                 </div>
                 <div>
@@ -154,12 +155,13 @@ type Decision = 'Approved' | 'Rejected' | 'RevisionRequested';
                   </div>
                   @if (tagsDiffer()) {
                     <button (click)="applyTags()" [disabled]="busy()"
-                      class="mt-2 text-xs px-2 py-1 rounded bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-60">Etiketleri uygula</button>
+                      class="mt-2 text-xs px-2 py-1 rounded da-grad text-white disabled:opacity-60">Etiketleri uygula</button>
                   }
                 </div>
                 <div class="flex gap-6 text-xs text-dim">
                   <span>Zorluk: <b class="text-ink">{{ content()!.difficulty || '—' }}</b> · AI: {{ ai()!.difficulty || '—' }}</span>
-                  <span>Sınıf: <b class="text-ink">{{ content()!.gradeLevel ?? '—' }}</b> · AI: {{ ai()!.gradeLevel ?? '—' }}</span>
+                  <span>Sınıf: <b class="text-ink">{{ formatContentGradeLevels(content()!.gradeLevels) }}</b> · AI: {{ ai()!.gradeLevel ?? '—' }}</span>
+                  <span>Ders: <b class="text-ink">{{ formatContentSubjects(content()!.subjects) }}</b> · AI: {{ ai()!.subject ?? '—' }}</span>
                 </div>
               </div>
             }
@@ -203,6 +205,9 @@ export class EditorReviewComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly sanitizer = inject(DomSanitizer);
+
+  readonly formatContentSubjects = formatContentSubjects;
+  readonly formatContentGradeLevels = formatContentGradeLevels;
 
   readonly item = signal<ReviewItem | null>(null);
   readonly report = signal<ModerationReport | null>(null);

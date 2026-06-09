@@ -9,24 +9,24 @@ import { ApiService } from '@core/api/api.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-3xl mx-auto p-6">
-      <h1 class="text-3xl font-bold mb-2 text-slate-900">KVKK Haklarım</h1>
-      <p class="text-slate-600 mb-6">
+      <h1 class="text-3xl font-bold mb-2 text-ink">KVKK Haklarım</h1>
+      <p class="text-muted mb-6">
         6698 sayılı KVKK kapsamında kişisel verilerinize ilişkin haklarınızı buradan kullanabilirsiniz.
       </p>
 
       <section class="space-y-4">
-        <div class="border border-slate-200 rounded-lg p-5 bg-white">
+        <div class="border border-line/15 rounded-lg p-5 bg-surface">
           <h2 class="font-semibold text-lg mb-1">Verilerimi İndir</h2>
-          <p class="text-sm text-slate-600 mb-3">Profilinize ait kayıtlı verileri JSON olarak indirebilirsiniz.</p>
-          <button class="px-4 py-2 bg-brand-600 text-white rounded disabled:opacity-50 hover:bg-brand-700"
+          <p class="text-sm text-muted mb-3">Profilinize ait kayıtlı verileri JSON olarak indirebilirsiniz.</p>
+          <button class="px-4 py-2 da-grad text-white rounded disabled:opacity-50"
             (click)="handleExport()" [disabled]="busy() !== null">
             {{ busy() === 'export' ? 'Hazırlanıyor...' : 'İndir' }}
           </button>
         </div>
 
-        <div class="border border-slate-200 rounded-lg p-5 bg-white">
+        <div class="border border-line/15 rounded-lg p-5 bg-surface">
           <h2 class="font-semibold text-lg mb-1">Profilimi Anonimleştir</h2>
-          <p class="text-sm text-slate-600 mb-3">
+          <p class="text-sm text-muted mb-3">
             Ad, soyad, biyografi gibi kişisel alanlar anonimleştirilir. Yayınlanmış içerikleriniz ve etkileşim verileriniz için ayrı talep gereklidir.
           </p>
           <button class="px-4 py-2 bg-rose-600 text-white rounded disabled:opacity-50 hover:bg-rose-700"

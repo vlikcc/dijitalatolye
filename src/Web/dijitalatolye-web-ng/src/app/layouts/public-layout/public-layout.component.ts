@@ -13,50 +13,38 @@ type Theme = 'light' | 'dark';
   styles: [`:host { display: block; min-height: 100%; }`],
   template: `
     <div class="min-h-full flex flex-col bg-bg text-ink">
-      <!-- Üst eyebrow şeridi -->
-      <div class="hidden md:block border-b border-line/10 bg-bg2/60">
-        <div class="max-w-7xl mx-auto px-4 h-9 flex items-center justify-between font-mono text-[11px] tracking-widest uppercase text-dim">
-          <span class="inline-flex items-center gap-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot"></span>
-            Dijital Atölye · Oyunla Öğrenme Platformu
-          </span>
-          <span class="inline-flex items-center gap-5">
-            <a routerLink="/games" class="hover:text-accent transition-colors">Oyunlar</a>
-            <a routerLink="/digital" class="hover:text-accent transition-colors">Dijital İçerikler</a>
-            <a routerLink="/ebooks" class="hover:text-accent transition-colors">e-Kitaplar</a>
-            <span class="text-accent">v1 · Türkiye</span>
-          </span>
-        </div>
-      </div>
-
       <!-- Ana header -->
-      <header class="sticky top-0 z-40 backdrop-blur-xl bg-bg/80 border-b border-line/10">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <a routerLink="/" class="flex items-center gap-2.5 font-display font-bold text-ink">
-            <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-accent2 text-white shadow-lg shadow-accent/25">
-              <mat-icon class="!text-white" style="font-size:18px;width:18px;height:18px">sports_esports</mat-icon>
+      <header class="sticky top-0 z-40 backdrop-blur-xl bg-bg2/80 border-b border-line/10">
+        <div class="max-w-7xl mx-auto px-4 lg:px-6 h-[68px] flex items-center justify-between gap-4">
+          <a routerLink="/" class="flex items-center gap-3 shrink-0">
+            <img src="assets/brand/logo.png" alt="Dijital Oyun Atölyesi" class="h-11 w-auto" />
+            <span class="hidden sm:block font-display font-bold text-ink text-lg lg:text-xl tracking-tight leading-none">
+              Dijital&nbsp;Oyun<br class="hidden lg:block" /> <span class="da-rainbow-text">Atölyesi</span>
             </span>
-            <span class="text-lg tracking-tight">Dijital<span class="text-accent">Atölye</span></span>
           </a>
 
-          <nav class="hidden md:flex items-center gap-7 text-sm">
-            <a routerLink="/games" routerLinkActive="text-accent" class="text-muted hover:text-accent transition-colors font-medium">Oyunlar</a>
-            <a routerLink="/digital" routerLinkActive="text-accent" class="text-muted hover:text-accent transition-colors font-medium">Dijital İçerikler</a>
-            <a routerLink="/ebooks" routerLinkActive="text-accent" class="text-muted hover:text-accent transition-colors font-medium">e-Kitaplar</a>
-            <a routerLink="/about" routerLinkActive="text-accent" class="text-muted hover:text-accent transition-colors font-medium">Hakkımızda</a>
+          <nav class="hidden md:flex items-center gap-8 text-[15px] font-display font-medium">
+            <a routerLink="/games" routerLinkActive="text-accent" class="text-ink/80 hover:text-accent transition-colors">Oyunlar</a>
+            <a routerLink="/digital" routerLinkActive="text-accent" class="text-ink/80 hover:text-accent transition-colors">Videolar</a>
+            <a routerLink="/ebooks" routerLinkActive="text-accent" class="text-ink/80 hover:text-accent transition-colors">E-Kitaplar</a>
+            <a routerLink="/about" routerLinkActive="text-accent" class="text-ink/80 hover:text-accent transition-colors">Hakkımızda</a>
           </nav>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2.5">
             <button type="button" (click)="toggleTheme()"
-              class="w-9 h-9 rounded-lg border border-line/15 text-muted hover:text-accent hover:border-accent/40 inline-flex items-center justify-center transition"
-              [attr.aria-label]="theme() === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'">
-              <mat-icon style="font-size:18px;width:18px;height:18px">{{ theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+              class="w-10 h-10 rounded-full border border-line/15 bg-surface/60 hover:border-accent/40 inline-flex items-center justify-center transition"
+              [attr.aria-label]="theme() === 'dark' ? 'Gündüz moduna geç' : 'Gece moduna geç'">
+              <img [src]="theme() === 'dark' ? 'assets/brand/light-mode.png' : 'assets/brand/dark-mode.png'"
+                   [alt]="theme() === 'dark' ? 'Gündüz modu' : 'Gece modu'" class="w-5 h-5" />
             </button>
-            <a routerLink="/login" class="hidden sm:inline-flex text-sm font-medium text-muted hover:text-accent px-3 py-2 rounded-lg transition">Giriş</a>
+            <a routerLink="/login"
+               class="text-sm font-semibold px-5 py-2 rounded-full border border-accent/40 text-accent hover:bg-accent/10 transition">
+              Giriş
+            </a>
             <a routerLink="/register"
-               class="text-sm font-semibold px-4 py-2 rounded-xl bg-accent text-white hover:bg-brand-700 shadow-lg shadow-accent/25 transition inline-flex items-center gap-1.5">
-              Hemen Oyna
-              <mat-icon style="font-size:16px;width:16px;height:16px">arrow_forward</mat-icon>
+               class="text-sm font-semibold px-5 py-2 rounded-full text-white shadow-lg shadow-accent/25 transition hover:shadow-xl hover:shadow-accent/30"
+               style="background:linear-gradient(92deg,#e0457b 0%,#b14fd8 45%,#6f4ee0 100%)">
+              KAYIT OL
             </a>
           </div>
         </div>

@@ -81,6 +81,90 @@ body {
   letter-spacing: 0.01em;
 }
 
+/* El yazısı (script) vurgu — "En Eğlenceli", "oyna ve öğren!" */
+.da-script {
+  font-family: "Dancing Script", "Instrument Serif", cursive;
+  font-weight: 700;
+  letter-spacing: 0.005em;
+  line-height: 1;
+}
+
+/* Pastel rüya arka planı (1. sayfa hero / yumuşak bölümler) */
+.da-dream-bg {
+  background-color: #f4f1fb;
+  background-image:
+    radial-gradient(48rem 32rem at 12% 8%, rgba(167, 139, 250, 0.22), transparent 60%),
+    radial-gradient(42rem 30rem at 88% 0%, rgba(12, 181, 219, 0.16), transparent 58%),
+    radial-gradient(54rem 38rem at 70% 100%, rgba(245, 201, 209, 0.30), transparent 62%),
+    linear-gradient(180deg, #f6f3fc 0%, #fbfaff 55%, #f3f6fb 100%);
+}
+[data-theme="dark"] .da-dream-bg {
+  background-color: #0b1020;
+  background-image:
+    radial-gradient(48rem 32rem at 12% 8%, rgba(111, 78, 224, 0.30), transparent 60%),
+    radial-gradient(42rem 30rem at 88% 0%, rgba(12, 181, 219, 0.18), transparent 58%),
+    radial-gradient(54rem 38rem at 70% 100%, rgba(90, 63, 203, 0.28), transparent 62%),
+    linear-gradient(180deg, #0b1020 0%, #0a0f1e 60%, #0b1224 100%);
+}
+
+/* Renkli marka gradyan metni (logo paleti) */
+.da-rainbow-text {
+  background-image: linear-gradient(92deg, #e0457b 0%, #b14fd8 38%, #6f4ee0 70%, #0cb5db 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ============================================================
+   Tasarım dili bileşen yardımcıları (1. sayfa görsel dili)
+   ============================================================ */
+
+/* Marka gradyan dolgusu — birincil pill butonlar, ikon rozetleri */
+.da-grad {
+  background-image: linear-gradient(92deg, #e0457b 0%, #b14fd8 45%, #6f4ee0 100%);
+  color: #fff;
+  border: none;
+  transition: filter .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.da-grad:hover:not(:disabled) { filter: brightness(1.06) saturate(1.05); box-shadow: 0 10px 26px -10px rgba(111, 78, 224, 0.55); }
+.da-grad:active:not(:disabled) { transform: translateY(1px); }
+
+/* Yumuşak yuvarlak kart */
+.da-card {
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--border) / 0.10);
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 0 rgb(var(--border) / 0.06), 0 24px 48px -32px rgb(90 63 203 / 0.22);
+}
+
+/* Pastel rüya cam panel (auth/odak kartları için arka plan üstünde) */
+.da-glass {
+  background: rgb(var(--surface) / 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgb(var(--border) / 0.08);
+  border-radius: 1.5rem;
+  box-shadow: 0 30px 60px -30px rgb(90 63 203 / 0.30);
+}
+
+/* Bölüm başlığı — display + ince */
+.da-h {
+  font-family: "Space Grotesk", Inter, sans-serif;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: rgb(var(--ink));
+}
+
+/* Form girişleri — yuvarlak, temaya duyarlı */
+.da-input {
+  width: 100%;
+  border-radius: 0.875rem;
+  border: 1px solid rgb(var(--border) / 0.16);
+  background: rgb(var(--surface));
+  color: rgb(var(--ink));
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.da-input:focus { outline: none; border-color: rgb(var(--accent-2)); box-shadow: 0 0 0 3px rgb(var(--accent-2) / 0.16); }
+
 /* Display başlık */
 .da-display {
   font-family: "Space Grotesk", Inter, sans-serif;

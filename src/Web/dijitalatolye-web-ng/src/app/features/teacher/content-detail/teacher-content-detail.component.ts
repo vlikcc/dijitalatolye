@@ -4,7 +4,9 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '@core/api/api.service';
-import type { ContentDetail } from '@core/api/contracts';
+import {
+  formatContentGradeLevels, formatContentSubjects, type ContentDetail,
+} from '@core/api/contracts';
 
 type ContentStatus = ContentDetail['state'];
 
@@ -49,8 +51,8 @@ interface OutcomeStat {
               <p class="text-xs font-semibold uppercase tracking-wide text-dim">İçerik detayı</p>
               <h1 class="text-2xl font-extrabold text-ink mt-1">{{ content()!.title }}</h1>
               <p class="text-sm text-muted mt-2">
-                {{ content()!.subject || '—' }}
-                @if (content()!.gradeLevel) { · {{ content()!.gradeLevel }}. sınıf }
+                {{ formatContentSubjects(content()!.subjects) }}
+                @if (content()!.gradeLevels?.length) { · {{ formatContentGradeLevels(content()!.gradeLevels) }} }
               </p>
             </div>
             <span [class]="statusClass(content()!.state)">{{ statusLabel(content()!.state) }}</span>
@@ -144,7 +146,7 @@ interface OutcomeStat {
           }
           @if (canEdit()) {
             <a [routerLink]="['/teacher/contents', content()!.id, 'edit']"
-              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold">
               <mat-icon style="font-size:16px;width:16px;height:16px">edit</mat-icon> Düzenle
             </a>
           }
@@ -169,6 +171,9 @@ export class TeacherContentDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly api = inject(ApiService);
+
+  readonly formatContentSubjects = formatContentSubjects;
+  readonly formatContentGradeLevels = formatContentGradeLevels;
 
   readonly content = signal<(ContentDetail & { slug?: string | null; versions?: unknown[] }) | null>(null);
   readonly loading = signal(true);

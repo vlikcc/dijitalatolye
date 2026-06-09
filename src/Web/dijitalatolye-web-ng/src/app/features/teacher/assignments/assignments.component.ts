@@ -108,7 +108,7 @@ interface MyContent {
           </div>
           <div class="mt-4 flex items-center gap-3">
             <button type="button" (click)="create()" [disabled]="!selectedContentId || creating()"
-              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 disabled:opacity-50">
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold disabled:opacity-50">
               <mat-icon style="font-size:18px;width:18px;height:18px">check</mat-icon> Oluştur
             </button>
             @if (createError()) { <span class="text-sm text-rose-700">{{ createError() }}</span> }

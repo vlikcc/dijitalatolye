@@ -122,6 +122,26 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Databas
         """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "Type" character varying(20) NOT NULL DEFAULT 'Game';""");
     await db.Database.ExecuteSqlRawAsync(
         """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "AutoRejectReason" text;""");
+    // EF ExecuteSqlRawAsync treats { } as format placeholders — PostgreSQL '{}' icin {{}} kullan.
+    await db.Database.ExecuteSqlRawAsync(
+        """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "Subjects" text[] NOT NULL DEFAULT '{{}}';""");
+    await db.Database.ExecuteSqlRawAsync(
+        """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "GradeLevels" integer[] NOT NULL DEFAULT '{{}}';""");
+    await db.Database.ExecuteSqlRawAsync(
+        """
+        UPDATE content."Contents"
+        SET "Subjects" = ARRAY["Subject"]
+        WHERE cardinality("Subjects") = 0
+          AND "Subject" IS NOT NULL
+          AND btrim("Subject") <> '';
+        """);
+    await db.Database.ExecuteSqlRawAsync(
+        """
+        UPDATE content."Contents"
+        SET "GradeLevels" = ARRAY["GradeLevel"]
+        WHERE cardinality("GradeLevels") = 0
+          AND "GradeLevel" IS NOT NULL;
+        """);
 }
 
 app.Run();

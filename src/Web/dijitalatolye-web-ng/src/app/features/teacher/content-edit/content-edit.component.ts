@@ -3,8 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { forkJoin } from 'rxjs';
 import { ApiService } from '@core/api/api.service';
-import { CatalogOutcome, CatalogSubject, ContentDetail, UpdateMetadataRequest } from '@core/api/contracts';
+import {
+  CatalogOutcome, CatalogSubject, ContentDetail, formatContentGradeLevels, formatContentSubjects,
+  UpdateMetadataRequest,
+} from '@core/api/contracts';
 
 @Component({
   selector: 'da-content-edit',
@@ -29,7 +33,7 @@ import { CatalogOutcome, CatalogSubject, ContentDetail, UpdateMetadataRequest } 
       } @else {
         <header class="mb-6">
           <h1 class="text-2xl font-extrabold text-ink">İçeriği düzenle</h1>
-          <p class="text-sm text-muted mt-1">Metadata alanlarını güncelleyip kaydedin.</p>
+          <p class="text-sm text-muted mt-1">Metadata alanlarını güncelleyip kaydedin. Birden fazla ders ve sınıf seviyesi seçebilirsiniz.</p>
         </header>
 
         <div class="bg-surface border border-line/10 rounded-2xl p-6 shadow-sm space-y-4">
@@ -45,23 +49,35 @@ import { CatalogOutcome, CatalogSubject, ContentDetail, UpdateMetadataRequest } 
               class="w-full px-3 py-2.5 rounded-lg border border-line/15 bg-bg focus:border-brand-400 outline-none resize-y"></textarea>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="space-y-1">
-              <label class="text-xs font-semibold text-muted">Ders</label>
-              <select [(ngModel)]="subject" (ngModelChange)="onSubjectGradeChange()"
-                class="w-full px-3 py-2.5 rounded-lg border border-line/15 bg-bg outline-none">
-                <option value="">Seçiniz…</option>
-                @for (s of subjects(); track s) { <option [value]="s">{{ s }}</option> }
-              </select>
+          <div class="space-y-2">
+            <label class="text-xs font-semibold text-muted">Dersler</label>
+            <div class="flex flex-wrap gap-2">
+              @for (s of availableSubjects(); track s) {
+                <button type="button" (click)="toggleSubject(s)"
+                  [class]="selectedSubjects().includes(s)
+                    ? 'px-3 py-1.5 rounded-lg text-sm font-medium border border-brand-400 bg-brand-50 text-brand-800'
+                    : 'px-3 py-1.5 rounded-lg text-sm font-medium border border-line/15 bg-bg text-muted hover:border-brand-300'">
+                  {{ s }}
+                </button>
+              }
             </div>
-            <div class="space-y-1">
-              <label class="text-xs font-semibold text-muted">Sınıf</label>
-              <select [(ngModel)]="gradeLevel" (ngModelChange)="onSubjectGradeChange()"
-                class="w-full px-3 py-2.5 rounded-lg border border-line/15 bg-bg outline-none">
-                <option [ngValue]="null">—</option>
-                @for (g of grades; track g) { <option [ngValue]="g">{{ g }}. Sınıf</option> }
-              </select>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs font-semibold text-muted">Sınıf seviyeleri</label>
+            <div class="flex flex-wrap gap-2">
+              @for (g of grades; track g) {
+                <button type="button" (click)="toggleGradeLevel(g)"
+                  [class]="selectedGradeLevels().includes(g)
+                    ? 'px-3 py-1.5 rounded-lg text-sm font-medium border border-brand-400 bg-brand-50 text-brand-800'
+                    : 'px-3 py-1.5 rounded-lg text-sm font-medium border border-line/15 bg-bg text-muted hover:border-brand-300'">
+                  {{ g }}. Sınıf
+                </button>
+              }
             </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="space-y-1">
               <label class="text-xs font-semibold text-muted">Zorluk</label>
               <select [(ngModel)]="difficulty"
@@ -71,15 +87,13 @@ import { CatalogOutcome, CatalogSubject, ContentDetail, UpdateMetadataRequest } 
                 <option value="Hard">Zor</option>
               </select>
             </div>
+            <div class="space-y-1">
+              <label class="text-xs font-semibold text-muted">Süre (dakika)</label>
+              <input type="number" min="1" max="120" [(ngModel)]="durationMinutes"
+                class="w-full px-3 py-2.5 rounded-lg border border-line/15 bg-bg outline-none" />
+            </div>
           </div>
 
-          <div class="space-y-1 max-w-xs">
-            <label class="text-xs font-semibold text-muted">Süre (dakika)</label>
-            <input type="number" min="1" max="120" [(ngModel)]="durationMinutes"
-              class="w-full px-3 py-2.5 rounded-lg border border-line/15 bg-bg outline-none" />
-          </div>
-
-          <!-- Etiketler -->
           <div class="space-y-1">
             <label class="text-xs font-semibold text-muted">Etiketler</label>
             <div class="flex flex-wrap gap-1.5 mb-2">
@@ -97,7 +111,6 @@ import { CatalogOutcome, CatalogSubject, ContentDetail, UpdateMetadataRequest } 
               class="w-full px-3 py-2 rounded-lg border border-line/15 bg-bg outline-none text-sm" />
           </div>
 
-          <!-- Kazanımlar -->
           <div class="space-y-1">
             <label class="text-xs font-semibold text-muted">Kazanım kodları</label>
             <div class="flex flex-wrap gap-1.5 mb-2">
@@ -110,20 +123,20 @@ import { CatalogOutcome, CatalogSubject, ContentDetail, UpdateMetadataRequest } 
                 </span>
               } @empty { <span class="text-xs text-dim">Kazanım seçilmedi</span> }
             </div>
-            @if (!subject() || gradeLevel() == null) {
-              <p class="text-xs text-dim">Katalogdan seçmek için önce ders ve sınıf belirleyin.</p>
+            @if (!canBrowseOutcomes()) {
+              <p class="text-xs text-dim">Katalogdan seçmek için en az bir ders ve bir sınıf seviyesi belirleyin.</p>
             } @else {
               <button type="button" (click)="catalogOpen.set(!catalogOpen())"
                 class="text-xs px-3 py-1.5 rounded-lg border border-line/15 hover:bg-panel inline-flex items-center gap-1">
                 <mat-icon style="font-size:14px;width:14px;height:14px">{{ catalogOpen() ? 'expand_less' : 'expand_more' }}</mat-icon>
-                Katalogdan kazanım seç ({{ subject() }} · {{ gradeLevel() }}. sınıf)
+                Katalogdan kazanım seç ({{ catalogScopeLabel() }})
               </button>
               @if (catalogOpen()) {
                 <div class="mt-2 max-h-64 overflow-y-auto rounded-lg border border-line/15 divide-y divide-line/10">
                   @if (outcomesLoading()) {
                     <div class="p-3 text-xs text-dim">Kazanımlar yükleniyor…</div>
                   } @else if (catalogOutcomes().length === 0) {
-                    <div class="p-3 text-xs text-dim">Bu ders/sınıf için kazanım bulunamadı.</div>
+                    <div class="p-3 text-xs text-dim">Seçilen ders/sınıf kombinasyonları için kazanım bulunamadı.</div>
                   } @else {
                     @for (o of catalogOutcomes(); track o.code) {
                       <label class="flex items-start gap-2 p-2 hover:bg-panel cursor-pointer text-sm">
@@ -142,8 +155,8 @@ import { CatalogOutcome, CatalogSubject, ContentDetail, UpdateMetadataRequest } 
           }
 
           <div class="flex gap-3 pt-2">
-            <button type="button" (click)="save()" [disabled]="saving() || !title.trim()"
-              class="px-5 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 disabled:opacity-50">
+            <button type="button" (click)="save()" [disabled]="saving() || !title.trim() || selectedSubjects().length === 0"
+              class="px-5 py-2.5 rounded-xl da-grad text-white font-semibold disabled:opacity-50">
               Kaydet
             </button>
             <a [routerLink]="['/teacher/contents', contentId]"
@@ -169,14 +182,22 @@ export class ContentEditComponent implements OnInit {
   readonly state = signal<string>('');
   readonly editable = computed(() => this.state() === 'Draft' || this.state() === 'RevisionRequested');
 
-  readonly subjects = signal<string[]>(['Matematik', 'Türkçe', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İngilizce']);
-  readonly subject = signal<string>('');
-  readonly gradeLevel = signal<number | null>(null);
+  readonly availableSubjects = signal<string[]>(['Matematik', 'Türkçe', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İngilizce']);
+  readonly selectedSubjects = signal<string[]>([]);
+  readonly selectedGradeLevels = signal<number[]>([]);
   readonly tags = signal<string[]>([]);
   readonly outcomeCodes = signal<string[]>([]);
   readonly catalogOutcomes = signal<CatalogOutcome[]>([]);
   readonly outcomesLoading = signal(false);
   readonly catalogOpen = signal(false);
+
+  readonly canBrowseOutcomes = computed(() =>
+    this.selectedSubjects().length > 0 && this.selectedGradeLevels().length > 0,
+  );
+
+  readonly catalogScopeLabel = computed(() =>
+    `${formatContentSubjects(this.selectedSubjects())} · ${formatContentGradeLevels(this.selectedGradeLevels())}`,
+  );
 
   title = '';
   description = '';
@@ -190,7 +211,10 @@ export class ContentEditComponent implements OnInit {
     this.contentId = id;
 
     this.api.get<CatalogSubject[]>('/catalog/subjects').subscribe({
-      next: (list) => { const names = (list ?? []).map((s) => s.name).filter(Boolean); if (names.length) this.subjects.set(names); },
+      next: (list) => {
+        const names = (list ?? []).map((s) => s.name).filter(Boolean);
+        if (names.length) this.availableSubjects.set(names);
+      },
     });
 
     this.api.get<ContentDetail>(`/contents/${id}`).subscribe({
@@ -198,29 +222,57 @@ export class ContentEditComponent implements OnInit {
         this.state.set(c.state);
         this.title = c.title ?? '';
         this.description = c.description ?? '';
-        this.subject.set(c.subject ?? '');
-        this.gradeLevel.set(c.gradeLevel ?? null);
+        this.selectedSubjects.set([...(c.subjects ?? [])]);
+        this.selectedGradeLevels.set([...(c.gradeLevels ?? [])]);
         this.difficulty = c.difficulty || 'Medium';
         this.durationMinutes = c.durationMinutes ?? null;
         this.tags.set([...(c.tags ?? [])]);
         this.outcomeCodes.set([...(c.outcomeCodes ?? [])]);
         this.loading.set(false);
-        if (this.subject() && this.gradeLevel() != null) this.loadCatalogOutcomes();
+        if (this.canBrowseOutcomes()) this.loadCatalogOutcomes();
       },
       error: () => { this.loadError.set(true); this.loading.set(false); },
     });
   }
 
+  toggleSubject(name: string): void {
+    const cur = this.selectedSubjects();
+    this.selectedSubjects.set(cur.includes(name) ? cur.filter((x) => x !== name) : [...cur, name]);
+    this.onSubjectGradeChange();
+  }
+
+  toggleGradeLevel(grade: number): void {
+    const cur = this.selectedGradeLevels();
+    this.selectedGradeLevels.set(cur.includes(grade) ? cur.filter((x) => x !== grade) : [...cur, grade].sort((a, b) => a - b));
+    this.onSubjectGradeChange();
+  }
+
   onSubjectGradeChange(): void {
     this.catalogOutcomes.set([]);
-    if (this.subject() && this.gradeLevel() != null) this.loadCatalogOutcomes();
+    this.catalogOpen.set(false);
+    if (this.canBrowseOutcomes()) this.loadCatalogOutcomes();
   }
 
   private loadCatalogOutcomes(): void {
+    const subjects = this.selectedSubjects();
+    const grades = this.selectedGradeLevels();
+    if (!subjects.length || !grades.length) return;
+
     this.outcomesLoading.set(true);
-    this.api.get<CatalogOutcome[]>('/catalog/outcomes', { subject: this.subject(), grade: this.gradeLevel(), limit: 500 }).subscribe({
-      next: (list) => { this.catalogOutcomes.set(list ?? []); this.outcomesLoading.set(false); },
-      error: () => { this.catalogOutcomes.set([]); this.outcomesLoading.set(false); },
+    const pairs = subjects.flatMap((subject) => grades.map((grade) => ({ subject, grade })));
+    forkJoin(
+      pairs.map((p) => this.api.get<CatalogOutcome[]>('/catalog/outcomes', { subject: p.subject, grade: p.grade, limit: 500 })),
+    ).subscribe({
+      next: (results) => {
+        const map = new Map<string, CatalogOutcome>();
+        for (const list of results) for (const o of list ?? []) map.set(o.code, o);
+        this.catalogOutcomes.set(Array.from(map.values()));
+        this.outcomesLoading.set(false);
+      },
+      error: () => {
+        this.catalogOutcomes.set([]);
+        this.outcomesLoading.set(false);
+      },
     });
   }
 
@@ -239,14 +291,14 @@ export class ContentEditComponent implements OnInit {
   removeOutcome(code: string): void { this.outcomeCodes.set(this.outcomeCodes().filter((x) => x !== code)); }
 
   save(): void {
-    if (!this.title.trim()) return;
+    if (!this.title.trim() || this.selectedSubjects().length === 0) return;
     this.saving.set(true);
     this.saveError.set(null);
     const body: UpdateMetadataRequest = {
       title: this.title.trim(),
       description: this.description.trim() || null,
-      subject: this.subject() || null,
-      gradeLevel: this.gradeLevel(),
+      subjects: this.selectedSubjects(),
+      gradeLevels: this.selectedGradeLevels(),
       difficulty: this.difficulty,
       durationMinutes: this.durationMinutes,
       tags: this.tags(),

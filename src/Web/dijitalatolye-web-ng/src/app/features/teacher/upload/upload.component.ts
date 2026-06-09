@@ -12,8 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSliderModule } from '@angular/material/slider';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { switchMap, of, timer, Subscription, startWith } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { switchMap, timer, Subscription, forkJoin } from 'rxjs';
 import { ApiService } from '@core/api/api.service';
 import {
   AiExtractResponse, BundleUploadResponse, CatalogOutcome, CatalogSubject,
@@ -21,7 +20,7 @@ import {
   UpdateMetadataRequest,
 } from '@core/api/contracts';
 
-type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMinutes' | 'difficulty' | 'tags' | 'outcomeCodes';
+type AiField = 'title' | 'description' | 'subjects' | 'gradeLevels' | 'durationMinutes' | 'difficulty' | 'tags' | 'outcomeCodes';
 
 @Component({
   selector: 'da-teacher-upload',
@@ -77,13 +76,13 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
              (dragover)="$event.preventDefault(); dragOver.set(true)"
              (dragleave)="dragOver.set(false)"
              (drop)="onDrop($event)">
-          <div class="mx-auto inline-flex w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white items-center justify-center mb-4 shadow-lg shadow-brand-700/20">
+          <div class="mx-auto inline-flex w-16 h-16 rounded-2xl da-grad text-white items-center justify-center mb-4 shadow-lg shadow-brand-700/20">
             <mat-icon style="font-size:32px;width:32px;height:32px">cloud_upload</mat-icon>
           </div>
           <h2 class="text-xl font-bold text-ink">Dosyayı buraya bırakın</h2>
           <p class="text-sm text-muted mt-1">veya tıklayıp seçin. ZIP ya da tek HTML, en fazla 50 MB.</p>
           <button (click)="fileInput.click()" type="button"
-            class="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-md shadow-brand-600/20">
+            class="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold shadow-md shadow-brand-600/20">
             <mat-icon style="font-size:16px;width:16px;height:16px">folder_open</mat-icon>
             Dosya seç
           </button>
@@ -162,27 +161,37 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
                 class="w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none resize-y"></textarea>
             </div>
 
-            <!-- Ders + Sınıf yan yana -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-muted flex items-center gap-2">
-                  Ders <span [class]="badgeClass('subject')">{{ badgeLabel('subject') }}</span>
-                </label>
-                <select formControlName="subject" (change)="onSubjectOrGradeChange(); markManual('subject')"
-                  class="w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none">
-                  <option value="">Seçiniz…</option>
-                  @for (s of subjects(); track s) { <option [value]="s">{{ s }}</option> }
-                </select>
+            <!-- Dersler (çoklu) -->
+            <div class="space-y-2">
+              <label class="text-xs font-semibold text-muted flex items-center gap-2">
+                Dersler <span [class]="badgeClass('subjects')">{{ badgeLabel('subjects') }}</span>
+              </label>
+              <div class="flex flex-wrap gap-2">
+                @for (s of catalogSubjects(); track s) {
+                  <button type="button" (click)="toggleSubject(s); markManual('subjects')"
+                    [class]="selectedSubjects().includes(s)
+                      ? 'px-3 py-1.5 rounded-lg text-sm font-medium border border-brand-400 bg-brand-50 text-brand-800'
+                      : 'px-3 py-1.5 rounded-lg text-sm font-medium border border-line/10 bg-surface text-muted hover:border-brand-300'">
+                    {{ s }}
+                  </button>
+                }
               </div>
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-muted flex items-center gap-2">
-                  Sınıf <span [class]="badgeClass('gradeLevel')">{{ badgeLabel('gradeLevel') }}</span>
-                </label>
-                <select formControlName="gradeLevel" (change)="onSubjectOrGradeChange(); markManual('gradeLevel')"
-                  class="w-full px-3 py-2.5 rounded-lg border border-line/10 bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none">
-                  <option [ngValue]="null">Seçiniz…</option>
-                  @for (g of grades; track g) { <option [ngValue]="g">{{ g }}. Sınıf</option> }
-                </select>
+            </div>
+
+            <!-- Sınıf seviyeleri (çoklu) -->
+            <div class="space-y-2">
+              <label class="text-xs font-semibold text-muted flex items-center gap-2">
+                Sınıf seviyeleri <span [class]="badgeClass('gradeLevels')">{{ badgeLabel('gradeLevels') }}</span>
+              </label>
+              <div class="flex flex-wrap gap-2">
+                @for (g of grades; track g) {
+                  <button type="button" (click)="toggleGradeLevel(g); markManual('gradeLevels')"
+                    [class]="selectedGradeLevels().includes(g)
+                      ? 'px-3 py-1.5 rounded-lg text-sm font-medium border border-brand-400 bg-brand-50 text-brand-800'
+                      : 'px-3 py-1.5 rounded-lg text-sm font-medium border border-line/10 bg-surface text-muted hover:border-brand-300'">
+                    {{ g }}. Sınıf
+                  </button>
+                }
               </div>
             </div>
 
@@ -313,7 +322,7 @@ type AiField = 'title' | 'description' | 'subject' | 'gradeLevel' | 'durationMin
                 Vazgeç ve yeniden yükle
               </button>
               <button type="submit" [disabled]="submitting() || form.invalid"
-                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-md shadow-brand-600/20 disabled:opacity-60">
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold shadow-md shadow-brand-600/20 disabled:opacity-60">
                 @if (submitting()) { <mat-spinner diameter="16"></mat-spinner> }
                 @else { <mat-icon style="font-size:16px;width:16px;height:16px">send</mat-icon> }
                 Kaydet ve İncelemeye Gönder
@@ -331,7 +340,9 @@ export class UploadComponent {
   private readonly fb = inject(FormBuilder);
 
   // Dersler Catalog'tan yüklenir; yüklenene kadar (ve hata halinde) makul bir fallback gösterilir.
-  readonly subjects = signal<string[]>(['Matematik', 'Türkçe', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İngilizce']);
+  readonly catalogSubjects = signal<string[]>(['Matematik', 'Türkçe', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İngilizce']);
+  readonly selectedSubjects = signal<string[]>([]);
+  readonly selectedGradeLevels = signal<number[]>([]);
   readonly grades = Array.from({ length: 12 }, (_, i) => i + 1);
   readonly separatorKeys = [ENTER, COMMA];
 
@@ -351,8 +362,6 @@ export class UploadComponent {
   readonly form = this.fb.group({
     title: ['', Validators.required],
     description: [''],
-    subject: ['', Validators.required],
-    gradeLevel: [null as number | null],
     durationMinutes: [null as number | null],
     difficulty: ['Medium'],
   });
@@ -365,24 +374,15 @@ export class UploadComponent {
   readonly outcomesLoading = signal(false);
   readonly outcomeCatalogExpanded = signal(false);
 
-  private readonly formValues = toSignal(
-    this.form.valueChanges.pipe(startWith(this.form.value)),
-    { initialValue: this.form.value },
+  readonly canBrowseOutcomes = computed(() =>
+    this.selectedSubjects().length > 0 && this.selectedGradeLevels().length > 0,
   );
 
-  readonly canBrowseOutcomes = computed(() => {
-    const formVal = this.formValues();
-    const subject = (formVal?.subject ?? '').trim();
-    const grade = formVal?.gradeLevel;
-    return Boolean(subject && grade != null);
-  });
-
   readonly outcomeCatalogTitle = computed(() => {
-    const formVal = this.formValues();
-    const subject = (formVal?.subject ?? '').trim();
-    const grade = formVal?.gradeLevel;
-    if (!subject || grade == null) return 'Katalogdan kazanım seç';
-    return `${subject} · ${grade}. Sınıf kazanımları`;
+    if (!this.canBrowseOutcomes()) return 'Katalogdan kazanım seç';
+    const subjects = this.selectedSubjects().join(', ');
+    const grades = this.selectedGradeLevels().map((g) => `${g}. Sınıf`).join(', ');
+    return `${subjects} · ${grades} kazanımları`;
   });
 
   readonly selectedCatalogCount = computed(() => {
@@ -396,34 +396,49 @@ export class UploadComponent {
   });
 
   constructor() {
-    this.form.valueChanges.pipe(
-      startWith(this.form.value),
-      switchMap((formVal) => {
-        const subject = (formVal.subject ?? '').trim();
-        const grade = formVal.gradeLevel;
-        if (!subject || grade == null) {
-          this.outcomesLoading.set(false);
-          return of([] as CatalogOutcome[]);
-        }
-        this.outcomesLoading.set(true);
-        return this.api.get<CatalogOutcome[]>('/catalog/outcomes', { subject, grade, limit: 500 });
-      }),
-    ).subscribe({
+    // Dersleri katalogdan yükle (16 MEB dersi); hata halinde fallback liste kalır.
+    this.api.get<CatalogSubject[]>('/catalog/subjects').subscribe({
       next: (list) => {
-        this.catalogOutcomes.set(list ?? []);
+        const names = (list ?? []).map((s) => s.name).filter(Boolean);
+        if (names.length) this.catalogSubjects.set(names);
+      },
+    });
+  }
+
+  toggleSubject(name: string): void {
+    const cur = this.selectedSubjects();
+    this.selectedSubjects.set(cur.includes(name) ? cur.filter((x) => x !== name) : [...cur, name]);
+    this.onSubjectOrGradeChange();
+  }
+
+  toggleGradeLevel(grade: number): void {
+    const cur = this.selectedGradeLevels();
+    this.selectedGradeLevels.set(cur.includes(grade) ? cur.filter((x) => x !== grade) : [...cur, grade].sort((a, b) => a - b));
+    this.onSubjectOrGradeChange();
+  }
+
+  private refreshCatalogOutcomes(): void {
+    const subjects = this.selectedSubjects();
+    const grades = this.selectedGradeLevels();
+    if (!subjects.length || !grades.length) {
+      this.catalogOutcomes.set([]);
+      this.outcomesLoading.set(false);
+      return;
+    }
+    this.outcomesLoading.set(true);
+    const pairs = subjects.flatMap((subject) => grades.map((grade) => ({ subject, grade })));
+    forkJoin(
+      pairs.map((p) => this.api.get<CatalogOutcome[]>('/catalog/outcomes', { subject: p.subject, grade: p.grade, limit: 500 })),
+    ).subscribe({
+      next: (results) => {
+        const map = new Map<string, CatalogOutcome>();
+        for (const list of results) for (const o of list ?? []) map.set(o.code, o);
+        this.catalogOutcomes.set(Array.from(map.values()));
         this.outcomesLoading.set(false);
       },
       error: () => {
         this.catalogOutcomes.set([]);
         this.outcomesLoading.set(false);
-      },
-    });
-
-    // Dersleri katalogdan yükle (16 MEB dersi); hata halinde fallback liste kalır.
-    this.api.get<CatalogSubject[]>('/catalog/subjects').subscribe({
-      next: (list) => {
-        const names = (list ?? []).map((s) => s.name).filter(Boolean);
-        if (names.length) this.subjects.set(names);
       },
     });
   }
@@ -445,6 +460,7 @@ export class UploadComponent {
 
   onSubjectOrGradeChange(): void {
     this.outcomeCatalogExpanded.set(false);
+    this.refreshCatalogOutcomes();
   }
 
   toggleOutcomeCatalog(): void {
@@ -601,15 +617,15 @@ export class UploadComponent {
     this.form.patchValue({
       title: m.title ?? '',
       description: m.description ?? '',
-      subject: m.subject ?? '',
-      gradeLevel: m.gradeLevel ?? null,
       durationMinutes: m.durationMinutes ?? null,
       difficulty: m.difficulty ?? 'Medium',
     });
+    this.selectedSubjects.set(m.subject ? [m.subject] : []);
+    this.selectedGradeLevels.set(m.gradeLevel != null ? [m.gradeLevel] : []);
     if (m.title) filled.add('title');
     if (m.description) filled.add('description');
-    if (m.subject) filled.add('subject');
-    if (m.gradeLevel) filled.add('gradeLevel');
+    if (m.subject) filled.add('subjects');
+    if (m.gradeLevel != null) filled.add('gradeLevels');
     if (m.durationMinutes) filled.add('durationMinutes');
     if (m.difficulty) filled.add('difficulty');
     this.tags.set([...m.tags]);
@@ -621,6 +637,7 @@ export class UploadComponent {
 
     this.aiFilled.set(filled);
     this.manualEdited.set(new Set());
+    this.refreshCatalogOutcomes();
     this.phase.set('form');
   }
 
@@ -665,6 +682,10 @@ export class UploadComponent {
   // ---- Submit ----
   onSubmit(): void {
     if (this.form.invalid || !this.extraction() || !this.draftContentId()) return;
+    if (this.selectedSubjects().length === 0) {
+      this.submitError.set('En az bir ders seçmelisiniz.');
+      return;
+    }
     if (this.selectedType() === 'DigitalContent' && this.outcomeCodes().length === 0) {
       this.submitError.set('Dijital içerik için en az bir kazanım seçilmelidir.');
       return;
@@ -680,8 +701,8 @@ export class UploadComponent {
       title: v.title!,
       type: this.selectedType(),
       description: v.description || null,
-      subject: v.subject!,
-      gradeLevel: v.gradeLevel ?? null,
+      subjects: this.selectedSubjects(),
+      gradeLevels: this.selectedGradeLevels(),
       outcomeCodes: this.outcomeCodes(),
       tags: this.tags(),
       durationMinutes: v.durationMinutes ?? null,
@@ -724,6 +745,8 @@ export class UploadComponent {
     this.extraction.set(null);
     this.draftContentId.set(null);
     this.form.reset({ difficulty: 'Medium' });
+    this.selectedSubjects.set([]);
+    this.selectedGradeLevels.set([]);
     this.tags.set([]);
     this.outcomeCodes.set([]);
     this.outcomeDescriptions.set({});

@@ -14,61 +14,60 @@ type Theme = 'light' | 'dark';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`:host { display: block; min-height: 100%; }`],
   template: `
-    <div class="min-h-full flex flex-col bg-bg text-ink">
-      <header class="bg-bg/80 backdrop-blur-xl border-b border-line/10 sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-          <a routerLink="/" class="flex items-center gap-2 font-display font-bold text-ink shrink-0">
-            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent2 text-white shadow-lg shadow-accent/25">
-              <mat-icon class="!text-white" style="font-size:16px;width:16px;height:16px">sports_esports</mat-icon>
-            </span>
-            <span class="hidden sm:inline">Dijital<span class="text-accent">Atölye</span></span>
+    <div class="min-h-full flex flex-col da-dream-bg text-ink">
+      <header class="bg-bg2/80 backdrop-blur-xl border-b border-line/10 sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+          <a routerLink="/" class="flex items-center gap-2.5 font-display font-bold text-ink shrink-0">
+            <img src="assets/brand/logo.png" alt="Dijital Oyun Atölyesi" class="h-9 w-auto" />
+            <span class="hidden sm:inline text-[15px] tracking-tight">Dijital Oyun <span class="da-rainbow-text">Atölyesi</span></span>
           </a>
 
           <nav class="flex items-center gap-1 overflow-x-auto">
             @if (isTeacher()) {
-              <a routerLink="/teacher/dashboard" routerLinkActive="!bg-accent/10 !text-accent"
+              <a routerLink="/teacher/dashboard" routerLinkActive="!da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Panel</a>
-              <a routerLink="/teacher/contents" routerLinkActive="!bg-accent/10 !text-accent"
+              <a routerLink="/teacher/contents" routerLinkActive="!da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">İçeriklerim</a>
-              <a routerLink="/teacher/contents/new" routerLinkActive="!bg-accent/10 !text-accent"
+              <a routerLink="/teacher/contents/new" routerLinkActive="!da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Yükle</a>
-              <a routerLink="/teacher/assignments" routerLinkActive="!bg-accent/10 !text-accent"
+              <a routerLink="/teacher/assignments" routerLinkActive="!da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Ödevler</a>
-              <a routerLink="/teacher/classes" routerLinkActive="!bg-accent/10 !text-accent"
+              <a routerLink="/teacher/classes" routerLinkActive="!da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Sınıflarım</a>
             }
             @if (isEditor()) {
-              <a routerLink="/editor" routerLinkActive="!bg-accent/10 !text-accent" [routerLinkActiveOptions]="{ exact: true }"
+              <a routerLink="/editor" routerLinkActive="!da-grad !text-white !rounded-full" [routerLinkActiveOptions]="{ exact: true }"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Editör</a>
-              <a routerLink="/editor/queue" routerLinkActive="!bg-accent/10 !text-accent"
+              <a routerLink="/editor/queue" routerLinkActive="!da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Kuyruk</a>
             }
             @if (isAdmin()) {
-              <a routerLink="/admin" routerLinkActive="!bg-accent/10 !text-accent" [routerLinkActiveOptions]="{ exact: true }"
+              <a routerLink="/admin" routerLinkActive="!da-grad !text-white !rounded-full" [routerLinkActiveOptions]="{ exact: true }"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Yönetim</a>
             }
             @if (isStudent()) {
-              <a routerLink="/assignments" routerLinkActive="!bg-accent/10 !text-accent"
+              <a routerLink="/assignments" routerLinkActive="!da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Ödevlerim</a>
-              <a routerLink="/progress" routerLinkActive="!bg-accent/10 !text-accent"
+              <a routerLink="/progress" routerLinkActive="!da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">İlerlemem</a>
             }
           </nav>
 
           <div class="flex items-center gap-2 shrink-0">
             <button type="button" (click)="toggleTheme()"
-              class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-muted hover:bg-accent/5 hover:text-accent transition"
-              [attr.aria-label]="theme() === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'">
-              <mat-icon style="font-size:18px;width:18px;height:18px">{{ theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+              class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-line/15 bg-surface/60 hover:border-accent/40 transition"
+              [attr.aria-label]="theme() === 'dark' ? 'Gündüz moduna geç' : 'Gece moduna geç'">
+              <img [src]="theme() === 'dark' ? 'assets/brand/light-mode.png' : 'assets/brand/dark-mode.png'"
+                   [alt]="theme() === 'dark' ? 'Gündüz modu' : 'Gece modu'" class="w-5 h-5" />
             </button>
-            <a routerLink="/notifications" routerLinkActive="!bg-accent/10 !text-accent"
+            <a routerLink="/notifications" routerLinkActive="!da-grad !text-white !rounded-full"
                class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-muted hover:bg-accent/5 hover:text-accent transition"
                aria-label="Bildirimler">
               <mat-icon style="font-size:18px;width:18px;height:18px">notifications</mat-icon>
             </a>
 
             <button mat-button [matMenuTriggerFor]="userMenu" class="inline-flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-accent/5 text-ink">
-              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-accent to-accent2 text-white text-xs font-bold flex items-center justify-center">
+              <div class="w-7 h-7 rounded-full da-grad text-white text-xs font-bold flex items-center justify-center">
                 {{ initial() }}
               </div>
               <span class="hidden md:inline text-sm">{{ email() }}</span>

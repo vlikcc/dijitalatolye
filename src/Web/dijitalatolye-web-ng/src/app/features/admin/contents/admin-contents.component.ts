@@ -33,7 +33,7 @@ const TYPE_LABELS: Record<ContentType, string> = {
         @for (f of typeFilters; track f.label) {
           <button type="button" (click)="setTypeFilter(f.value)"
             [class]="f.value === typeFilter()
-              ? 'px-3 py-1.5 rounded-full text-sm font-semibold bg-brand-600 text-white'
+              ? 'px-3 py-1.5 rounded-full text-sm font-semibold da-grad text-white'
               : 'px-3 py-1.5 rounded-full text-sm font-medium bg-panel text-muted hover:text-ink'">
             {{ f.label }}
           </button>

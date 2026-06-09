@@ -45,9 +45,10 @@ public static class SearchEndpoints
                 }))
                 .Aggregations(a => a
                     .Add("types", agg => agg.Terms(t => t.Field(f => f.Type).Size(5)))
-                    .Add("subjects", agg => agg.Terms(t => t.Field(f => f.Subject).Size(20)))
-                    .Add("gradeLevels", agg => agg.Terms(t => t.Field(f => f.GradeLevel).Size(12)))
-                    .Add("tags", agg => agg.Terms(t => t.Field(f => f.Tags).Size(30))))
+                    .Add("subjects", agg => agg.Terms(t => t.Field(f => f.Subjects).Size(20)))
+                    .Add("gradeLevels", agg => agg.Terms(t => t.Field(f => f.GradeLevels).Size(12)))
+                    .Add("tags", agg => agg.Terms(t => t.Field(f => f.Tags).Size(30)))
+                    .Add("outcomes", agg => agg.Terms(t => t.Field(f => f.OutcomeCodes).Size(40))))
                 .Sort(so => so.Field(f => f.Popularity, fs => fs.Order(Elastic.Clients.Elasticsearch.SortOrder.Desc))), ct);
 
             if (!resp.IsValidResponse)
@@ -163,9 +164,9 @@ public static class SearchEndpoints
         if (!string.IsNullOrWhiteSpace(type))
             filters.Add(qd => qd.Term(t => t.Field(f => f.Type).Value(type!)));
         if (!string.IsNullOrWhiteSpace(subject))
-            filters.Add(qd => qd.Term(t => t.Field(f => f.Subject).Value(subject!)));
+            filters.Add(qd => qd.Term(t => t.Field(f => f.Subjects).Value(subject!)));
         if (gradeLevel is not null)
-            filters.Add(qd => qd.Term(t => t.Field(f => f.GradeLevel).Value(gradeLevel.Value)));
+            filters.Add(qd => qd.Term(t => t.Field(f => f.GradeLevels).Value(gradeLevel.Value)));
         if (!string.IsNullOrWhiteSpace(outcome))
             filters.Add(qd => qd.Term(t => t.Field(f => f.OutcomeCodes).Value(outcome!)));
         if (!string.IsNullOrWhiteSpace(tag))
@@ -184,6 +185,7 @@ public static class SearchEndpoints
                 subject = Array.Empty<object>(),
                 gradeLevel = Array.Empty<object>(),
                 tags = Array.Empty<object>(),
+                outcome = Array.Empty<object>(),
             };
         }
 
@@ -193,6 +195,7 @@ public static class SearchEndpoints
             subject = ExtractTerms(aggregations, "subjects"),
             gradeLevel = ExtractTerms(aggregations, "gradeLevels"),
             tags = ExtractTerms(aggregations, "tags"),
+            outcome = ExtractTerms(aggregations, "outcomes"),
         };
     }
 

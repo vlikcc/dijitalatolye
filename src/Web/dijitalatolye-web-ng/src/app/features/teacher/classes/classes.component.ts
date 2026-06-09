@@ -33,7 +33,7 @@ interface ClassRow {
           <input type="text" [(ngModel)]="newName" name="name" maxlength="160" placeholder="Sınıf adı (örn. 9-A Matematik)"
             class="rounded-lg border border-line/20 bg-bg px-3 py-2 text-sm text-ink w-72" />
           <button type="button" (click)="create()" [disabled]="!newName.trim() || creating()"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 disabled:opacity-50">
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold disabled:opacity-50">
             Oluştur
           </button>
         </div>
@@ -54,7 +54,7 @@ interface ClassRow {
                     <input type="text" [(ngModel)]="editName" name="edit-{{ c.id }}" maxlength="160"
                       class="rounded-lg border border-line/20 bg-bg px-3 py-2 text-sm text-ink flex-1" />
                     <button type="button" (click)="saveRename(c.id)" [disabled]="!editName.trim() || busy()"
-                      class="px-3 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 disabled:opacity-50">Kaydet</button>
+                      class="px-3 py-2 rounded-lg da-grad text-white text-sm font-semibold disabled:opacity-50">Kaydet</button>
                     <button type="button" (click)="cancelEdit()" class="px-3 py-2 rounded-lg border border-line/20 text-muted text-sm hover:bg-bg">İptal</button>
                   </div>
                 } @else {

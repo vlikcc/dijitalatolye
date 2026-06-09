@@ -15,7 +15,7 @@ public static class ContentSubmittedEventFactory
             Title = content.Title,
             OutcomeCodes = content.OutcomeCodes.AsReadOnly(),
             Tags = content.Tags.AsReadOnly(),
-            GradeLevel = content.GradeLevel,
-            Subject = content.Subject,
+            GradeLevels = content.GradeLevels.AsReadOnly(),
+            Subjects = content.Subjects.AsReadOnly(),
         };
 }

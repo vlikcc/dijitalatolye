@@ -32,8 +32,8 @@ public static class ContentEndpoints
                 Title = body.Title,
                 Type = body.Type,
                 Description = body.Description,
-                Subject = body.Subject,
-                GradeLevel = body.GradeLevel,
+                Subjects = NormalizeSubjects(body.Subjects),
+                GradeLevels = NormalizeGradeLevels(body.GradeLevels),
                 OutcomeCodes = body.OutcomeCodes.ToList(),
                 Tags = body.Tags.ToList(),
                 TargetAge = body.TargetAge,
@@ -165,9 +165,9 @@ public static class ContentEndpoints
                     State = c.State.ToString(),
                     Status = c.State.ToString(),
                     c.AutoRejectReason,
-                    Subject = c.Subject,
-                    Grade = c.GradeLevel.ToString(),
-                    GradeLevel = c.GradeLevel,
+                    Subjects = c.Subjects,
+                    GradeLevels = c.GradeLevels,
+                    Grade = FormatGradeLevels(c.GradeLevels),
                     UpdatedAt = c.UpdatedAtUtc,
                     UpdatedAtUtc = c.UpdatedAtUtc,
                     CreatedAtUtc = c.CreatedAtUtc,
@@ -241,8 +241,8 @@ public static class ContentEndpoints
             content.Title = body.Title ?? content.Title;
             if (body.Type is not null) content.Type = body.Type.Value;
             content.Description = body.Description ?? content.Description;
-            content.Subject = body.Subject ?? content.Subject;
-            content.GradeLevel = body.GradeLevel ?? content.GradeLevel;
+            if (body.Subjects is not null) content.Subjects = NormalizeSubjects(body.Subjects);
+            if (body.GradeLevels is not null) content.GradeLevels = NormalizeGradeLevels(body.GradeLevels);
             if (body.OutcomeCodes is not null) content.OutcomeCodes = body.OutcomeCodes.ToList();
             if (body.Tags is not null) content.Tags = body.Tags.ToList();
             content.TargetAge = body.TargetAge ?? content.TargetAge;
@@ -275,8 +275,8 @@ public static class ContentEndpoints
 
             if (body.OutcomeCodes is not null) content.OutcomeCodes = body.OutcomeCodes.ToList();
             if (body.Tags is not null) content.Tags = body.Tags.ToList();
-            if (body.Subject is not null) content.Subject = body.Subject;
-            content.GradeLevel = body.GradeLevel ?? content.GradeLevel;
+            if (body.Subjects is not null) content.Subjects = NormalizeSubjects(body.Subjects);
+            if (body.GradeLevels is not null) content.GradeLevels = NormalizeGradeLevels(body.GradeLevels);
             content.Difficulty = NormalizeDifficulty(body.Difficulty) ?? content.Difficulty;
             content.UpdatedAtUtc = DateTime.UtcNow;
 
@@ -839,13 +839,36 @@ public static class ContentEndpoints
             _ => null,
         };
     }
+
+    private static List<string> NormalizeSubjects(IReadOnlyCollection<string>? values) =>
+        values is null
+            ? []
+            : values
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+    private static List<int> NormalizeGradeLevels(IReadOnlyCollection<int>? values) =>
+        values is null
+            ? []
+            : values
+                .Where(g => g is >= 1 and <= 12)
+                .Distinct()
+                .OrderBy(g => g)
+                .ToList();
+
+    private static string FormatGradeLevels(IReadOnlyCollection<int> gradeLevels) =>
+        gradeLevels.Count == 0
+            ? string.Empty
+            : string.Join(", ", gradeLevels.OrderBy(g => g));
 }
 
 public sealed record CreateContentRequest(
     string Title,
     string? Description,
-    string Subject,
-    int? GradeLevel,
+    string[] Subjects,
+    int[] GradeLevels,
     string[] OutcomeCodes,
     string[] Tags,
     int? TargetAge = null,
@@ -870,8 +893,8 @@ public sealed record UpdateMetadataRequest(
     string? Title,
     ContentType? Type,
     string? Description,
-    string? Subject,
-    int? GradeLevel,
+    string[]? Subjects,
+    int[]? GradeLevels,
     string[]? OutcomeCodes,
     string[]? Tags,
     int? TargetAge,
@@ -884,8 +907,8 @@ public sealed record UpdateMetadataRequest(
 public sealed record EditorMetadataRequest(
     string[]? OutcomeCodes,
     string[]? Tags,
-    string? Subject,
-    int? GradeLevel,
+    string[]? Subjects,
+    int[]? GradeLevels,
     string? Difficulty);
 
 public sealed record AddVersionRequest(

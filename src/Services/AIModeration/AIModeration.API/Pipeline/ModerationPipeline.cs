@@ -161,8 +161,8 @@ public sealed class ModerationPipeline
     {
         var sb = new StringBuilder();
         sb.Append("İçerik başlık: ").AppendLine(s.Title);
-        sb.Append("Sınıf seviyesi: ").AppendLine(s.GradeLevel?.ToString() ?? "?");
-        sb.Append("Ders: ").AppendLine(s.Subject);
+        sb.Append("Sınıf seviyeleri: ").AppendLine(s.GradeLevels.Count > 0 ? string.Join(", ", s.GradeLevels) : "?");
+        sb.Append("Dersler: ").AppendLine(s.Subjects.Count > 0 ? string.Join(", ", s.Subjects) : "?");
         sb.Append("Hedeflenen kazanımlar: ").AppendLine(string.Join(", ", s.OutcomeCodes));
         sb.AppendLine();
         sb.AppendLine("Statik analiz raporu:");

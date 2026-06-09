@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '@core/api/api.service';
-import { ContentType } from '@core/api/contracts';
+import { ContentType, formatContentGradeLevels, formatContentSubjects } from '@core/api/contracts';
 
 type ContentStatus =
   | 'Draft' | 'GuardScanning' | 'Submitted' | 'AIReviewing' | 'AIReviewed' | 'EditorReviewing'
@@ -19,7 +19,8 @@ interface ContentItem {
   autoRejectReason?: string | null;
   updatedAt: string;
   grade?: string;
-  subject?: string;
+  subjects?: string[];
+  gradeLevels?: number[];
 }
 
 const TYPE_FILTERS: ReadonlyArray<{ value: ContentType | null; label: string }> = [
@@ -45,7 +46,7 @@ const TYPE_LABELS: Record<ContentType, string> = {
         <p class="text-sm text-muted mt-1">Yüklediğiniz tüm içeriklerin durumunu buradan takip edebilirsiniz.</p>
       </div>
       <a routerLink="/teacher/contents/new"
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-md shadow-brand-600/20">
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold shadow-md shadow-brand-600/20">
         <mat-icon style="font-size:16px;width:16px;height:16px">add</mat-icon> Yeni içerik
       </a>
     </header>
@@ -54,7 +55,7 @@ const TYPE_LABELS: Record<ContentType, string> = {
       @for (f of typeFilters; track f.label) {
         <button type="button" (click)="setTypeFilter(f.value)"
           [class]="f.value === typeFilter()
-            ? 'px-3 py-1.5 rounded-full text-sm font-semibold bg-brand-600 text-white'
+            ? 'px-3 py-1.5 rounded-full text-sm font-semibold da-grad text-white'
             : 'px-3 py-1.5 rounded-full text-sm font-medium bg-panel text-muted hover:text-ink'">
           {{ f.label }}
         </button>
@@ -82,7 +83,7 @@ const TYPE_LABELS: Record<ContentType, string> = {
         <h2 class="mt-4 font-semibold text-ink">Henüz içerik yüklemediniz</h2>
         <p class="mt-1 text-sm text-muted">İlk interaktif içeriğinizi 5 dakikada yayına hazırlayabilirsiniz.</p>
         <a routerLink="/teacher/contents/new"
-          class="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">
+          class="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold">
           <mat-icon style="font-size:16px;width:16px;height:16px">add</mat-icon> İlk içeriği yükle
         </a>
       </div>
@@ -104,7 +105,7 @@ const TYPE_LABELS: Record<ContentType, string> = {
               <tr class="hover:bg-brand-50/40">
                 <td class="px-4 py-3 font-medium text-ink">{{ c.title }}</td>
                 <td class="px-4 py-3 text-muted">{{ typeLabel(c.type) }}</td>
-                <td class="px-4 py-3 text-muted">{{ c.grade ?? '—' }} {{ c.subject ? '• ' + c.subject : '' }}</td>
+                <td class="px-4 py-3 text-muted">{{ formatGradeSubjects(c) }}</td>
                 <td class="px-4 py-3">
                   <span [class]="badgeClass(c.status)" [title]="c.status === 'AutoRejected' ? (c.autoRejectReason || '') : ''">
                     <mat-icon style="font-size:14px;width:14px;height:14px">{{ badgeIcon(c.status) }}</mat-icon>
@@ -163,6 +164,14 @@ export class MyContentsComponent implements OnInit {
   }
 
   typeLabel(t?: ContentType): string { return t ? TYPE_LABELS[t] : '—'; }
+
+  formatGradeSubjects(c: ContentItem): string {
+    const grades = c.gradeLevels?.length
+      ? formatContentGradeLevels(c.gradeLevels)
+      : (c.grade ?? '—');
+    const subjects = formatContentSubjects(c.subjects);
+    return subjects === '—' ? grades : `${grades} • ${subjects}`;
+  }
 
   private load(): void {
     this.loading.set(true);

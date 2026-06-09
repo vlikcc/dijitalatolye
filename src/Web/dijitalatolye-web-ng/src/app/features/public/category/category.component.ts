@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '@core/api/api.service';
+import { formatContentGradeLevels } from '@core/api/contracts';
 
 interface SearchItem {
   id: string;
   title: string;
   description?: string;
   slug: string;
-  subject?: string;
-  gradeLevel?: number;
+  gradeLevels?: number[];
 }
 
 interface FacetBucket {
@@ -35,10 +35,10 @@ interface SearchResponse {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-6xl mx-auto p-6">
-      <nav class="text-sm text-slate-500 mb-4">
+      <nav class="text-sm text-dim mb-4">
         <a routerLink="/discover" class="hover:text-brand-700">Keşfet</a>
         <span class="mx-2">/</span>
-        <span class="text-slate-800">{{ subject() }}</span>
+        <span class="text-ink">{{ subject() }}</span>
       </nav>
 
       <h1 class="text-3xl font-bold mb-2">{{ subject() }} içerikleri</h1>
@@ -50,8 +50,8 @@ interface SearchResponse {
             <a [routerLink]="['/category', subject()]"
                [queryParams]="{ grade: isGradeSelected(b.value) ? null : b.value }"
                [class]="isGradeSelected(b.value)
-                 ? 'text-sm px-3 py-1 rounded-full border bg-brand-600 text-white border-brand-600'
-                 : 'text-sm px-3 py-1 rounded-full border bg-white text-slate-700 border-slate-200 hover:border-brand-300'">
+                 ? 'text-sm px-3 py-1 rounded-full border da-grad text-white border-brand-600'
+                 : 'text-sm px-3 py-1 rounded-full border bg-surface text-muted border-line/15 hover:border-brand-300'">
               {{ b.value }}. sınıf ({{ b.count }})
             </a>
           }
@@ -59,20 +59,20 @@ interface SearchResponse {
       }
 
       @if (loading()) {
-        <p class="text-slate-500">Yükleniyor…</p>
+        <p class="text-dim">Yükleniyor…</p>
       } @else if (items().length === 0) {
-        <p class="text-slate-500">Bu kategoride henüz içerik yok.</p>
+        <p class="text-dim">Bu kategoride henüz içerik yok.</p>
       } @else {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           @for (item of items(); track item.id) {
             <a [routerLink]="['/contents', item.slug]"
-               class="block rounded-xl border border-slate-200 bg-white p-4 hover:border-brand-300 hover:shadow-md transition">
-              <h2 class="font-semibold text-slate-900">{{ item.title }}</h2>
+               class="block rounded-xl border border-line/15 bg-surface p-4 hover:border-brand-300 hover:shadow-md transition">
+              <h2 class="font-semibold text-ink">{{ item.title }}</h2>
               @if (item.description) {
-                <p class="text-sm text-slate-600 mt-1 line-clamp-2">{{ item.description }}</p>
+                <p class="text-sm text-muted mt-1 line-clamp-2">{{ item.description }}</p>
               }
-              <p class="text-xs text-slate-400 mt-2">
-                {{ item.gradeLevel ? item.gradeLevel + '. sınıf' : '' }}
+              <p class="text-xs text-dim mt-2">
+                {{ formatContentGradeLevels(item.gradeLevels) }}
               </p>
             </a>
           }
@@ -84,6 +84,8 @@ interface SearchResponse {
 export class CategoryComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(ApiService);
+
+  readonly formatContentGradeLevels = formatContentGradeLevels;
 
   readonly subject = signal('');
   readonly grade = signal('');

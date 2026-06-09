@@ -105,7 +105,7 @@ interface AssignmentDetail {
               </div>
               <div class="flex gap-2 pt-1">
                 <button type="button" (click)="save()" [disabled]="busy() || !editTitle.trim()"
-                  class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 disabled:opacity-50">Kaydet</button>
+                  class="px-4 py-2 rounded-lg da-grad text-white text-sm font-semibold disabled:opacity-50">Kaydet</button>
                 <button type="button" (click)="editing.set(false)" class="px-4 py-2 rounded-lg border border-line/20 text-muted text-sm hover:bg-bg">İptal</button>
               </div>
             </div>

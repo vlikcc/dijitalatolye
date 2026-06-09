@@ -31,49 +31,74 @@ interface SearchResponse { items: SearchItem[]; total: number; }
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- ================= HERO ================= -->
-    <section class="da-science-bg relative overflow-hidden">
-      <div class="da-blob top-10 -left-20 w-96 h-96 bg-accent/15 animate-drift"></div>
-      <div class="da-blob top-40 -right-24 w-[30rem] h-[30rem] bg-accent2/15 animate-drift" style="animation-delay:-3s"></div>
+    <section class="da-dream-bg relative overflow-hidden">
+      <!-- Tam genişlik (full-bleed) hero görseli -->
+      <div class="relative w-full">
+        <img src="assets/brand/hero-bg.png" alt="Dijital Oyun Atölyesi oyun ekranları"
+             class="block w-full h-auto select-none pointer-events-none" />
+        <!-- Alt kenarı sayfa arka planına yumuşakça karıştır (dikiş izini gizler) -->
+        <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-bg pointer-events-none"></div>
 
-      <div class="relative max-w-7xl mx-auto px-4 pt-16 pb-12 lg:pt-24">
-        <div class="da-eyebrow flex items-center gap-3 mb-6 animate-fade-up">
-          <span>[ 01 ]</span>
-          <span class="text-dim">MEB Müfredatı · AI Ön İnceleme · Editör Onaylı</span>
-        </div>
-
-        <h1 class="da-display font-bold text-ink text-5xl sm:text-6xl lg:text-7xl leading-[1.02] max-w-5xl animate-fade-up">
-          Öğrenmenin en
-          <span class="da-serif text-accent">eğlenceli</span>
-          hâli:
-          <span class="da-serif bg-clip-text text-transparent bg-gradient-to-r from-accent to-accent2">oyunlarla</span>
-          keşfet.
-        </h1>
-
-        <p class="mt-7 text-lg sm:text-xl text-muted max-w-2xl leading-relaxed animate-fade-up" style="animation-delay:80ms">
-          DijitalAtölye; öğretmenlerin ürettiği interaktif eğitsel oyunları ve dijital içerikleri,
-          sınıf-ders-kazanım bazlı, güvenli sandbox ortamında öğrencilerle buluşturur. Hesap aç, tıkla, <span class="text-ink font-medium">oyna ve öğren.</span>
-        </p>
-
-        <div class="mt-9 flex flex-col sm:flex-row gap-3 animate-fade-up" style="animation-delay:140ms">
-          <a routerLink="/discover"
-             class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-accent text-white font-semibold hover:bg-brand-700 shadow-xl shadow-accent/30 transition">
-            <mat-icon style="font-size:18px;width:18px;height:18px">sports_esports</mat-icon>
-            Oyunları Keşfet
-          </a>
-          <a href="#nasil" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-line/20 text-ink font-semibold hover:border-accent/50 hover:text-accent transition">
-            <mat-icon style="font-size:18px;width:18px;height:18px">play_circle</mat-icon>
-            Nasıl çalışır?
-          </a>
-        </div>
-
-        <!-- Canlı istatistik şeridi -->
-        <div class="mt-14 grid grid-cols-2 md:grid-cols-4 gap-px rounded-2xl overflow-hidden border border-line/10 bg-line/10 animate-fade-up" style="animation-delay:200ms">
-          @for (s of stats; track s.label) {
-            <div class="bg-bg2 px-5 py-5">
-              <div class="da-display text-3xl font-bold text-ink">{{ s.value }}</div>
-              <div class="mt-1 font-mono text-[11px] tracking-widest uppercase text-dim">{{ s.label }}</div>
+        <!-- lg+ : metin görselin sağındaki boş alana overlay -->
+        <div class="hidden lg:flex absolute inset-y-0 right-0 w-[40%] pr-[3.2vw] pl-[1vw] pt-[3.5vw] flex-col justify-start items-end text-right animate-fade-up">
+          <img src="assets/brand/logo.png" alt="" aria-hidden="true"
+               class="w-[7.5vw] max-w-[155px] h-auto mb-[0.5vw]" />
+          <h1 class="da-display font-bold text-ink leading-[1.03]">
+            <span class="block" style="font-size:3vw">Öğrenmenin</span>
+            <span class="block da-script da-rainbow-text leading-[0.92]" style="font-size:3.5vw">En Eğlenceli</span>
+            <span class="block" style="font-size:3vw">Hâli</span>
+          </h1>
+          <p class="text-muted leading-relaxed mt-[0.8vw] max-w-[30vw]" style="font-size:0.94vw">
+            Dijital Oyun Atölyesi; öğretmenlerin ürettiği interaktif eğitsel
+            oyunları ve dijital içerikleri, sınıf-ders-öğrenme çıktısı bazlı,
+            güvenli sandbox ortamında öğrencilerle buluşturur.
+          </p>
+          <p class="da-script da-rainbow-text mt-[0.6vw]" style="font-size:1.6vw">
+            Hesap aç, tıkla, oyna ve öğren!
+          </p>
+          <div class="mt-[0.9vw] w-full flex flex-col items-end">
+            <div class="da-eyebrow text-accent2" style="font-size:0.76vw">
+              MEB Müfredatı - AI Ön İnceleme - Editör Onaylı
             </div>
-          }
+            <div class="mt-[0.4vw] h-px w-[22vw] max-w-full bg-gradient-to-l from-cyan2/70 via-accent2/40 to-transparent"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- lg altı: metin görselin altında normal akışta -->
+      <div class="lg:hidden px-4 pt-5 pb-2 animate-fade-up">
+        <div class="flex justify-center mb-3">
+          <img src="assets/brand/logo.png" alt="" aria-hidden="true" class="h-16 w-auto" />
+        </div>
+        <h1 class="da-display font-bold text-ink text-4xl sm:text-5xl leading-[1.06] text-center">
+          Öğrenmenin
+          <span class="block da-script da-rainbow-text text-6xl sm:text-7xl leading-[0.95] my-1">En Eğlenceli</span>
+          Hâli
+        </h1>
+        <p class="mt-5 text-base text-muted leading-relaxed text-center max-w-xl mx-auto">
+          Dijital Oyun Atölyesi; öğretmenlerin ürettiği interaktif eğitsel oyunları ve dijital içerikleri,
+          sınıf-ders-öğrenme çıktısı bazlı, güvenli sandbox ortamında öğrencilerle buluşturur.
+        </p>
+        <p class="mt-4 da-script da-rainbow-text text-3xl text-center">Hesap aç, tıkla, oyna ve öğren!</p>
+        <div class="mt-4 da-eyebrow text-accent2 text-center">MEB Müfredatı - AI Ön İnceleme - Editör Onaylı</div>
+      </div>
+
+      <!-- İstatistik şeridi (tam genişlik) + Oyunları Keşfet -->
+      <div class="relative -mt-6">
+        <div class="max-w-7xl mx-auto px-4 lg:px-8 pb-8 pt-2 flex flex-col lg:flex-row lg:items-center gap-8">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 flex-1">
+            @for (s of stats; track s.label) {
+              <div>
+                <div class="da-display text-3xl lg:text-4xl font-bold text-accent2 leading-none">{{ s.value }}</div>
+                <div class="mt-2 font-mono text-[11px] tracking-widest uppercase text-dim leading-snug">{{ s.label }}</div>
+              </div>
+            }
+          </div>
+          <a routerLink="/discover"
+             class="shrink-0 inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full da-grad font-display font-semibold tracking-wide shadow-lg shadow-accent2/25 transition">
+            <mat-icon style="font-size:18px;width:18px;height:18px">sports_esports</mat-icon>
+            OYUNLARI KEŞFET
+          </a>
         </div>
       </div>
     </section>
@@ -85,7 +110,7 @@ interface SearchResponse { items: SearchItem[]; total: number; }
           <div>
             <div class="da-eyebrow mb-3">[ 02 ] Öne Çıkan Oyunlar</div>
             <h2 class="da-display text-3xl md:text-4xl font-bold text-ink">
-              Hemen <span class="da-serif text-accent">oynamaya</span> başla
+              Hemen <span class="da-script da-rainbow-text">oynamaya</span> başla
             </h2>
             <p class="mt-2 text-muted max-w-xl">Editör onayından geçmiş, en çok oynanan interaktif içerikler.</p>
           </div>
@@ -125,11 +150,11 @@ interface SearchResponse { items: SearchItem[]; total: number; }
     </section>
 
     <!-- ================= KATEGORİLER ================= -->
-    <section class="relative py-20 da-science-bg">
+    <section class="relative py-20 da-dream-bg">
       <div class="max-w-7xl mx-auto px-4">
         <div class="da-eyebrow mb-3">[ 03 ] Kategoriler</div>
         <h2 class="da-display text-3xl md:text-4xl font-bold text-ink max-w-2xl">
-          İlgini çeken alanı seç, <span class="da-serif text-accent">keşfe</span> çık.
+          İlgini çeken alanı seç, <span class="da-script da-rainbow-text">keşfe</span> çık.
         </h2>
         <p class="mt-2 text-muted max-w-xl">Her ders için özenle hazırlanmış, kazanım odaklı oyun ve etkinlikler.</p>
 
@@ -160,7 +185,7 @@ interface SearchResponse { items: SearchItem[]; total: number; }
       <div class="max-w-7xl mx-auto px-4">
         <div class="da-eyebrow mb-3">[ 04 ] Nasıl Çalışır</div>
         <h2 class="da-display text-3xl md:text-4xl font-bold text-ink max-w-2xl">
-          Üç adımda <span class="da-serif text-accent">güvenli</span> öğrenme.
+          Üç adımda <span class="da-script da-rainbow-text">güvenli</span> öğrenme.
         </h2>
 
         <div class="mt-12 grid md:grid-cols-3 gap-6">
@@ -198,11 +223,11 @@ interface SearchResponse { items: SearchItem[]; total: number; }
           <div class="relative">
             <div class="font-mono text-[11px] tracking-[0.25em] uppercase text-white/80">Ücretsiz · Kart Bilgisi Yok</div>
             <h2 class="mt-4 da-display text-3xl md:text-5xl font-bold text-white leading-tight max-w-3xl mx-auto">
-              Hazırsan, ilk oyunun <span class="da-serif">bir tık</span> uzakta.
+              Hazırsan, ilk oyunun <span class="da-script">bir tık</span> uzakta.
             </h2>
             <p class="mt-4 text-white/85 max-w-xl mx-auto">Öğrenci, öğretmen ya da meraklı; hemen başla. Yüzlerce eğitsel oyun ve dijital içerik seni bekliyor.</p>
             <div class="mt-9 flex flex-col sm:flex-row gap-3 justify-center">
-              <a routerLink="/register" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white text-accent font-semibold hover:bg-white/90 shadow-lg transition">
+              <a routerLink="/register" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-surface text-accent font-semibold hover:bg-white/90 shadow-lg transition">
                 Ücretsiz başla <mat-icon style="font-size:18px;width:18px;height:18px">arrow_forward</mat-icon>
               </a>
               <a routerLink="/discover" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-white/40 text-white font-semibold hover:bg-white/10 transition">Önce göz at</a>
@@ -220,10 +245,10 @@ export class HomeComponent implements OnInit {
   readonly displayGames = computed(() => this.liveGames() ?? this.fallbackGames);
 
   readonly stats: Stat[] = [
-    { value: 'K-12', label: 'Tüm sınıflar' },
-    { value: '100%', label: 'AI ön incelemeli' },
-    { value: 'MEB', label: 'Kazanım eşlemeli' },
-    { value: '∞', label: 'Ücretsiz erişim' },
+    { value: 'K-12', label: 'Tüm Sınıflar İçin' },
+    { value: 'MEB', label: 'Öğrenme Çıktısı Eşlemeli' },
+    { value: '%100', label: 'AI Ön İnceleme' },
+    { value: 'Ø', label: 'Ücretsiz Erişim' },
   ];
 
   readonly categories: Category[] = [

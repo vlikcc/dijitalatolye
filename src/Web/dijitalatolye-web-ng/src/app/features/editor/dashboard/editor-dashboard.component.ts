@@ -64,7 +64,7 @@ interface DashboardStats {
 
     <div class="mt-8 grid md:grid-cols-2 gap-5">
       <a routerLink="/editor/history" class="group rounded-2xl bg-surface border border-line/10 p-6 hover:border-brand-300 hover:shadow-md transition">
-        <div class="w-10 h-10 rounded-lg bg-brand-50 text-brand-700 inline-flex items-center justify-center mb-3 group-hover:bg-brand-600 group-hover:text-white transition">
+        <div class="w-10 h-10 rounded-lg bg-brand-50 text-brand-700 inline-flex items-center justify-center mb-3 group-hover:da-grad group-hover:text-white transition">
           <mat-icon style="font-size:20px;width:20px;height:20px">rule</mat-icon>
         </div>
         <h3 class="font-semibold text-ink">Karar geçmişim</h3>

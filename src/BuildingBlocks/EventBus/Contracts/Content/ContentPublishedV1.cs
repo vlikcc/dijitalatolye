@@ -18,7 +18,7 @@ public sealed record ContentPublishedV1 : IntegrationEvent
     public string Type { get; init; } = "Game";
     public required IReadOnlyCollection<string> OutcomeCodes { get; init; }
     public required IReadOnlyCollection<string> Tags { get; init; }
-    public required int? GradeLevel { get; init; }
-    public required string Subject { get; init; }
+    public required IReadOnlyCollection<int> GradeLevels { get; init; }
+    public required IReadOnlyCollection<string> Subjects { get; init; }
     public required DateTime PublishedAt { get; init; }
 }

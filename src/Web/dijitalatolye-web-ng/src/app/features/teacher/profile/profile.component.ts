@@ -20,7 +20,7 @@ import { AuthStore } from '@core/auth/auth.store';
 
       <div class="rounded-2xl bg-surface border border-line/10 p-6 mb-6">
         <div class="flex items-start gap-4">
-          <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white flex items-center justify-center font-bold text-lg">
+          <div class="w-14 h-14 rounded-xl da-grad text-white flex items-center justify-center font-bold text-lg">
             {{ initial() }}
           </div>
           <div>
@@ -60,7 +60,7 @@ import { AuthStore } from '@core/auth/auth.store';
         <div class="flex items-center justify-between pt-2">
           @if (saved()) { <span class="text-sm text-emerald-700">Kaydedildi ✓</span> }
           <button type="submit" [disabled]="saving()"
-            class="ml-auto inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-md shadow-brand-600/20 disabled:opacity-60">
+            class="ml-auto inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold shadow-md shadow-brand-600/20 disabled:opacity-60">
             @if (saving()) { <mat-spinner diameter="16"></mat-spinner> }
             @else { <mat-icon style="font-size:16px;width:16px;height:16px">save</mat-icon> }
             Kaydet

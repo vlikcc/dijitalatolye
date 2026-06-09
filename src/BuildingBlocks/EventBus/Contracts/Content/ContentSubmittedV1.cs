@@ -24,7 +24,7 @@ public sealed record ContentSubmittedV1 : IntegrationEvent
 
     public required IReadOnlyCollection<string> Tags { get; init; }
 
-    public required int? GradeLevel { get; init; }
+    public required IReadOnlyCollection<int> GradeLevels { get; init; }
 
-    public required string Subject { get; init; }
+    public required IReadOnlyCollection<string> Subjects { get; init; }
 }

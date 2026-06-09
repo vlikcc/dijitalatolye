@@ -31,7 +31,7 @@ interface StudentResult { userId: string; email: string; displayName: string; }
             <p class="text-sm text-muted mt-1">{{ data()!.members.length }} öğrenci</p>
           </div>
           <a [routerLink]="['/teacher/assignments']" [queryParams]="{ classId: data()!.id }"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold">
             <mat-icon style="font-size:18px;width:18px;height:18px">assignment_add</mat-icon> Ödev ata
           </a>
         </header>

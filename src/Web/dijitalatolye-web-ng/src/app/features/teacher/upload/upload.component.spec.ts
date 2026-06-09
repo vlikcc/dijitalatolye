@@ -20,6 +20,7 @@ describe('UploadComponent (Guard-önce upload)', () => {
     fileSizeBytes: 12345,
     sha256: 'deadbeef',
     guardScanStatus: null,
+    type: 'Game',
   };
 
   const sampleMetadata: MetadataExtractResponse = {
