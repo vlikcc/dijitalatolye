@@ -1,9 +1,21 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ApiService } from '@core/api/api.service';
+
+interface LlmRow { label: string; value: string | null; depth: number; header: boolean; }
+
+/** LLM ham JSON anahtarları → Türkçe etiketler (okunabilir liste için). */
+const LLM_LABELS: Record<string, string> = {
+  score: 'Puan', summary: 'Özet', rubric: 'Değerlendirme Kriterleri',
+  pedagogicalFit: 'Pedagojik Uygunluk', languageQuality: 'Dil Kalitesi',
+  safety: 'Güvenlik', accessibility: 'Erişilebilirlik', interactionQuality: 'Etkileşim Kalitesi',
+  rationale: 'Gerekçe', outcomeAlignment: 'Kazanım Uyumu',
+  flags: 'Kritik Bulgular', warnings: 'Uyarılar', suggestedRevisions: 'Revizyon Önerileri',
+};
+const SCALAR_LABELS: Record<string, string> = { low: 'Düşük', medium: 'Orta', high: 'Yüksek' };
 
 interface ReviewItem { id: string; contentId: string; versionId: string; title: string; aiScore: number; aiDecision: string; aiReportId: string; }
 interface ModerationReport {
@@ -57,7 +69,27 @@ type Decision = 'Approved' | 'Rejected' | 'RevisionRequested';
                     </ul>
                   </div>
                 }
-                <details class="text-xs"><summary>LLM Ham JSON</summary><pre class="overflow-x-auto bg-panel p-2 mt-1">{{ report()!.llmRawJson }}</pre></details>
+                @if (llmRows().length > 0) {
+                  <div>
+                    <p class="font-semibold text-dim text-xs uppercase tracking-wide mb-1">AI Değerlendirme Detayı</p>
+                    <ul class="space-y-0.5">
+                      @for (row of llmRows(); track $index) {
+                        <li class="text-sm leading-snug" [style.padding-left.px]="row.depth * 14">
+                          @if (row.header) {
+                            <span class="font-semibold text-ink">{{ row.label }}</span>
+                          } @else if (row.label) {
+                            <span class="text-dim">{{ row.label }}:</span> <span class="text-ink">{{ row.value }}</span>
+                          } @else {
+                            <span class="text-ink">• {{ row.value }}</span>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+                @if (llmParseFailed()) {
+                  <details class="text-xs"><summary>LLM ham yanıt</summary><pre class="overflow-x-auto bg-panel p-2 mt-1">{{ report()!.llmRawJson }}</pre></details>
+                }
               </div>
             } @else {
               <p class="text-sm text-dim">Rapor yükleniyor...</p>
@@ -143,11 +175,23 @@ type Decision = 'Approved' | 'Rejected' | 'RevisionRequested';
         </div>
 
         <div>
-          <h2 class="font-semibold mb-2 text-ink">Önizleme (sandbox)</h2>
-          @if (downloadUrl()) {
-            <iframe [src]="downloadUrl()" sandbox="allow-scripts" class="w-full h-[480px] border border-line/10 rounded bg-surface" title="content-preview"></iframe>
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-semibold text-ink">Oyun Önizleme (sandbox)</h2>
+            @if (playUrlRaw()) {
+              <a [href]="playUrlRaw()" target="_blank" rel="noopener"
+                class="text-xs text-brand-600 hover:underline">Yeni sekmede aç ↗</a>
+            }
+          </div>
+          @if (playUrl()) {
+            <iframe [src]="playUrl()" sandbox="allow-scripts"
+              class="w-full h-[480px] border border-line/10 rounded bg-surface" title="oyun-önizleme"></iframe>
+            <p class="text-xs text-dim mt-1.5">Oyun güvenli bir sandbox içinde çalışır; tam ekran için yeni sekmede açabilirsiniz.</p>
+          } @else if (playError()) {
+            <p class="text-sm text-rose-700">Oyun önizlemesi yüklenemedi: {{ playError() }}</p>
           } @else {
-            <p class="text-sm text-dim">Önizleme V1 sonunda — download URL ile sandboxed iframe içinde gösterilir.</p>
+            <div class="flex items-center gap-2 text-sm text-dim h-[120px] justify-center border border-dashed border-line/20 rounded">
+              Oyun önizlemesi hazırlanıyor…
+            </div>
           }
         </div>
       </section>
@@ -164,9 +208,59 @@ export class EditorReviewComponent implements OnInit {
   readonly report = signal<ModerationReport | null>(null);
   readonly content = signal<ContentMeta | null>(null);
   readonly ai = signal<AiSuggestion | null>(null);
-  readonly downloadUrl = signal<SafeResourceUrl | null>(null);
+  readonly playUrl = signal<SafeResourceUrl | null>(null);
+  readonly playUrlRaw = signal<string | null>(null);
+  readonly playError = signal<string | null>(null);
   readonly busy = signal(false);
   comment = '';
+
+  /** LLM ham JSON'ı okunabilir, girintili satırlara dönüştürür. */
+  readonly llmRows = computed<LlmRow[]>(() => {
+    const raw = this.report()?.llmRawJson;
+    if (!raw) return [];
+    try {
+      const obj = JSON.parse(raw) as unknown;
+      if (obj === null || typeof obj !== 'object') return [];
+      const rows: LlmRow[] = [];
+      this.flattenLlm(obj, 0, rows);
+      return rows;
+    } catch { return []; }
+  });
+
+  readonly llmParseFailed = computed(() => {
+    const raw = this.report()?.llmRawJson;
+    if (!raw) return false;
+    try { JSON.parse(raw); return false; } catch { return true; }
+  });
+
+  private prettifyKey(k: string): string {
+    return LLM_LABELS[k] ?? k.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()).trim();
+  }
+
+  private formatScalar(v: unknown): string {
+    if (v === null || v === undefined || v === '') return '—';
+    if (typeof v === 'boolean') return v ? 'Evet' : 'Hayır';
+    const s = String(v);
+    return SCALAR_LABELS[s] ?? s;
+  }
+
+  private flattenLlm(value: unknown, depth: number, rows: LlmRow[]): void {
+    if (value === null || typeof value !== 'object') return;
+    const isArray = Array.isArray(value);
+    const entries: Array<readonly [string, unknown]> = isArray
+      ? (value as unknown[]).map((v, i) => [String(i), v] as const)
+      : Object.entries(value as Record<string, unknown>);
+    if (entries.length === 0) { rows.push({ label: '', value: '—', depth, header: false }); return; }
+    for (const [k, v] of entries) {
+      const label = isArray ? '' : this.prettifyKey(k);
+      if (v !== null && typeof v === 'object') {
+        rows.push({ label: label || '•', value: null, depth, header: true });
+        this.flattenLlm(v, depth + 1, rows);
+      } else {
+        rows.push({ label, value: this.formatScalar(v), depth, header: false });
+      }
+    }
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -179,7 +273,26 @@ export class EditorReviewComponent implements OnInit {
             next: (r) => this.report.set(r),
           });
         }
-        if (data.contentId) this.loadContent(data.contentId);
+        if (data.contentId) {
+          this.loadContent(data.contentId);
+          this.loadPreview(data.contentId);
+        }
+      },
+    });
+  }
+
+  /** Editör inceleme önizlemesi: yayınlanmamış bundle'ı oynanabilir public URL olarak alır. */
+  private loadPreview(contentId: string): void {
+    this.playError.set(null);
+    this.api.get<{ url: string }>(`/contents/${contentId}/preview-url`).subscribe({
+      next: (r) => {
+        if (!r?.url) { this.playError.set('Önizleme adresi alınamadı.'); return; }
+        this.playUrlRaw.set(r.url);
+        this.playUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(r.url));
+      },
+      error: (e) => {
+        const msg = (e as { error?: { error?: string; detail?: string } })?.error;
+        this.playError.set(msg?.error ?? msg?.detail ?? 'Oyun paketi açılamadı.');
       },
     });
   }

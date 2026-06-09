@@ -292,6 +292,38 @@ public static class ContentEndpoints
             return content is null ? Results.NotFound() : Results.Json(content);
         });
 
+        // Editör inceleme önizlemesi: yayınlanmamış (ama Guard-temiz) bundle'ı public-read bucket'a
+        // geçici prefix ile extract edip oynanabilir entry URL'ini döndürür. İframe bu public URL'i yükler.
+        contents.MapGet("/{id:guid}/preview-url", async (
+            Guid id,
+            ContentDbContext db,
+            BundleExtractor extractor,
+            ContentMinioOptions minioOpts,
+            IConfiguration config,
+            CancellationToken ct) =>
+        {
+            var content = await db.Contents.Include(c => c.Versions)
+                .FirstOrDefaultAsync(c => c.Id == id, ct);
+            if (content is null) return Results.NotFound();
+            if (content.CurrentVersionId is null) return Results.NotFound();
+            var version = content.Versions.FirstOrDefault(v => v.Id == content.CurrentVersionId);
+            if (version is null) return Results.NotFound();
+
+            var publicBase = string.IsNullOrWhiteSpace(minioOpts.PublicEndpoint)
+                ? $"http://{minioOpts.Endpoint}"
+                : minioOpts.PublicEndpoint.TrimEnd('/');
+
+            // Zaten yayınlanmışsa published kopyayı kullan.
+            if (!string.IsNullOrWhiteSpace(content.PublishedBucket) && !string.IsNullOrWhiteSpace(content.PublishedKey))
+                return Results.Ok(new { url = $"{publicBase}/{content.PublishedBucket}/{content.PublishedKey}" });
+
+            var publishedBucket = config["Minio:BucketPublished"] ?? "dijitalatolye-content-published";
+            var prefix = $"preview/{content.Id:N}/{version.Id:N}";
+            var result = await extractor.ExtractToPublishedAsync(
+                version.StorageBucket, version.StorageKey, version.ManifestEntry, publishedBucket, prefix, ct);
+            return Results.Ok(new { url = $"{publicBase}/{publishedBucket}/{result.EntryKey}" });
+        }).RequireAuthorization(Policies.EditorOrAbove);
+
         // Guard-önce-AI yükleme: dosya → MinIO → versiyon → Guard; LLM metadata sonra.
         contents.MapPost("/bundle-upload", async (
             IFormFile file,
