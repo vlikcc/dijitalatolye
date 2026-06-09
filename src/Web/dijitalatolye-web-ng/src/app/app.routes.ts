@@ -64,6 +64,11 @@ export const APP_ROUTES: Routes = [
         loadComponent: () => import('./features/teacher/upload/upload.component').then((m) => m.UploadComponent),
       },
       {
+        path: 'teacher/contents/:id/edit',
+        canActivate: [roleGuard(['Teacher', 'Editor', 'Admin', 'SuperAdmin'])],
+        loadComponent: () => import('./features/teacher/content-edit/content-edit.component').then((m) => m.ContentEditComponent),
+      },
+      {
         path: 'teacher/contents/:id',
         canActivate: [roleGuard(['Teacher', 'Editor', 'Admin', 'SuperAdmin'])],
         loadComponent: () => import('./features/teacher/content-detail/teacher-content-detail.component').then((m) => m.TeacherContentDetailComponent),

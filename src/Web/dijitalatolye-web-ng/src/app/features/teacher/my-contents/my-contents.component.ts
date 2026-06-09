@@ -122,6 +122,16 @@ const TYPE_LABELS: Record<ContentType, string> = {
                         <mat-icon style="font-size:14px;width:14px;height:14px">refresh</mat-icon> Revize et
                       </button>
                     }
+                    @if (canEdit(c.status)) {
+                      <a [routerLink]="['/teacher/contents', c.id, 'edit']" class="inline-flex items-center gap-1 text-brand-700 font-medium hover:text-brand-800">
+                        <mat-icon style="font-size:14px;width:14px;height:14px">edit</mat-icon> Düzenle
+                      </a>
+                    }
+                    @if (canDelete(c.status)) {
+                      <button (click)="remove(c)" [disabled]="busy()" class="inline-flex items-center gap-1 text-rose-700 font-medium hover:text-rose-800 disabled:opacity-50">
+                        <mat-icon style="font-size:14px;width:14px;height:14px">delete</mat-icon> Sil
+                      </button>
+                    }
                     <a [routerLink]="['/teacher/contents', c.id]" class="text-brand-700 font-medium hover:text-brand-800">Detay →</a>
                   </div>
                 </td>
@@ -140,6 +150,7 @@ export class MyContentsComponent implements OnInit {
   readonly items = signal<ContentItem[]>([]);
   readonly loading = signal(true);
   readonly error = signal(false);
+  readonly busy = signal(false);
   readonly typeFilter = signal<ContentType | null>(null);
   readonly typeFilters = TYPE_FILTERS;
 
@@ -166,6 +177,20 @@ export class MyContentsComponent implements OnInit {
     this.api.post(`/contents/${id}/revise`, {}).subscribe({
       next: () => { this.load(); this.router.navigate(['/teacher/contents/new']); },
       error: () => undefined,
+    });
+  }
+
+  canEdit(s: ContentStatus): boolean { return s === 'Draft' || s === 'RevisionRequested'; }
+  canDelete(s: ContentStatus): boolean {
+    return s === 'Draft' || s === 'RevisionRequested' || s === 'AutoRejected' || s === 'Rejected';
+  }
+
+  remove(c: ContentItem): void {
+    if (!confirm(`"${c.title}" içeriği silinsin mi? Bu işlem geri alınamaz.`)) return;
+    this.busy.set(true);
+    this.api.delete(`/contents/${c.id}`).subscribe({
+      next: () => { this.busy.set(false); this.load(); },
+      error: () => this.busy.set(false),
     });
   }
 

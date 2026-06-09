@@ -48,13 +48,35 @@ interface ClassRow {
         } @else {
           <div class="divide-y divide-line/10">
             @for (c of classes(); track c.id) {
-              <a [routerLink]="['/teacher/classes', c.id]" class="px-6 py-4 flex items-center justify-between hover:bg-panel transition">
-                <div>
-                  <h3 class="font-semibold text-ink">{{ c.name }}</h3>
-                  <p class="text-xs text-dim mt-1">{{ c.memberCount }} öğrenci</p>
-                </div>
-                <mat-icon class="text-dim" style="font-size:20px;width:20px;height:20px">chevron_right</mat-icon>
-              </a>
+              <div class="px-6 py-4 flex items-center justify-between gap-3 hover:bg-panel transition">
+                @if (editingId() === c.id) {
+                  <div class="flex items-center gap-2 flex-1">
+                    <input type="text" [(ngModel)]="editName" name="edit-{{ c.id }}" maxlength="160"
+                      class="rounded-lg border border-line/20 bg-bg px-3 py-2 text-sm text-ink flex-1" />
+                    <button type="button" (click)="saveRename(c.id)" [disabled]="!editName.trim() || busy()"
+                      class="px-3 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 disabled:opacity-50">Kaydet</button>
+                    <button type="button" (click)="cancelEdit()" class="px-3 py-2 rounded-lg border border-line/20 text-muted text-sm hover:bg-bg">İptal</button>
+                  </div>
+                } @else {
+                  <a [routerLink]="['/teacher/classes', c.id]" class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-ink">{{ c.name }}</h3>
+                    <p class="text-xs text-dim mt-1">{{ c.memberCount }} öğrenci</p>
+                  </a>
+                  <div class="flex items-center gap-1 shrink-0">
+                    <button type="button" (click)="startEdit(c)" title="Adı düzenle"
+                      class="p-2 rounded-lg text-muted hover:text-brand-700 hover:bg-brand-50">
+                      <mat-icon style="font-size:18px;width:18px;height:18px">edit</mat-icon>
+                    </button>
+                    <button type="button" (click)="remove(c)" [disabled]="busy()" title="Sınıfı sil"
+                      class="p-2 rounded-lg text-muted hover:text-rose-700 hover:bg-rose-50 disabled:opacity-50">
+                      <mat-icon style="font-size:18px;width:18px;height:18px">delete</mat-icon>
+                    </button>
+                    <a [routerLink]="['/teacher/classes', c.id]" class="p-1 text-dim">
+                      <mat-icon style="font-size:20px;width:20px;height:20px">chevron_right</mat-icon>
+                    </a>
+                  </div>
+                }
+              </div>
             }
           </div>
         }
@@ -68,9 +90,34 @@ export class TeacherClassesComponent implements OnInit {
   readonly classes = signal<ClassRow[]>([]);
   readonly loading = signal(true);
   readonly creating = signal(false);
+  readonly busy = signal(false);
+  readonly editingId = signal<string | null>(null);
   newName = '';
+  editName = '';
 
   ngOnInit(): void { this.load(); }
+
+  startEdit(c: ClassRow): void { this.editingId.set(c.id); this.editName = c.name; }
+  cancelEdit(): void { this.editingId.set(null); this.editName = ''; }
+
+  saveRename(id: string): void {
+    const name = this.editName.trim();
+    if (!name) return;
+    this.busy.set(true);
+    this.api.put(`/classes/${id}`, { name }).subscribe({
+      next: () => { this.busy.set(false); this.cancelEdit(); this.load(); },
+      error: () => this.busy.set(false),
+    });
+  }
+
+  remove(c: ClassRow): void {
+    if (!confirm(`"${c.name}" sınıfı silinsin mi? Bu işlem geri alınamaz.`)) return;
+    this.busy.set(true);
+    this.api.delete(`/classes/${c.id}`).subscribe({
+      next: () => { this.busy.set(false); this.load(); },
+      error: () => this.busy.set(false),
+    });
+  }
 
   private load(): void {
     this.api.get<ClassRow[]>('/classes/mine').subscribe({

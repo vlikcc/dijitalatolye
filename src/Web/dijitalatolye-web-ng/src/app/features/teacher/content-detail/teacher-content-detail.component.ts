@@ -142,11 +142,23 @@ interface OutcomeStat {
               <mat-icon style="font-size:16px;width:16px;height:16px">refresh</mat-icon> Revize et
             </button>
           }
+          @if (canEdit()) {
+            <a [routerLink]="['/teacher/contents', content()!.id, 'edit']"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">
+              <mat-icon style="font-size:16px;width:16px;height:16px">edit</mat-icon> Düzenle
+            </a>
+          }
           @if (content()!.state === 'Draft' || content()!.state === 'RevisionRequested' || content()!.state === 'AutoRejected') {
             <a routerLink="/teacher/contents/new"
               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-brand-200 text-brand-800 font-semibold hover:bg-brand-50">
               Yeni yükleme
             </a>
+          }
+          @if (canDelete()) {
+            <button type="button" (click)="remove()" [disabled]="busy()"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-rose-200 text-rose-700 font-semibold hover:bg-rose-50 disabled:opacity-50">
+              <mat-icon style="font-size:16px;width:16px;height:16px">delete</mat-icon> Sil
+            </button>
           }
         </div>
       </div>
@@ -162,8 +174,30 @@ export class TeacherContentDetailComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly actionError = signal<string | null>(null);
+  readonly busy = signal(false);
   readonly stats = signal<ContentStats | null>(null);
   readonly outcomes = signal<OutcomeStat[]>([]);
+
+  canEdit(): boolean {
+    const s = this.content()?.state;
+    return s === 'Draft' || s === 'RevisionRequested';
+  }
+  canDelete(): boolean {
+    const s = this.content()?.state;
+    return s === 'Draft' || s === 'RevisionRequested' || s === 'AutoRejected' || s === 'Rejected';
+  }
+
+  remove(): void {
+    const c = this.content();
+    if (!c) return;
+    if (!confirm(`"${c.title}" içeriği silinsin mi? Bu işlem geri alınamaz.`)) return;
+    this.busy.set(true);
+    this.actionError.set(null);
+    this.api.delete(`/contents/${c.id}`).subscribe({
+      next: () => this.router.navigate(['/teacher/contents']),
+      error: () => { this.busy.set(false); this.actionError.set('Silme işlemi başarısız.'); },
+    });
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');

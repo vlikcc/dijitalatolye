@@ -324,6 +324,40 @@ public static class ContentEndpoints
             return Results.Ok(new { url = $"{publicBase}/{publishedBucket}/{result.EntryKey}" });
         }).RequireAuthorization(Policies.EditorOrAbove);
 
+        // Taslak/red içerik silme: yalnızca yayınlanmamış sahip durumları. Versiyonlar cascade,
+        // MinIO nesneleri best-effort temizlenir. İçerik tamamen sistemden kalkar.
+        contents.MapDelete("/{id:guid}", async (
+            Guid id,
+            ICurrentUser current,
+            ContentDbContext db,
+            IMinioClient minio,
+            CancellationToken ct) =>
+        {
+            if (current.UserId is null) return Results.Unauthorized();
+            var content = await db.Contents.Include(c => c.Versions).FirstOrDefaultAsync(c => c.Id == id, ct);
+            if (content is null) return Results.NotFound();
+            if (content.AuthorUserId != current.UserId) return Results.Forbid();
+            if (content.State is not (ContentState.Draft or ContentState.RevisionRequested
+                or ContentState.AutoRejected or ContentState.Rejected))
+                return Results.Conflict(new { error = $"Bu durumda silinemez: {content.State}. Yalnızca yayınlanmamış taslak/red içerikler silinebilir." });
+
+            // MinIO temizliği (best-effort; eksik nesne silmeyi engellemesin).
+            foreach (var v in content.Versions)
+                await TryRemoveObjectAsync(minio, v.StorageBucket, v.StorageKey, ct);
+            if (!string.IsNullOrWhiteSpace(content.PublishedBucket) && !string.IsNullOrWhiteSpace(content.PublishedKey))
+                await TryRemoveObjectAsync(minio, content.PublishedBucket!, content.PublishedKey!, ct);
+            if (!string.IsNullOrWhiteSpace(content.CoverImageBucket) && !string.IsNullOrWhiteSpace(content.CoverImageKey))
+                await TryRemoveObjectAsync(minio, content.CoverImageBucket!, content.CoverImageKey!, ct);
+
+            db.Likes.RemoveRange(db.Likes.Where(x => x.ContentId == id));
+            db.Favorites.RemoveRange(db.Favorites.Where(x => x.ContentId == id));
+            db.Comments.RemoveRange(db.Comments.Where(x => x.ContentId == id));
+            db.Ratings.RemoveRange(db.Ratings.Where(x => x.ContentId == id));
+            db.Contents.Remove(content); // Versions cascade
+            await db.SaveChangesAsync(ct);
+            return Results.NoContent();
+        }).RequireAuthorization(Policies.TeacherOrAbove);
+
         // Guard-önce-AI yükleme: dosya → MinIO → versiyon → Guard; LLM metadata sonra.
         contents.MapPost("/bundle-upload", async (
             IFormFile file,
@@ -758,6 +792,18 @@ public static class ContentEndpoints
             });
         }
         return sb.ToString();
+    }
+
+    private static async Task TryRemoveObjectAsync(IMinioClient minio, string bucket, string key, CancellationToken ct)
+    {
+        try
+        {
+            await minio.RemoveObjectAsync(new RemoveObjectArgs().WithBucket(bucket).WithObject(key), ct);
+        }
+        catch
+        {
+            // best-effort: nesne yoksa veya silinemezse içerik silmeyi engellemez.
+        }
     }
 
     private static async Task EnsureBucketAsync(IMinioClient minio, string bucket, CancellationToken ct)

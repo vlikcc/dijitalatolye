@@ -127,20 +127,37 @@ interface MyContent {
         } @else {
           <div class="divide-y divide-line/10">
             @for (a of assignments(); track a.id) {
-              <a [routerLink]="['/teacher/assignments', a.id]" class="px-6 py-4 flex items-center justify-between hover:bg-panel transition">
-                <div>
-                  <h3 class="font-semibold text-ink">{{ a.title }}</h3>
+              <div class="px-6 py-4 flex items-center justify-between gap-3 hover:bg-panel transition">
+                <a [routerLink]="['/teacher/assignments', a.id]" class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-ink inline-flex items-center gap-2">
+                    {{ a.title }}
+                    <span class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded-full"
+                      [class]="a.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-panel text-muted border border-line/20'">
+                      {{ a.status === 'Active' ? 'Aktif' : 'Kapalı' }}
+                    </span>
+                  </h3>
                   <div class="text-xs text-dim mt-1 flex gap-2">
                     <span>{{ a.contentTitle }}</span>
                     @if (a.dueAtUtc) { <span>•</span><span>Son: {{ formatDate(a.dueAtUtc) }}</span> }
                   </div>
-                </div>
-                <div class="flex items-center gap-4">
+                </a>
+                <div class="flex items-center gap-3 shrink-0">
                   <span class="font-mono text-sm px-2.5 py-1 rounded-lg bg-brand-50 text-brand-800 border border-brand-200">{{ a.joinCode }}</span>
-                  <span class="text-xs text-dim">{{ a.completedCount }}/{{ a.memberCount }} tamamladı</span>
-                  <mat-icon class="text-dim" style="font-size:20px;width:20px;height:20px">chevron_right</mat-icon>
+                  <span class="text-xs text-dim hidden sm:inline">{{ a.completedCount }}/{{ a.memberCount }} tamamladı</span>
+                  <button type="button" (click)="toggleStatus(a)" [disabled]="busy()"
+                    [title]="a.status === 'Active' ? 'Ödevi kapat' : 'Ödevi aç'"
+                    class="p-2 rounded-lg text-muted hover:text-brand-700 hover:bg-brand-50 disabled:opacity-50">
+                    <mat-icon style="font-size:18px;width:18px;height:18px">{{ a.status === 'Active' ? 'lock' : 'lock_open' }}</mat-icon>
+                  </button>
+                  <button type="button" (click)="remove(a)" [disabled]="busy()" title="Ödevi sil"
+                    class="p-2 rounded-lg text-muted hover:text-rose-700 hover:bg-rose-50 disabled:opacity-50">
+                    <mat-icon style="font-size:18px;width:18px;height:18px">delete</mat-icon>
+                  </button>
+                  <a [routerLink]="['/teacher/assignments', a.id]" class="p-1 text-dim">
+                    <mat-icon style="font-size:20px;width:20px;height:20px">chevron_right</mat-icon>
+                  </a>
                 </div>
-              </a>
+              </div>
             }
           </div>
         }
@@ -159,6 +176,7 @@ export class TeacherAssignmentsComponent implements OnInit {
   readonly targetMode = signal<'all' | 'some'>('all');
   readonly loading = signal(true);
   readonly creating = signal(false);
+  readonly busy = signal(false);
   readonly createError = signal<string | null>(null);
 
   selectedContentId = '';
@@ -181,6 +199,24 @@ export class TeacherAssignmentsComponent implements OnInit {
           this.onClassChange(preset);
         }
       },
+    });
+  }
+
+  toggleStatus(a: AssignmentRow): void {
+    const next = a.status === 'Active' ? 'Closed' : 'Active';
+    this.busy.set(true);
+    this.api.put(`/assignments/${a.id}`, { status: next }).subscribe({
+      next: () => { this.busy.set(false); this.load(); },
+      error: () => this.busy.set(false),
+    });
+  }
+
+  remove(a: AssignmentRow): void {
+    if (!confirm(`"${a.title}" ödevi silinsin mi? (İçerik silinmez, yalnızca ödev kaldırılır.)`)) return;
+    this.busy.set(true);
+    this.api.delete(`/assignments/${a.id}`).subscribe({
+      next: () => { this.busy.set(false); this.load(); },
+      error: () => this.busy.set(false),
     });
   }
 
