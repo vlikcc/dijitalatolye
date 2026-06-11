@@ -81,12 +81,15 @@ body {
   letter-spacing: 0.01em;
 }
 
-/* El yazısı (script) vurgu — "En Eğlenceli", "oyna ve öğren!" */
+/* El yazısı (script) vurgu — "En Eğlenceli", "oyna ve öğren!"
+   Not: gradyan metin (background-clip:text) kutu dışına taşan harf uzantılarını
+   boyamaz; bu yüzden satır yüksekliği geniş, alt/üst küçük dolgu bırakılır. */
 .da-script {
   font-family: "Dancing Script", "Instrument Serif", cursive;
   font-weight: 700;
   letter-spacing: 0.005em;
-  line-height: 1;
+  line-height: 1.18;
+  padding: 0.06em 0.05em 0.14em;
 }
 
 /* Pastel rüya arka planı (1. sayfa hero / yumuşak bölümler) */

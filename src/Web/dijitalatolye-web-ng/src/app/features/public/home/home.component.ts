@@ -32,20 +32,18 @@ interface SearchResponse { items: SearchItem[]; total: number; }
   template: `
     <!-- ================= HERO ================= -->
     <section class="da-dream-bg relative overflow-hidden">
-      <!-- Tam genişlik (full-bleed) hero görseli -->
-      <div class="relative w-full">
+      <!-- Tam genişlik hero görseli — kenarlardan küçük marjla tek panel (hedef tasarımdaki gibi) -->
+      <div class="relative w-full px-2 pt-2 sm:px-4 sm:pt-4">
         <img src="assets/brand/hero-bg.png" alt="Dijital Oyun Atölyesi oyun ekranları"
-             class="block w-full h-auto select-none pointer-events-none" />
-        <!-- Alt kenarı sayfa arka planına yumuşakça karıştır (dikiş izini gizler) -->
-        <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-bg pointer-events-none"></div>
+             class="block w-full h-auto select-none pointer-events-none rounded-lg" />
 
         <!-- lg+ : metin görselin sağındaki boş alana overlay -->
-        <div class="hidden lg:flex absolute inset-y-0 right-0 w-[40%] pr-[3.2vw] pl-[1vw] pt-[3.5vw] flex-col justify-start items-end text-right animate-fade-up">
+        <div class="hidden lg:flex absolute inset-y-0 right-0 w-[40%] pr-[3.2vw] pl-[1vw] pt-[2.6vw] flex-col justify-start items-end text-right animate-fade-up">
           <img src="assets/brand/logo.png" alt="" aria-hidden="true"
                class="w-[7.5vw] max-w-[155px] h-auto mb-[0.5vw]" />
           <h1 class="da-display font-bold text-ink leading-[1.03]">
             <span class="block" style="font-size:3vw">Öğrenmenin</span>
-            <span class="block da-script da-rainbow-text leading-[0.92]" style="font-size:3.5vw">En Eğlenceli</span>
+            <span class="block da-script da-rainbow-text" style="font-size:3.5vw">En Eğlenceli</span>
             <span class="block" style="font-size:3vw">Hâli</span>
           </h1>
           <p class="text-muted leading-relaxed mt-[0.8vw] max-w-[30vw]" style="font-size:0.94vw">
@@ -63,6 +61,24 @@ interface SearchResponse { items: SearchItem[]; total: number; }
             <div class="mt-[0.4vw] h-px w-[22vw] max-w-full bg-gradient-to-l from-cyan2/70 via-accent2/40 to-transparent"></div>
           </div>
         </div>
+
+        <!-- lg+ : istatistikler görselin alt bandının üzerine overlay (hedef tasarımdaki gibi) -->
+        <div class="hidden lg:flex absolute inset-x-0 bottom-0 h-[7.2vw] items-center px-[4.5vw] gap-[2vw] animate-fade-up">
+          <div class="flex items-start gap-[3.2vw]">
+            @for (s of stats; track s.label) {
+              <div>
+                <div class="da-display font-bold text-accent2 leading-none" style="font-size:1.9vw">{{ s.value }}</div>
+                <div class="mt-[0.45vw] font-mono tracking-widest uppercase text-muted leading-snug" style="font-size:0.62vw">{{ s.label }}</div>
+              </div>
+            }
+          </div>
+          <div class="flex-1 h-px bg-ink/25 mx-[1vw]"></div>
+          <a routerLink="/discover"
+             class="shrink-0 inline-flex items-center justify-center gap-2 rounded-full da-grad font-display font-semibold tracking-wide shadow-lg shadow-accent2/25 transition px-[1.8vw] py-[0.75vw]" style="font-size:0.92vw">
+            <mat-icon style="font-size:1.1vw;width:1.1vw;height:1.1vw">sports_esports</mat-icon>
+            OYUNLARI KEŞFET
+          </a>
+        </div>
       </div>
 
       <!-- lg altı: metin görselin altında normal akışta -->
@@ -72,7 +88,7 @@ interface SearchResponse { items: SearchItem[]; total: number; }
         </div>
         <h1 class="da-display font-bold text-ink text-4xl sm:text-5xl leading-[1.06] text-center">
           Öğrenmenin
-          <span class="block da-script da-rainbow-text text-6xl sm:text-7xl leading-[0.95] my-1">En Eğlenceli</span>
+          <span class="block da-script da-rainbow-text text-6xl sm:text-7xl my-1">En Eğlenceli</span>
           Hâli
         </h1>
         <p class="mt-5 text-base text-muted leading-relaxed text-center max-w-xl mx-auto">
@@ -83,9 +99,9 @@ interface SearchResponse { items: SearchItem[]; total: number; }
         <div class="mt-4 da-eyebrow text-accent2 text-center">MEB Müfredatı - AI Ön İnceleme - Editör Onaylı</div>
       </div>
 
-      <!-- İstatistik şeridi (tam genişlik) + Oyunları Keşfet -->
-      <div class="relative -mt-6">
-        <div class="max-w-7xl mx-auto px-4 lg:px-8 pb-8 pt-2 flex flex-col lg:flex-row lg:items-center gap-8">
+      <!-- İstatistik şeridi — yalnız mobil/tablet (lg+'da görselin alt bandına overlay) -->
+      <div class="lg:hidden relative">
+        <div class="max-w-7xl mx-auto px-4 pb-8 pt-4 flex flex-col gap-8">
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 flex-1">
             @for (s of stats; track s.label) {
               <div>

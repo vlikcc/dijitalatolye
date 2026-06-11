@@ -25,7 +25,7 @@ type Theme = 'light' | 'dark';
 
           <nav class="hidden md:flex items-center gap-8 text-[15px] font-display font-medium">
             <a routerLink="/games" routerLinkActive="text-accent" class="text-ink/80 hover:text-accent transition-colors">Oyunlar</a>
-            <a routerLink="/digital" routerLinkActive="text-accent" class="text-ink/80 hover:text-accent transition-colors">Videolar</a>
+            <a routerLink="/digital" routerLinkActive="text-accent" class="text-ink/80 hover:text-accent transition-colors">Dijital İçerikler</a>
             <a routerLink="/ebooks" routerLinkActive="text-accent" class="text-ink/80 hover:text-accent transition-colors">E-Kitaplar</a>
             <a routerLink="/about" routerLinkActive="text-accent" class="text-ink/80 hover:text-accent transition-colors">Hakkımızda</a>
           </nav>
@@ -60,10 +60,8 @@ type Theme = 'light' | 'dark';
         <div class="relative max-w-7xl mx-auto px-4 py-14 grid gap-10 md:grid-cols-4 text-sm">
           <div class="md:col-span-2">
             <a routerLink="/" class="flex items-center gap-2.5 font-display font-bold text-ink text-lg">
-              <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-accent2 text-white">
-                <mat-icon style="font-size:18px;width:18px;height:18px">sports_esports</mat-icon>
-              </span>
-              Dijital<span class="text-accent">Atölye</span>
+              <img src="assets/brand/logo.png" alt="Dijital Oyun Atölyesi" class="h-11 w-auto" />
+              Dijital&nbsp;Oyun <span class="da-rainbow-text">Atölyesi</span>
             </a>
             <p class="mt-4 max-w-md leading-relaxed text-muted">
               Eğlenerek öğrenmenin dijital adresi. MEB müfredatına uygun, AI ön incelemesinden geçmiş,
