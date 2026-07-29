@@ -8,7 +8,7 @@
     <EfCoreVersion>10.0.0</EfCoreVersion>
     <OpenIddictVersion>6.0.0</OpenIddictVersion>
     <MassTransitVersion>8.3.4</MassTransitVersion>
-    <SerilogAspNetCoreVersion>8.0.3</SerilogAspNetCoreVersion>
+    <SerilogAspNetCoreVersion>10.0.0</SerilogAspNetCoreVersion>
     <OpenTelemetryVersion>1.12.0</OpenTelemetryVersion>
     <YarpVersion>2.2.0</YarpVersion>
   </PropertyGroup>
@@ -55,7 +55,7 @@
 
   <ItemGroup Label="Observability">
     <PackageVersion Include="Serilog.AspNetCore" Version="$(SerilogAspNetCoreVersion)" />
-    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.OpenTelemetry" Version="4.1.1" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="$(OpenTelemetryVersion)" />
