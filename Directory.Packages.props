@@ -74,7 +74,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Storage / S3 / Mail">
-    <PackageVersion Include="Minio" Version="6.0.4" />
+    <PackageVersion Include="Minio" Version="7.0.0" />
     <PackageVersion Include="MongoDB.Driver" Version="3.1.0" />
     <PackageVersion Include="MailKit" Version="4.10.0" />
     <PackageVersion Include="WebPush" Version="1.0.13" />
