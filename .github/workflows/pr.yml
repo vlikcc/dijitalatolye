@@ -54,7 +54,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with: { node-version: "22" }
       - run: npm install --no-save @commitlint/cli @commitlint/config-conventional
       - run: npx commitlint --from=origin/${{ github.base_ref }} --to=HEAD --verbose
@@ -126,7 +126,7 @@ jobs:
         working-directory: src/Web/dijitalatolye-web-ng
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
