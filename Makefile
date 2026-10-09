@@ -74,17 +74,21 @@ clean:  ## bin/obj klasorlerini temizle
 	@echo "Cleaned."
 
 # === Migrations ===
+# Servisler acilista kendi migration'larini uygular (MigrateDatabaseAsync: advisory lock + eski DB baseline).
+# Ham 'dotnet ef database update' baseline'i atladigi icin kullanilmaz. Esleme: scripts/ef.sh
 
 .PHONY: migrate
-migrate:  ## Tum servislerin EF Core migration'larini calistir
-	@for svc in Identity User Catalog Content Review Notification; do \
-		echo ">>> Migrating $$svc..."; \
-		dotnet ef database update --project src/Services/$$svc/$$svc.Infrastructure --startup-project src/Services/$$svc/$$svc.API || exit 1; \
-	done
+migrate:  ## (Bilgi) Migration'lar servis acilisinda otomatik uygulanir
+	@echo "Migration'lar servis acilisinda uygulanir (Development veya Database__AutoMigrate=true)."
+	@echo "Lokal: 'make run-<servis>' / prod: 'make prod-up'. Yeni migration: make migration-add SVC=Content NAME=AddFoo"
 
 .PHONY: migration-add
-migration-add:  ## Servise yeni migration ekle (kullanim: make migration-add SVC=Identity NAME=AddUserClaims)
-	dotnet ef migrations add $(NAME) --project src/Services/$(SVC)/$(SVC).Infrastructure --startup-project src/Services/$(SVC)/$(SVC).API
+migration-add:  ## Yeni migration ekle (kullanim: make migration-add SVC=Content NAME=AddFoo)
+	./scripts/ef.sh add $(SVC) $(NAME)
+
+.PHONY: migration-check
+migration-check:  ## Tum context'lerde model ile son migration senkron mu (CI'da da calisir)
+	./scripts/ef.sh check
 
 # === Servisleri calistir ===
 
@@ -199,14 +203,34 @@ PROD_COMPOSE := docker compose -f deploy/docker-compose/docker-compose.prod.yml 
 .PHONY: prod-env
 prod-env:  ## .env.prod yoksa .env.prod.example'dan kopyala ve secret'lari otomatik uret
 	@if [ ! -f .env.prod ]; then cp .env.prod.example .env.prod && chmod 600 .env.prod && echo ".env.prod olusturuldu (chmod 600)."; else echo ".env.prod mevcut."; fi
-	@for k in POSTGRES_PASSWORD MONGO_PASSWORD REDIS_PASSWORD RABBITMQ_PASSWORD MINIO_ROOT_PASSWORD; do \
+	@# Compose'da ':?' ile zorunlu olan secret'lar (bos/eksikse uretilir; satir yoksa eklenir)
+	@for k in POSTGRES_PASSWORD MONGO_PASSWORD REDIS_PASSWORD RABBITMQ_PASSWORD MINIO_ROOT_PASSWORD GUARD_PG_PASSWORD GUARD_HMAC_SECRET GRAFANA_ADMIN_PASSWORD; do \
+		grep -qE "^$$k=" .env.prod || echo "$$k=" >> .env.prod; \
 		grep -qE "^$$k=[A-Za-z0-9]+" .env.prod || (sed -i.bak "s|^$$k=.*|$$k=$$(openssl rand -hex 24)|" .env.prod && rm -f .env.prod.bak && echo "$$k uretildi."); \
 	done
-	@grep -qE "^JWT_SIGNING_KEY=[A-Za-z0-9]+" .env.prod || (sed -i.bak "s|^JWT_SIGNING_KEY=.*|JWT_SIGNING_KEY=$$(openssl rand -hex 48)|" .env.prod && rm -f .env.prod.bak && echo "JWT_SIGNING_KEY uretildi.")
+	@# MinIO servis kullanicilarinin secret'lari (MinIO secret key 8-40 karakter olmali)
+	@for k in MINIO_STORAGE_SECRET_KEY MINIO_CONTENT_SECRET_KEY MINIO_AIMODERATION_SECRET_KEY; do \
+		grep -qE "^$$k=" .env.prod || echo "$$k=" >> .env.prod; \
+		grep -qE "^$$k=[A-Za-z0-9]+" .env.prod || (sed -i.bak "s|^$$k=.*|$$k=$$(openssl rand -hex 16)|" .env.prod && rm -f .env.prod.bak && echo "$$k uretildi."); \
+	done
+	@for k in JWT_SIGNING_KEY GUARD_DJANGO_SECRET_KEY; do \
+		grep -qE "^$$k=" .env.prod || echo "$$k=" >> .env.prod; \
+		grep -qE "^$$k=[A-Za-z0-9]+" .env.prod || (sed -i.bak "s|^$$k=.*|$$k=$$(openssl rand -hex 48)|" .env.prod && rm -f .env.prod.bak && echo "$$k uretildi."); \
+	done
+	@# Guard HMAC: main-site secret ve GUARD_HMAC_SECRETS JSON'u GUARD_HMAC_SECRET'tan turetilir
+	@HMAC=$$(grep -E '^GUARD_HMAC_SECRET=' .env.prod | cut -d= -f2- | awk '{print $$1}'); \
+	SRC=$$(grep -E '^GUARD_SOURCE_ID=' .env.prod | cut -d= -f2- | awk '{print $$1}'); SRC=$${SRC:-dijitalatolye}; \
+	grep -qE "^GUARD_MAIN_SITE_HMAC_SECRET=" .env.prod || echo "GUARD_MAIN_SITE_HMAC_SECRET=" >> .env.prod; \
+	grep -qE "^GUARD_MAIN_SITE_HMAC_SECRET=[A-Za-z0-9]+" .env.prod || (sed -i.bak "s|^GUARD_MAIN_SITE_HMAC_SECRET=.*|GUARD_MAIN_SITE_HMAC_SECRET=$$HMAC|" .env.prod && rm -f .env.prod.bak && echo "GUARD_MAIN_SITE_HMAC_SECRET uretildi (= GUARD_HMAC_SECRET)."); \
+	grep -qE "^GUARD_HMAC_SECRETS=" .env.prod || echo "GUARD_HMAC_SECRETS=" >> .env.prod; \
+	if grep -qE '^GUARD_HMAC_SECRETS=.*<GUARD_HMAC_SECRET>' .env.prod || ! grep -qE '^GUARD_HMAC_SECRETS=[{]' .env.prod; then \
+		sed -i.bak "s|^GUARD_HMAC_SECRETS=.*|GUARD_HMAC_SECRETS={\"$$SRC\":\"$$HMAC\"}|" .env.prod && rm -f .env.prod.bak && echo "GUARD_HMAC_SECRETS uretildi."; \
+	fi
 	@echo ""
 	@echo "Sonraki adim:"
 	@echo "  - .env.prod icine DEEPSEEK_API_KEY (ve istege bagli GEMINI/ANTHROPIC) yazin"
 	@echo "  - SMTP'yi gercek bir saglayiciya ayarlayin (lokalde mailhog profili kullanabilirsiniz)"
+	@echo "  - ACME_EMAIL (zorunlu), SEED_ADMIN_EMAIL/SEED_ADMIN_PASSWORD (ilk admin) ve IMAGE_TAG'i doldurun"
 	@echo "  - Daha sonra: make prod-up"
 
 .PHONY: prod-build
@@ -229,6 +253,12 @@ prod-up: prod-env  ## Production stack'i ayaga kaldir (lokalde test icin de kull
 prod-up-mail: prod-env  ## Production stack'i + lokal MailHog ile ayaga kaldir (SMTP testi)
 	$(PROD_COMPOSE) --profile mailhog up -d --build
 	@echo "MailHog UI: http://127.0.0.1:8025"
+
+.PHONY: prod-deploy
+prod-deploy: prod-env  ## Registry'deki hazir imajlarla deploy (IMAGE_REPO + IMAGE_TAG; build yapmaz)
+	$(PROD_COMPOSE) pull
+	$(PROD_COMPOSE) up -d --no-build
+	@echo "==> $$(grep -E '^IMAGE_REPO=' .env.prod | cut -d= -f2)-*:$$(grep -E '^IMAGE_TAG=' .env.prod | cut -d= -f2) ile deploy edildi."
 
 .PHONY: prod-down
 prod-down:  ## Production stack'i durdur (volume korunur)
@@ -256,9 +286,18 @@ prod-backup:  ## Postgres + Mongo + MinIO yedek al (./backups/<ts>/)
 	./scripts/prod-backup.sh
 
 .PHONY: prod-smoke
-prod-smoke:  ## Public endpoint smoke test (gateway /health/live, web /)
+prod-smoke:  ## Public endpoint smoke test (gateway /health/live, web /) — 200 degilse exit 1
 	@DOMAIN=$$(grep -E '^PUBLIC_DOMAIN=' .env.prod | cut -d= -f2 | tr -d '\"'); \
-	echo ">>> https://$$DOMAIN/health/live"; \
-	curl -ksS -o /dev/null -w "  HTTP %{http_code}\n" "https://$$DOMAIN/health/live"; \
-	echo ">>> https://$$DOMAIN/"; \
-	curl -ksS -o /dev/null -w "  HTTP %{http_code}\n" "https://$$DOMAIN/"
+	fail=0; \
+	for path in /health/live /; do \
+		code=$$(curl -ksS -o /dev/null -w "%{http_code}" "https://$$DOMAIN$$path" || true); \
+		echo ">>> https://$$DOMAIN$$path  HTTP $$code"; \
+		[ "$$code" = "200" ] || fail=1; \
+	done; \
+	if [ $$fail -ne 0 ]; then echo "SMOKE TEST BASARISIZ"; exit 1; fi; \
+	echo "Smoke test OK"
+
+.PHONY: prod-restore
+prod-restore:  ## Yedekten geri yukle (kullanim: make prod-restore BACKUP=backups/<ts>) — onay ister
+	@[ -n "$(BACKUP)" ] || (echo "Kullanim: make prod-restore BACKUP=backups/<ts>"; exit 1)
+	./scripts/prod-restore.sh "$(BACKUP)"

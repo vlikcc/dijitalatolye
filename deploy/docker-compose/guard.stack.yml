@@ -1,12 +1,14 @@
 # Guard alt-stack — dijitalatolye full/prod compose ile birlikte kullanılır.
-# Image: ghcr.io/gorkemio/guard:latest (PR #2 merge sonrası GHCR'da)
+# Image: ghcr.io/gorkemio/guard — etiket+digest ile sabitli; guncellerken GUARD_IMAGE'i yeni sha etiketine cekin.
 #
 # Gerekli .env:
 #   GUARD_HMAC_SECRET=<64-hex>
 #   GUARD_PG_PASSWORD=<postgres sifresi>
 #   GUARD_DJANGO_SECRET_KEY=<django secret>
 #
-# Lokal UI: guard-nginx -> http://localhost:${GUARD_HTTP_PORT:-18000}
+# Lokal UI: guard-nginx -> http://127.0.0.1:${GUARD_HTTP_PORT:-18000}
+# (port yalnizca 127.0.0.1'e bind edilir; uzak sunucuda SSH tuneli ile erisin:
+#   ssh -L 18000:127.0.0.1:18000 <sunucu>)
 # (React panel + /api proxy + Django /admin/)
 
 x-guard-env: &guard-env
@@ -32,7 +34,8 @@ x-guard-env: &guard-env
   GUARD_HMAC_SECRETS: ${GUARD_HMAC_SECRETS:?GUARD_HMAC_SECRETS JSON required — see .env.example}
   GUARD_HMAC_TIMESTAMP_SKEW: "300"
   GUARD_HMAC_NONCE_TTL: "600"
-  GUARD_INGEST_ALLOWED_CIDRS: ${GUARD_INGEST_ALLOWED_CIDRS:-0.0.0.0/0}
+  # Ingest'e yalnizca ozel aglardan (docker bridge agi dahil) izin ver; 0.0.0.0/0 KULLANMAYIN
+  GUARD_INGEST_ALLOWED_CIDRS: ${GUARD_INGEST_ALLOWED_CIDRS:-10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1/32}
   GUARD_MAIN_SITE_BASE: ${GUARD_MAIN_SITE_BASE:-http://storage:8080}
   GUARD_MAIN_SITE_HMAC_SECRET: ${GUARD_MAIN_SITE_HMAC_SECRET:?GUARD_MAIN_SITE_HMAC_SECRET is required}
   GUARD_DELIVERY_TIMEOUT: "120"
@@ -92,7 +95,7 @@ services:
       start_period: 360s
 
   guard-migrate:
-    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:sha-77b6b3c@sha256:61161ed4ac85d873b6dc48d2cd4ead77d67c7cd691d653a8c74fed6ce0831391}
     container_name: guard-migrate
     restart: "no"
     entrypoint: ["/bin/sh", "-c"]
@@ -112,7 +115,7 @@ services:
         condition: service_healthy
 
   guard-web:
-    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:sha-77b6b3c@sha256:61161ed4ac85d873b6dc48d2cd4ead77d67c7cd691d653a8c74fed6ce0831391}
     container_name: guard-web
     command: ["web"]
     environment: *guard-env
@@ -134,7 +137,7 @@ services:
       start_period: 30s
 
   guard-worker-scan:
-    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:sha-77b6b3c@sha256:61161ed4ac85d873b6dc48d2cd4ead77d67c7cd691d653a8c74fed6ce0831391}
     container_name: guard-worker-scan
     command: ["worker-scan"]
     environment: *guard-env
@@ -148,7 +151,7 @@ services:
         condition: service_healthy
 
   guard-worker-delivery:
-    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:sha-77b6b3c@sha256:61161ed4ac85d873b6dc48d2cd4ead77d67c7cd691d653a8c74fed6ce0831391}
     container_name: guard-worker-delivery
     command: ["worker-delivery"]
     environment: *guard-env
@@ -160,7 +163,7 @@ services:
         condition: service_healthy
 
   guard-beat:
-    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:sha-77b6b3c@sha256:61161ed4ac85d873b6dc48d2cd4ead77d67c7cd691d653a8c74fed6ce0831391}
     container_name: guard-beat
     command: ["beat"]
     environment: *guard-env
@@ -172,7 +175,7 @@ services:
         condition: service_healthy
 
   guard-frontend-publisher:
-    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:sha-77b6b3c@sha256:61161ed4ac85d873b6dc48d2cd4ead77d67c7cd691d653a8c74fed6ce0831391}
     container_name: guard-frontend-publisher
     restart: "no"
     user: "0:0"
@@ -186,7 +189,7 @@ services:
       - guard-frontend:/publish
 
   guard-static-publisher:
-    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:latest}
+    image: ${GUARD_IMAGE:-ghcr.io/gorkemio/guard:sha-77b6b3c@sha256:61161ed4ac85d873b6dc48d2cd4ead77d67c7cd691d653a8c74fed6ce0831391}
     container_name: guard-static-publisher
     restart: "no"
     user: "0:0"
@@ -210,7 +213,8 @@ services:
       guard-static-publisher:
         condition: service_completed_successfully
     ports:
-      - "${GUARD_HTTP_PORT:-18000}:80"
+      # Sadece localhost — Guard paneli internete acik DEGIL
+      - "127.0.0.1:${GUARD_HTTP_PORT:-18000}:80"
     volumes:
       - ./guard/nginx/guard.conf:/etc/nginx/conf.d/default.conf:ro
       - guard-frontend:/usr/share/nginx/html:ro

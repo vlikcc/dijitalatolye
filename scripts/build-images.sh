@@ -3,17 +3,20 @@
 #   ./scripts/build-images.sh                          # tum servisleri
 #   ./scripts/build-images.sh identity content         # belirli servisleri
 #   TAG=v0.2.0 ./scripts/build-images.sh               # tag override
+#   IMAGE_REPO=ghcr.io/<owner>/dijitalatolye ./scripts/build-images.sh
+#
+# Imaj adlari prod compose ile ayni: ${IMAGE_REPO}-<servis>:${TAG}
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-REGISTRY="${REGISTRY:-ghcr.io/dijitalatolye}"
+IMAGE_REPO="${IMAGE_REPO:-dijitalatolye}"
 TAG="${TAG:-$(git rev-parse --short HEAD 2>/dev/null || echo dev)}"
 
 ALL_SERVICES=(
-  "apigateway:src/ApiGateway"
+  "gateway:src/ApiGateway"
   "identity:src/Services/Identity/Identity.API"
   "user:src/Services/User/User.API"
   "catalog:src/Services/Catalog/Catalog.API"
@@ -24,6 +27,8 @@ ALL_SERVICES=(
   "notification:src/Services/Notification/Notification.API"
   "search:src/Services/Search/Search.API"
   "analytics:src/Services/Analytics/Analytics.API"
+  "admin:src/Services/Admin/Admin.API"
+  "web:src/Web/dijitalatolye-web-ng"
 )
 
 BUILD_LIST=()
@@ -48,14 +53,17 @@ fi
 for entry in "${BUILD_LIST[@]}"; do
   name="${entry%%:*}"
   path="${entry#*:}"
-  image="${REGISTRY}/dijitalatolye-${name}:${TAG}"
+  image="${IMAGE_REPO}-${name}:${TAG}"
+  # web kendi klasorunu context olarak kullanir; .NET servisleri repo kokunu
+  context="."
+  [ "$name" = "web" ] && context="$path"
   echo ""
-  echo "==> Building $image (context=., dockerfile=${path}/Dockerfile)"
+  echo "==> Building $image (context=${context}, dockerfile=${path}/Dockerfile)"
   docker build \
     -t "$image" \
-    -t "${REGISTRY}/dijitalatolye-${name}:latest" \
+    -t "${IMAGE_REPO}-${name}:latest" \
     -f "${path}/Dockerfile" \
-    .
+    "$context"
 done
 
 echo ""

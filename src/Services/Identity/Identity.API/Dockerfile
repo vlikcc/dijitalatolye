@@ -18,6 +18,10 @@ ENV ASPNETCORE_URLS=http://+:8080 \
 WORKDIR /app
 EXPOSE 8080
 COPY --from=build /app/publish/ ./
+# DataProtection anahtar dizini (compose volume buraya baglanir; yeni volume bu sahipligi devralir)
+RUN mkdir -p /app/dp-keys && chown $APP_UID /app/dp-keys
+# Root olmayan kullanici (aspnet imajlarinda APP_UID=1654 tanimli)
+USER $APP_UID
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD curl -fsS http://localhost:8080/health/live || exit 1
 ENTRYPOINT ["dotnet", "DijitalAtolye.Identity.API.dll"]

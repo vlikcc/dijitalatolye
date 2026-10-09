@@ -15,14 +15,12 @@ describe('AuthStore', () => {
     expect(store.roles()).toEqual([]);
   });
 
-  it('setTokens ve setUser sonrası signals güncellenir', () => {
+  it('setSession sonrası signals güncellenir', () => {
     const store = TestBed.inject(AuthStore);
-    store.setTokens('access-1', 'refresh-1');
-    store.setUser('teacher@example.com', ['Teacher']);
+    store.setSession('access-1', ['Teacher'], 'teacher@example.com');
 
     expect(store.isAuthenticated()).toBeTrue();
     expect(store.accessToken()).toBe('access-1');
-    expect(store.refreshToken()).toBe('refresh-1');
     expect(store.email()).toBe('teacher@example.com');
     expect(store.roles()).toEqual(['Teacher']);
     expect(store.isTeacher()).toBeTrue();
@@ -48,40 +46,38 @@ describe('AuthStore', () => {
 
   it('logout state sıfırlar', () => {
     const store = TestBed.inject(AuthStore);
-    store.setTokens('a', 'r');
-    store.setUser('x', ['Admin']);
+    store.setSession('a', ['Admin'], 'x');
     store.logout();
     expect(store.isAuthenticated()).toBeFalse();
     expect(store.email()).toBeNull();
     expect(store.roles()).toEqual([]);
+    expect(store.hasSessionHint()).toBeFalse();
   });
 
-  it('localStorage persistence — yeniden init okuduğu state ile gelir', async () => {
+  it('rol ve e-posta verilmezse token içeriğinden okunur', () => {
+    const payload = btoa(JSON.stringify({ email: 'jwt@x', role: ['Editor'] })).replace(/=+$/, '');
     const store = TestBed.inject(AuthStore);
-    store.setTokens('persisted-token', 'persisted-refresh');
-    store.setUser('user@x', ['Teacher']);
+    store.setSession(`h.${payload}.s`);
+    expect(store.email()).toBe('jwt@x');
+    expect(store.roles()).toEqual(['Editor']);
+  });
 
-    // effect senkron çalışmadığı için flush
-    await Promise.resolve();
-    TestBed.flushEffects();
+  it("token hiçbir zaman localStorage'a yazılmaz; yalnızca oturum ipucu kalır", () => {
+    const store = TestBed.inject(AuthStore);
+    store.setSession('secret-access-token', ['Teacher'], 'user@x');
 
-    const raw = localStorage.getItem('dijitalatolye-auth');
-    expect(raw).not.toBeNull();
-    const parsed = JSON.parse(raw!);
-    expect(parsed.state.accessToken).toBe('persisted-token');
+    expect(store.hasSessionHint()).toBeTrue();
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)!;
+      expect(localStorage.getItem(key)).not.toContain('secret-access-token');
+    }
 
-    // Yeni TestBed instance — disk'ten okumalı
+    // Yeni instance (sayfa yenileme) token'sız başlar; oturum AuthSession.restore() ile çerezden gelir
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({});
     const fresh = TestBed.inject(AuthStore);
-    expect(fresh.accessToken()).toBe('persisted-token');
-    expect(fresh.roles()).toEqual(['Teacher']);
-  });
-
-  it('bozuk localStorage payload — boş state ile fallback', () => {
-    localStorage.setItem('dijitalatolye-auth', '{not-json');
-    const store = TestBed.inject(AuthStore);
-    expect(store.isAuthenticated()).toBeFalse();
+    expect(fresh.accessToken()).toBeNull();
+    expect(fresh.hasSessionHint()).toBeTrue();
   });
 
   it('hasAnyRole birden fazla rol kontrolünde true döner', () => {

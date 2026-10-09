@@ -8,6 +8,10 @@ public sealed class ReviewDbContext : DbContext
 {
     public ReviewDbContext(DbContextOptions<ReviewDbContext> options) : base(options) { }
 
+    /// <summary>Migration geçmişi kendi şemasında tutulur (aynı DB'yi paylaşan context'ler çakışmasın).</summary>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseNpgsql(o => o.MigrationsHistoryTable("__EFMigrationsHistory", "review"));
+
     public DbSet<ReviewItem> ReviewItems => Set<ReviewItem>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 

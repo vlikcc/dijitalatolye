@@ -41,13 +41,32 @@ Bu komut PostgreSQL, MongoDB, RabbitMQ, Redis, Elasticsearch, MinIO, ClamAV ve M
 - **MinIO Console:** http://localhost:9001
 - **Mailhog (e-postalar):** http://localhost:8025
 
-## 5. Migration'ları çalıştır
+## 5. Migration'lar
+
+Development ortamında her servis açılışta kendi EF Core migration'larını uygular (`MigrateDatabaseAsync`, bkz. `src/BuildingBlocks/Common/EfMigrationExtensions.cs`); ayrı bir adım gerekmez. Migration öncesi kurulmuş eski bir lokal DB'niz varsa ilk açılışta otomatik baseline'lanır.
+
+### Yeni migration eklemek
+
+Model değiştirdikten sonra (repo kökünde; `dotnet tool restore` bir kez yeterli):
 
 ```bash
-make migrate
+dotnet tool restore
+# Servis API projeleri (Content, User, Catalog, Review, Notification, Analytics, Admin):
+dotnet ef migrations add AddFooColumn \
+  --project src/Services/Content/Content.API \
+  --startup-project src/Services/Content/Content.API \
+  --context ContentDbContext --output-dir Persistence/Migrations
+# Identity (context Infrastructure projesinde):
+dotnet ef migrations add AddFoo --project src/Services/Identity/Identity.Infrastructure \
+  --startup-project src/Services/Identity/Identity.API --context IdentityDbContext --output-dir Persistence/Migrations
+# Audit (BuildingBlocks):
+dotnet ef migrations add AddFoo --project src/BuildingBlocks/Audit \
+  --startup-project src/Services/Admin/Admin.API --context AuditDbContext --output-dir Migrations
+# Model ile son migration senkron mu?
+dotnet ef migrations has-pending-model-changes --project <aynı> --startup-project <aynı> --context <aynı>
 ```
 
-Tüm servislerin EF Core migration'larını sırayla uygular.
+Kurallar: `ALTER TABLE ... IF NOT EXISTS` gibi açılış SQL'i **yazmayın**; şema değişikliği her zaman migration ile gelir. `*LegacySchema.cs` dosyaları yalnızca migration öncesi DB'lerin baseline'ı içindir, yeni değişiklik eklenmez. Migration dosyaları design-time factory'deki dummy bağlantıyla üretilir; DB'ye bağlanmaz.
 
 ## 6. Servisleri başlat
 

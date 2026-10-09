@@ -3,7 +3,8 @@
 
 export interface LoginRequest { email: string; password: string; }
 export interface RegisterRequest { email: string; password: string; displayName: string; }
-export interface AuthTokens { accessToken: string; refreshToken: string; email?: string; roles?: string[]; }
+/** Login/refresh yanıtı. Refresh token gövdede dönmez; HttpOnly çerezdedir. */
+export interface AuthSessionResponse { accessToken: string; accessTokenExpiresAtUtc?: string; roles?: string[]; }
 
 export type ContentState =
   | 'Draft' | 'GuardScanning' | 'Submitted' | 'AIReviewing' | 'AIReviewed'

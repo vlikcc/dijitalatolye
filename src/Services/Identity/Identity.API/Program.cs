@@ -45,12 +45,14 @@ builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
+    // IP başına; bir sınıf tek NAT IP'sinden aynı anda giriş yapabilir. Tek hesaba karşı brute-force'u
+    // Identity lockout (5 deneme / 15 dk) engeller.
     options.AddPolicy("login", http =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: http.Connection.RemoteIpAddress?.ToString() ?? "anon",
             factory: _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 10,
+                PermitLimit = 60,
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0,
                 AutoReplenishment = true,
@@ -79,9 +81,9 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Databas
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
-    await db.EnsureSchemaAsync();
+    await db.MigrateDatabaseAsync();
     await IdentitySeeder.SeedAsync(scope.ServiceProvider);
-    await app.Services.EnsureAuditSchemaAsync();
+    await app.Services.MigrateAuditDatabaseAsync();
 }
 
 app.Run();

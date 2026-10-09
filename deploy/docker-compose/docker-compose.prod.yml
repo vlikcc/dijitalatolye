@@ -52,6 +52,13 @@ x-app-defaults: &app-defaults
   mem_limit: 768m
   mem_reservation: 256m
   cpus: 1.0
+  # Tum .NET imajlari alpine tabanli (busybox wget mevcut); /health/live BuildingBlocks'ta map'li.
+  healthcheck:
+    test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health/live >/dev/null || exit 1"]
+    interval: 15s
+    timeout: 5s
+    retries: 5
+    start_period: 60s
 
 x-data-defaults: &data-defaults
   <<: [*restart, *default-logging]
@@ -65,11 +72,14 @@ services:
     image: caddy:2.8-alpine
     container_name: da-caddy
     depends_on:
-      gateway: { condition: service_started }
-      web: { condition: service_started }
+      gateway: { condition: service_healthy }
+      web: { condition: service_healthy }
     environment:
       PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:-localhost}
-      ACME_EMAIL: ${ACME_EMAIL:-internal}
+      # Let's Encrypt hesap e-postasi; localhost'ta kullanilmaz (Caddy internal CA) ama yine de dolu olmali
+      ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL is required (gercek e-posta; lokal test icin ornegin admin@localhost.test)}
+      # /cdn/* yalnizca bu bucket'a proxy'lenir (Caddyfile)
+      MINIO_BUCKET_PUBLISHED: ${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published}
     ports:
       - "80:80"
       - "443:443"
@@ -102,6 +112,7 @@ services:
       timeout: 3s
       retries: 30
     shm_size: 256mb
+    mem_limit: 2g
     <<: *data-defaults
 
   mongodb:
@@ -120,6 +131,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 20
+    mem_limit: 1536m
     <<: *data-defaults
 
   rabbitmq:
@@ -139,6 +151,7 @@ services:
       timeout: 10s
       retries: 10
       start_period: 60s
+    mem_limit: 1g
     <<: *data-defaults
 
   redis:
@@ -165,6 +178,7 @@ services:
       retries: 20
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+    mem_limit: 768m
     <<: *data-defaults
 
   elasticsearch:
@@ -189,36 +203,51 @@ services:
       timeout: 5s
       retries: 30
       start_period: 60s
+    # Heap 512m (ES_JAVA_OPTS) + off-heap/page cache payi
+    mem_limit: 1536m
     <<: *data-defaults
 
   minio:
-    image: minio/minio:latest
+    # Resmi minio/minio imaji Docker Hub/Quay'de artik public degil (MinIO Ekim 2025'te
+    # community imaj yayinini durdurdu; anonim pull 401). Topluluk fork'u (pgsty, upstream
+    # Dockerfile ile ayni: ubi9-micro + minio + mc + curl). Yukseltirken tag'i bilincli degistirin.
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     container_name: da-minio
+    # Konsol yalnizca 127.0.0.1:9001'de (public route YOK). Uzak sunucuda SSH tuneli:
+    #   ssh -L 9001:127.0.0.1:9001 <sunucu>  ->  http://localhost:9001
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
-      MINIO_BROWSER_REDIRECT_URL: ${MINIO_CONSOLE_PUBLIC_URL:-https://${PUBLIC_DOMAIN:-localhost}/minio-console}
     ports:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
     volumes:
       - minio-data:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      # Server imaji 'mc' icerir; 'local' alias'i varsayilan olarak http://localhost:9000
+      test: ["CMD", "mc", "ready", "local"]
       interval: 15s
       timeout: 5s
       retries: 10
+    mem_limit: 1g
     <<: *data-defaults
 
   minio-init:
-    image: minio/mc:latest
+    # Bkz. minio notu: resmi minio/mc imaji public degil; pgsty fork'u (/bin/sh mevcut)
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
     container_name: da-minio-init
     depends_on:
       minio: { condition: service_healthy }
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_STORAGE_ACCESS_KEY: ${MINIO_STORAGE_ACCESS_KEY:-svc-storage}
+      MINIO_STORAGE_SECRET_KEY: ${MINIO_STORAGE_SECRET_KEY:?MINIO_STORAGE_SECRET_KEY is required (make prod-env)}
+      MINIO_CONTENT_ACCESS_KEY: ${MINIO_CONTENT_ACCESS_KEY:-svc-content}
+      MINIO_CONTENT_SECRET_KEY: ${MINIO_CONTENT_SECRET_KEY:?MINIO_CONTENT_SECRET_KEY is required (make prod-env)}
+      MINIO_AIMODERATION_ACCESS_KEY: ${MINIO_AIMODERATION_ACCESS_KEY:-svc-aimoderation}
+      MINIO_AIMODERATION_SECRET_KEY: ${MINIO_AIMODERATION_SECRET_KEY:?MINIO_AIMODERATION_SECRET_KEY is required (make prod-env)}
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
@@ -228,7 +257,18 @@ services:
         mc mb -p local/${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published} || true
         mc mb -p local/${MINIO_BUCKET_AVATARS:-dijitalatolye-avatars} || true
         mc anonymous set download local/${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published} || true
-        echo 'MinIO buckets ready.'
+        # Servis basina en az yetkili kullanici: uygulamalar root kimligiyle baglanmaz.
+        # policy create mevcut policy'yi gunceller; attach zaten bagliysa hata verir (|| true).
+        setup_user() {
+          printf '%s' "$$3" > /tmp/$$1.json
+          mc admin policy create local "da-$$1" /tmp/$$1.json
+          mc admin user add local "$$2" "$$4"
+          mc admin policy attach local "da-$$1" --user "$$2" >/dev/null 2>&1 || true
+        }
+        setup_user storage "$$MINIO_STORAGE_ACCESS_KEY" "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"s3:GetBucketLocation\",\"s3:ListBucket\"],\"Resource\":[\"arn:aws:s3:::${MINIO_BUCKET_CONTENT:-dijitalatolye-content}\",\"arn:aws:s3:::${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published}\",\"arn:aws:s3:::${MINIO_BUCKET_AVATARS:-dijitalatolye-avatars}\"]},{\"Effect\":\"Allow\",\"Action\":[\"s3:GetObject\",\"s3:PutObject\",\"s3:DeleteObject\"],\"Resource\":[\"arn:aws:s3:::${MINIO_BUCKET_CONTENT:-dijitalatolye-content}/*\",\"arn:aws:s3:::${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published}/*\",\"arn:aws:s3:::${MINIO_BUCKET_AVATARS:-dijitalatolye-avatars}/*\"]}]}" "$$MINIO_STORAGE_SECRET_KEY"
+        setup_user content "$$MINIO_CONTENT_ACCESS_KEY" "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"s3:GetBucketLocation\",\"s3:ListBucket\"],\"Resource\":[\"arn:aws:s3:::${MINIO_BUCKET_CONTENT:-dijitalatolye-content}\",\"arn:aws:s3:::${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published}\"]},{\"Effect\":\"Allow\",\"Action\":[\"s3:GetObject\",\"s3:PutObject\",\"s3:DeleteObject\"],\"Resource\":[\"arn:aws:s3:::${MINIO_BUCKET_CONTENT:-dijitalatolye-content}/*\",\"arn:aws:s3:::${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published}/*\"]},{\"Effect\":\"Allow\",\"Action\":[\"s3:GetBucketPolicy\",\"s3:PutBucketPolicy\"],\"Resource\":[\"arn:aws:s3:::${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published}\"]}]}" "$$MINIO_CONTENT_SECRET_KEY"
+        setup_user aimoderation "$$MINIO_AIMODERATION_ACCESS_KEY" "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"s3:GetBucketLocation\",\"s3:ListBucket\"],\"Resource\":[\"arn:aws:s3:::${MINIO_BUCKET_CONTENT:-dijitalatolye-content}\",\"arn:aws:s3:::${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published}\"]},{\"Effect\":\"Allow\",\"Action\":[\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::${MINIO_BUCKET_CONTENT:-dijitalatolye-content}/*\",\"arn:aws:s3:::${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published}/*\"]}]}" "$$MINIO_AIMODERATION_SECRET_KEY"
+        echo 'MinIO buckets + service users ready.'
     networks: [internal]
     restart: "no"
     logging: { driver: json-file, options: { max-size: "5m", max-file: "2" } }
@@ -236,7 +276,7 @@ services:
   # MailHog: lokal prod testlerinde gercek SMTP yokken; uretimde profili etkinlestirmeyin.
   # Aktif etmek icin: --profile mailhog
   mailhog:
-    image: mailhog/mailhog:latest
+    image: mailhog/mailhog:v1.0.1
     container_name: da-mailhog
     profiles: ["mailhog"]
     ports:
@@ -251,7 +291,7 @@ services:
     build:
       context: ../..
       dockerfile: src/Services/Identity/Identity.API/Dockerfile
-    image: dijitalatolye/identity:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-identity:${IMAGE_TAG:-latest}
     container_name: da-identity
     depends_on:
       postgres:  { condition: service_healthy }
@@ -267,6 +307,15 @@ services:
       JwtIssuer__RefreshTokenLifetime: ${JWT_REFRESH_LIFETIME:-14.00:00:00}
       OAuth__Google__ClientId: ${GOOGLE_OAUTH_CLIENT_ID:-}
       OAuth__Google__ClientSecret: ${GOOGLE_OAUTH_CLIENT_SECRET:-}
+      # Ilk admin: prod'da yalnizca ikisi de doluysa olusturulur (sifre >= 12 karakter)
+      Seed__AdminEmail: ${SEED_ADMIN_EMAIL:-}
+      Seed__AdminPassword: ${SEED_ADMIN_PASSWORD:-}
+      # Sifirlama linki (dev loglama icin; e-postayi Notification gonderir)
+      PasswordReset__UrlBase: https://${PUBLIC_DOMAIN:-localhost}/reset-password
+      # Dogrulama/sifirlama token anahtarlari restart'lar arasinda korunur
+      DataProtection__KeysPath: /app/dp-keys
+    volumes:
+      - identity-dpkeys:/app/dp-keys
     expose: ["8080"]
     <<: *app-defaults
 
@@ -274,12 +323,12 @@ services:
     build:
       context: ../..
       dockerfile: src/Services/User/User.API/Dockerfile
-    image: dijitalatolye/user:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-user:${IMAGE_TAG:-latest}
     container_name: da-user
     depends_on:
       postgres: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
-      identity: { condition: service_started }
+      identity: { condition: service_healthy }
     environment:
       <<: *common-env
       ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=user;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
@@ -290,7 +339,7 @@ services:
     build:
       context: ../..
       dockerfile: src/Services/Catalog/Catalog.API/Dockerfile
-    image: dijitalatolye/catalog:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-catalog:${IMAGE_TAG:-latest}
     container_name: da-catalog
     depends_on:
       postgres: { condition: service_healthy }
@@ -306,17 +355,17 @@ services:
     build:
       context: ../..
       dockerfile: src/Services/Storage/Storage.API/Dockerfile
-    image: dijitalatolye/storage:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-storage:${IMAGE_TAG:-latest}
     container_name: da-storage
     depends_on:
-      minio:      { condition: service_healthy }
+      minio-init: { condition: service_completed_successfully }
       guard-web:  { condition: service_healthy }
       rabbitmq:   { condition: service_healthy }
     environment:
       <<: *common-env
       Minio__Endpoint: minio:9000
-      Minio__AccessKey: ${MINIO_ROOT_USER}
-      Minio__SecretKey: ${MINIO_ROOT_PASSWORD}
+      Minio__AccessKey: ${MINIO_STORAGE_ACCESS_KEY:-svc-storage}
+      Minio__SecretKey: ${MINIO_STORAGE_SECRET_KEY:?MINIO_STORAGE_SECRET_KEY is required}
       Minio__UseSsl: "false"
       Minio__PublicEndpoint: ${MINIO_PUBLIC_ENDPOINT:-https://${PUBLIC_DOMAIN:-localhost}/cdn}
       Minio__BucketContent: ${MINIO_BUCKET_CONTENT:-dijitalatolye-content}
@@ -334,18 +383,18 @@ services:
     build:
       context: ../..
       dockerfile: src/Services/Content/Content.API/Dockerfile
-    image: dijitalatolye/content:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-content:${IMAGE_TAG:-latest}
     container_name: da-content
     depends_on:
       postgres: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
-      minio:    { condition: service_healthy }
+      minio-init: { condition: service_completed_successfully }
     environment:
       <<: *common-env
       ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=content;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       Minio__Endpoint: minio:9000
-      Minio__AccessKey: ${MINIO_ROOT_USER}
-      Minio__SecretKey: ${MINIO_ROOT_PASSWORD}
+      Minio__AccessKey: ${MINIO_CONTENT_ACCESS_KEY:-svc-content}
+      Minio__SecretKey: ${MINIO_CONTENT_SECRET_KEY:?MINIO_CONTENT_SECRET_KEY is required}
       Minio__UseSsl: "false"
       Minio__PublicEndpoint: ${MINIO_PUBLIC_ENDPOINT:-https://${PUBLIC_DOMAIN:-localhost}/cdn}
       Catalog__BaseUrl: http://catalog:8080
@@ -359,19 +408,19 @@ services:
     build:
       context: ../..
       dockerfile: src/Services/AIModeration/AIModeration.API/Dockerfile
-    image: dijitalatolye/aimoderation:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-aimoderation:${IMAGE_TAG:-latest}
     container_name: da-aimoderation
     depends_on:
       mongodb:  { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
-      minio:    { condition: service_healthy }
+      minio-init: { condition: service_completed_successfully }
     environment:
       <<: *common-env
       ConnectionStrings__Mongo: mongodb://${MONGO_USER:-dijitalatolye}:${MONGO_PASSWORD}@mongodb:27017/aimoderation?authSource=admin
       Mongo__Database: ai_moderation
       Minio__Endpoint: minio:9000
-      Minio__AccessKey: ${MINIO_ROOT_USER}
-      Minio__SecretKey: ${MINIO_ROOT_PASSWORD}
+      Minio__AccessKey: ${MINIO_AIMODERATION_ACCESS_KEY:-svc-aimoderation}
+      Minio__SecretKey: ${MINIO_AIMODERATION_SECRET_KEY:?MINIO_AIMODERATION_SECRET_KEY is required}
       Minio__UseSsl: "false"
       Llm__Provider: ${AIMODERATION_PROVIDER:-deepseek}
       Llm__DeepSeekApiKey: ${DEEPSEEK_API_KEY:-}
@@ -389,7 +438,7 @@ services:
     build:
       context: ../..
       dockerfile: src/Services/Review/Review.API/Dockerfile
-    image: dijitalatolye/review:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-review:${IMAGE_TAG:-latest}
     container_name: da-review
     depends_on:
       postgres: { condition: service_healthy }
@@ -404,7 +453,7 @@ services:
     build:
       context: ../..
       dockerfile: src/Services/Notification/Notification.API/Dockerfile
-    image: dijitalatolye/notification:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-notification:${IMAGE_TAG:-latest}
     container_name: da-notification
     depends_on:
       postgres: { condition: service_healthy }
@@ -422,6 +471,11 @@ services:
       WebPush__PublicKey: ${WEBPUSH_PUBLIC_KEY:-}
       WebPush__PrivateKey: ${WEBPUSH_PRIVATE_KEY:-}
       WebPush__Subject: ${WEBPUSH_SUBJECT:-mailto:admin@dijitalatolye.local}
+      # E-posta linkleri: AppUrl + dogrulama {UrlBase}?email=...&token=...
+      App__Url: https://${PUBLIC_DOMAIN:-localhost}
+      EmailVerification__UrlBase: https://${PUBLIC_DOMAIN:-localhost}/verify-email
+      # Sifre sifirlama e-postasi da Notification'dan gider: {UrlBase}?email=...&token=...
+      PasswordReset__UrlBase: https://${PUBLIC_DOMAIN:-localhost}/reset-password
     expose: ["8080"]
     <<: *app-defaults
 
@@ -429,7 +483,7 @@ services:
     build:
       context: ../..
       dockerfile: src/Services/Analytics/Analytics.API/Dockerfile
-    image: dijitalatolye/analytics:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-analytics:${IMAGE_TAG:-latest}
     container_name: da-analytics
     depends_on:
       postgres: { condition: service_healthy }
@@ -444,7 +498,7 @@ services:
     build:
       context: ../..
       dockerfile: src/Services/Search/Search.API/Dockerfile
-    image: dijitalatolye/search:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-search:${IMAGE_TAG:-latest}
     container_name: da-search
     depends_on:
       elasticsearch: { condition: service_healthy }
@@ -459,7 +513,7 @@ services:
     build:
       context: ../..
       dockerfile: src/Services/Admin/Admin.API/Dockerfile
-    image: dijitalatolye/admin:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-admin:${IMAGE_TAG:-latest}
     container_name: da-admin
     depends_on:
       postgres: { condition: service_healthy }
@@ -478,20 +532,20 @@ services:
     build:
       context: ../..
       dockerfile: src/ApiGateway/Dockerfile
-    image: dijitalatolye/gateway:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-gateway:${IMAGE_TAG:-latest}
     container_name: da-gateway
     depends_on:
-      identity:     { condition: service_started }
-      user:         { condition: service_started }
-      catalog:      { condition: service_started }
-      storage:      { condition: service_started }
-      content:      { condition: service_started }
-      review:       { condition: service_started }
-      notification: { condition: service_started }
-      aimoderation: { condition: service_started }
-      analytics:    { condition: service_started }
-      search:       { condition: service_started }
-      admin:        { condition: service_started }
+      identity:     { condition: service_healthy }
+      user:         { condition: service_healthy }
+      catalog:      { condition: service_healthy }
+      storage:      { condition: service_healthy }
+      content:      { condition: service_healthy }
+      review:       { condition: service_healthy }
+      notification: { condition: service_healthy }
+      aimoderation: { condition: service_healthy }
+      analytics:    { condition: service_healthy }
+      search:       { condition: service_healthy }
+      admin:        { condition: service_healthy }
     environment:
       <<: *common-env
       Cors__Origins: ${CORS_ORIGINS:-https://${PUBLIC_DOMAIN:-localhost}}
@@ -514,12 +568,19 @@ services:
     build:
       context: ../../src/Web/dijitalatolye-web-ng
       dockerfile: Dockerfile
-    image: dijitalatolye/web-ng:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REPO:-dijitalatolye}-web:${IMAGE_TAG:-latest}
     container_name: da-web
     depends_on:
-      gateway: { condition: service_started }
+      gateway: { condition: service_healthy }
     expose: ["8080"]
     <<: *app-defaults
+    # nginx'te /health/live yok; SPA kokunu kontrol et
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/ >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # ============================================================
   # Gözlemlenebilirlik (opt-in): --profile observability ile baslar
@@ -558,32 +619,58 @@ services:
       - "127.0.0.1:3000:3000"
     <<: *data-defaults
 
-  # guard.stack.yml servislerini prod internal agina bagla
+  # guard.stack.yml servislerini prod internal agina bagla + restart/log rotasyonu/bellek limiti.
+  # (YAML anchor'lari dosyalar arasi gecmez; anchor'lar bu dosyada tanimli oldugu icin burada uygulanir.)
+  # Tek seferlik servisler (migrate/publisher) restart: "no" kalir — yalnizca log rotasyonu.
   guard-postgres:
     networks: [internal]
+    mem_limit: 512m
+    <<: [*restart, *default-logging]
   guard-redis:
     networks: [internal]
+    mem_limit: 256m
+    <<: [*restart, *default-logging]
   guard-clamav:
     networks: [internal]
+    # clamd imza veritabanini bellege yukler (~1.5-2.5 GB, guncelleme sirasinda gecici 2x)
+    mem_limit: 3g
+    <<: [*restart, *default-logging]
   guard-migrate:
     networks: [internal]
+    mem_limit: 512m
+    <<: *default-logging
   guard-web:
     networks: [internal]
+    mem_limit: 768m
+    <<: [*restart, *default-logging]
   guard-worker-scan:
     networks: [internal]
+    mem_limit: 1g
+    <<: [*restart, *default-logging]
   guard-worker-delivery:
     networks: [internal]
+    mem_limit: 512m
+    <<: [*restart, *default-logging]
   guard-beat:
     networks: [internal]
+    mem_limit: 256m
+    <<: [*restart, *default-logging]
   guard-frontend-publisher:
     networks: [internal]
+    mem_limit: 256m
+    <<: *default-logging
   guard-static-publisher:
     networks: [internal]
+    mem_limit: 256m
+    <<: *default-logging
   guard-nginx:
     networks: [internal]
+    mem_limit: 128m
+    <<: [*restart, *default-logging]
 
 volumes:
   postgres-data:
+  identity-dpkeys:
   mongo-data:
   rabbitmq-data:
   redis-data:

@@ -441,7 +441,7 @@ services:
       ReverseProxy__Clusters__admin__Destinations__primary__Address: http://admin:8080
     expose: ["8080"]
     ports:
-      - "5000:8080"
+      - "${GATEWAY_PORT:-5050}:8080"
     <<: *restart
 
   web:

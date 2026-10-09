@@ -1,30 +1,34 @@
-import { HttpClient, HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Observable, catchError, from, switchMap, throwError } from 'rxjs';
+import { Router } from '@angular/router';
+import { catchError, switchMap, throwError } from 'rxjs';
+import { AuthSession } from '../auth/auth-session.service';
 import { AuthStore } from '../auth/auth.store';
 
-let refreshing: Promise<string | null> | null = null;
+// 401'i "oturum süresi doldu" değil "kimlik bilgisi hatalı" anlamında dönen uçlar: yenileme denenmez.
+const NO_REFRESH_SUFFIXES = ['/auth/refresh', '/auth/login', '/auth/logout', '/auth/register'];
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthStore);
-  const http = inject(HttpClient);
+  const session = inject(AuthSession);
+  const router = inject(Router);
 
   const withAuth = attachToken(req, auth.accessToken());
 
   return next(withAuth).pipe(
     catchError((err: HttpErrorResponse) => {
-      const isRefresh = req.url.endsWith('/auth/refresh');
-      if (err.status !== 401 || isRefresh || !auth.refreshToken()) {
+      const skip = NO_REFRESH_SUFFIXES.some((s) => req.url.endsWith(s));
+      if (err.status !== 401 || skip || (!auth.isAuthenticated() && !auth.hasSessionHint())) {
         return throwError(() => err);
       }
-      if (!refreshing) {
-        refreshing = refreshAccessToken(http, auth);
-      }
-      return from(refreshing).pipe(
+      return session.refresh().pipe(
         switchMap((token) => {
-          refreshing = null;
           if (!token) {
             auth.logout();
+            const returnUrl = router.url;
+            if (!returnUrl.startsWith('/login')) {
+              void router.navigate(['/login'], { queryParams: { returnUrl } });
+            }
             return throwError(() => err);
           }
           return next(attachToken(req, token));
@@ -38,22 +42,3 @@ function attachToken(req: HttpRequest<unknown>, token: string | null): HttpReque
   if (!token) return req;
   return req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
 }
-
-async function refreshAccessToken(http: HttpClient, auth: AuthStore): Promise<string | null> {
-  const refresh = auth.refreshToken();
-  if (!refresh) return null;
-  try {
-    const data = await new Promise<{ accessToken: string; refreshToken: string }>((resolve, reject) => {
-      http.post<{ accessToken: string; refreshToken: string }>('/api/auth/refresh', { refreshToken: refresh })
-        .subscribe({ next: resolve, error: reject });
-    });
-    auth.setTokens(data.accessToken, data.refreshToken);
-    return data.accessToken;
-  } catch {
-    return null;
-  }
-}
-
-// Observable<HttpEvent<unknown>> bağımlılığını minimize etmek için bağımsız tutuldu.
-// Eğer tree-shaking için harici kullanımı kapatmak istersek bu satır kaldırılabilir.
-export type _AuthInterceptorObservable = Observable<unknown>;

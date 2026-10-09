@@ -41,10 +41,7 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Databas
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-    await db.EnsureSchemaAsync();
-    // Outcome.Description varchar(1000) -> text (bazı MEB kazanımları 1000 karakteri aşıyor). Idempotent.
-    await db.Database.ExecuteSqlRawAsync(
-        """ALTER TABLE catalog."Outcomes" ALTER COLUMN "Description" TYPE text;""");
+    await db.MigrateDatabaseAsync(CatalogLegacySchema.UpgradeAsync);
     await CatalogSeeder.SeedAsync(db);
 
     // MEB kazanım setini Excel'den üretilmiş bundled JSON'dan içe aktar (idempotent).

@@ -46,10 +46,39 @@ public sealed class AuthFlowTests
 
         var login = await client.PostAsJsonAsync("/auth/login", new { email, password });
         login.StatusCode.Should().Be(HttpStatusCode.OK);
-        var body = await login.Content.ReadFromJsonAsync<TokenResponse>();
+        var body = await login.Content.ReadFromJsonAsync<SessionResponse>();
         body.Should().NotBeNull();
         body!.AccessToken.Should().NotBeNullOrWhiteSpace();
-        body.RefreshToken.Should().NotBeNullOrWhiteSpace();
+        body.RefreshToken.Should().BeNull("refresh token yalnızca HttpOnly çerezde taşınır");
+
+        var cookie = RefreshCookie(login);
+        cookie.Should().NotBeNull();
+        var setCookie = string.Join(";", login.Headers.GetValues("Set-Cookie")).ToLowerInvariant();
+        setCookie.Should().Contain("httponly").And.Contain("samesite=strict").And.Contain("path=/api/auth");
+
+        // Çerezle yenileme: yeni access token + rotasyon (yeni çerez)
+        var refresh = await SendWithCookieAsync(client, "/auth/refresh", cookie!);
+        refresh.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await refresh.Content.ReadFromJsonAsync<SessionResponse>())!.AccessToken.Should().NotBeNullOrWhiteSpace();
+        var rotated = RefreshCookie(refresh);
+        rotated.Should().NotBeNull().And.NotBe(cookie);
+
+        // Logout yeni token'ı iptal eder; sonrasında yenileme reddedilir
+        (await SendWithCookieAsync(client, "/auth/logout", rotated!)).StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await SendWithCookieAsync(client, "/auth/refresh", rotated!)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    private static string? RefreshCookie(HttpResponseMessage response) =>
+        response.Headers.TryGetValues("Set-Cookie", out var values)
+            ? values.Select(v => v.Split(';')[0])
+                .FirstOrDefault(v => v.StartsWith("da_rt=", StringComparison.Ordinal) && v.Length > "da_rt=".Length)
+            : null;
+
+    private static Task<HttpResponseMessage> SendWithCookieAsync(HttpClient client, string path, string cookie)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, path) { Content = JsonContent.Create(new { }) };
+        request.Headers.Add("Cookie", cookie);
+        return client.SendAsync(request);
     }
 
     [Fact]
@@ -82,7 +111,8 @@ public sealed class AuthFlowTests
         using var client = factory.CreateClient();
 
         HttpStatusCode? lastStatus = null;
-        for (var i = 0; i < 12; i++)
+        // Login politikası IP başına 60 istek/dk (Identity Program.cs); limitin hemen üstüne çık.
+        for (var i = 0; i < 65; i++)
         {
             var resp = await client.PostAsJsonAsync("/auth/login", new
             {
@@ -108,5 +138,5 @@ public sealed class AuthFlowTests
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    private sealed record TokenResponse(string AccessToken, string RefreshToken);
+    private sealed record SessionResponse(string AccessToken, string? RefreshToken);
 }

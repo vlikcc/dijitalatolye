@@ -13,7 +13,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAMESPACE: ${{ github.repository_owner }}/dijitalatolye
 
 permissions:
   contents: read
@@ -21,27 +20,103 @@ permissions:
   id-token: write
 
 jobs:
+  # Imajlar yalnizca testler gecerse push edilir.
+  test-backend:
+    name: Backend build + test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: gha_test
+          POSTGRES_DB: tests
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U gha_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+      rabbitmq:
+        image: rabbitmq:3.13-alpine
+        ports: ["5672:5672"]
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+      - run: dotnet restore DijitalAtolye.sln
+      - run: dotnet build DijitalAtolye.sln --no-restore -c Release /warnaserror
+      - name: EF migration'lari model ile senkron mu
+        run: ./scripts/ef.sh check
+      - name: Test (excluding LiveLLM)
+        run: dotnet test DijitalAtolye.sln --no-build -c Release --filter "Category!=LiveLLM"
+        env:
+          ConnectionStrings__Test: "Host=127.0.0.1;Port=5432;Database=tests;Username=gha_test"
+
+  test-frontend:
+    name: Frontend test + build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: src/Web/dijitalatolye-web-ng
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: src/Web/dijitalatolye-web-ng/package-lock.json
+      - run: npm ci
+      - run: npm test -- --watch=false --browsers=ChromeHeadless
+      - run: npm run build
+
   build-images:
     name: Build & push ${{ matrix.service }}
+    needs: [test-backend, test-frontend]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        service:
-          - apigateway
-          - identity
-          - user
-          - catalog
-          - storage
-          - content
-          - aimoderation
-          - review
-          - notification
-          - search
-          - analytics
-          - web
+        # Acik servis -> Dockerfile/context eslemesi (isimden path turetme yok)
+        include:
+          - { service: gateway,      context: ".",                          file: src/ApiGateway/Dockerfile }
+          - { service: identity,     context: ".",                          file: src/Services/Identity/Identity.API/Dockerfile }
+          - { service: user,         context: ".",                          file: src/Services/User/User.API/Dockerfile }
+          - { service: catalog,      context: ".",                          file: src/Services/Catalog/Catalog.API/Dockerfile }
+          - { service: storage,      context: ".",                          file: src/Services/Storage/Storage.API/Dockerfile }
+          - { service: content,      context: ".",                          file: src/Services/Content/Content.API/Dockerfile }
+          - { service: aimoderation, context: ".",                          file: src/Services/AIModeration/AIModeration.API/Dockerfile }
+          - { service: review,       context: ".",                          file: src/Services/Review/Review.API/Dockerfile }
+          - { service: notification, context: ".",                          file: src/Services/Notification/Notification.API/Dockerfile }
+          - { service: search,       context: ".",                          file: src/Services/Search/Search.API/Dockerfile }
+          - { service: analytics,    context: ".",                          file: src/Services/Analytics/Analytics.API/Dockerfile }
+          - { service: admin,        context: ".",                          file: src/Services/Admin/Admin.API/Dockerfile }
+          - { service: web,          context: src/Web/dijitalatolye-web-ng, file: src/Web/dijitalatolye-web-ng/Dockerfile }
     steps:
       - uses: actions/checkout@v4
+
+      # Imaj adi prod compose ile ayni sema: ${IMAGE_REPO}-<servis>:${IMAGE_TAG}
+      # IMAGE_REPO = ghcr.io/<owner>/dijitalatolye (GHCR kucuk harf ister)
+      - name: Imaj deposu adi
+        id: repo
+        run: echo "image_repo=${REGISTRY}/${OWNER,,}/dijitalatolye" >> "$GITHUB_OUTPUT"
+        env:
+          OWNER: ${{ github.repository_owner }}
 
       - uses: docker/setup-buildx-action@v3
 
@@ -54,7 +129,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}-${{ matrix.service }}
+          images: ${{ steps.repo.outputs.image_repo }}-${{ matrix.service }}
           tags: |
             type=ref,event=branch
             type=sha,format=short
@@ -62,19 +137,10 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Resolve dockerfile path
-        id: paths
-        run: |
-          case "${{ matrix.service }}" in
-            apigateway)    echo "context=." >> $GITHUB_OUTPUT; echo "file=src/ApiGateway/Dockerfile" >> $GITHUB_OUTPUT ;;
-            web)           echo "context=src/Web/dijitalatolye-web-ng" >> $GITHUB_OUTPUT; echo "file=src/Web/dijitalatolye-web-ng/Dockerfile" >> $GITHUB_OUTPUT ;;
-            *)             svc="${{ matrix.service }}"; PASCAL=$(echo "$svc" | sed 's/.*/\u&/' | sed 's/aimoderation/AIModeration/'); echo "context=." >> $GITHUB_OUTPUT; echo "file=src/Services/$PASCAL/$PASCAL.API/Dockerfile" >> $GITHUB_OUTPUT ;;
-          esac
-
       - uses: docker/build-push-action@v6
         with:
-          context: ${{ steps.paths.outputs.context }}
-          file: ${{ steps.paths.outputs.file }}
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

@@ -47,31 +47,8 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Databas
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
-
-    // EnsureSchemaAsync "ya hep ya hiç"; yeni PushSubscriptions tablosu eklenince mevcut DB'de 42P07 verir.
-    try
-    {
-        await db.EnsureSchemaAsync();
-    }
-    catch (Npgsql.PostgresException ex) when (ex.SqlState == "42P07")
-    {
-        // beklenen: mevcut tablolar var; eksik yeni tabloyu DDL ekleyecek.
-    }
-
-    await db.Database.ExecuteSqlRawAsync(
-        """
-        CREATE TABLE IF NOT EXISTS "notification"."PushSubscriptions" (
-            "Id" uuid NOT NULL,
-            "UserId" uuid NOT NULL,
-            "Endpoint" character varying(1000) NOT NULL,
-            "P256dh" character varying(300) NOT NULL,
-            "Auth" character varying(300) NOT NULL,
-            "CreatedAtUtc" timestamp with time zone NOT NULL DEFAULT now(),
-            CONSTRAINT "PK_PushSubscriptions" PRIMARY KEY ("Id")
-        );
-        CREATE UNIQUE INDEX IF NOT EXISTS "IX_PushSubscriptions_Endpoint" ON "notification"."PushSubscriptions" ("Endpoint");
-        CREATE INDEX IF NOT EXISTS "IX_PushSubscriptions_UserId" ON "notification"."PushSubscriptions" ("UserId");
-        """);
+    // Eski kurulumlardaki DDL farkları yalnızca legacy DB baseline'lanırken bir kez düzeltilir.
+    await db.MigrateDatabaseAsync(NotificationLegacySchema.UpgradeAsync);
 }
 
 app.Run();

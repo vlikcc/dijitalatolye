@@ -8,6 +8,10 @@ public sealed class ContentDbContext : DbContext
 {
     public ContentDbContext(DbContextOptions<ContentDbContext> options) : base(options) { }
 
+    /// <summary>Migration geçmişi kendi şemasında tutulur (aynı DB'yi paylaşan context'ler çakışmasın).</summary>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseNpgsql(o => o.MigrationsHistoryTable("__EFMigrationsHistory", "content"));
+
     public DbSet<Domain.Content> Contents => Set<Domain.Content>();
     public DbSet<ContentVersion> Versions => Set<ContentVersion>();
     public DbSet<ContentLike> Likes => Set<ContentLike>();

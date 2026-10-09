@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # DijitalAtolye - Production stack backup
-# Postgres (tum DB'ler), Mongo (aimoderation), MinIO (tum bucket'lar) yedekler.
+# Postgres (tum DB'ler), Guard Postgres, Mongo (aimoderation), MinIO (tum bucket'lar)
+# ve Guard veri volume'u (guard-data) yedekler. Herhangi bir adim basarisiz olursa
+# script hata koduyla cikar (set -euo pipefail) — cron loglarini izleyin.
+# Geri yukleme: ./scripts/prod-restore.sh <yedek-dizini>
 #
 # Kullanim:
 #   ./scripts/prod-backup.sh                       # ./backups/<timestamp>/ altina yazar
@@ -27,6 +30,9 @@ fi
 set -a; . "$ENV_FILE"; set +a
 
 DC=(docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE")
+PROJECT="${COMPOSE_PROJECT_NAME:-dijitalatolye-prod}"
+# guard-data volume'unu okumak icin tar iceren hafif imaj (guard-postgres ile ayni imaj, zaten cekili)
+HELPER_IMAGE="${HELPER_IMAGE:-postgres:16-alpine}"
 
 mkdir -p "$DEST"
 echo ">>> Backup hedef: $DEST"
@@ -40,6 +46,11 @@ for db in "${DBS[@]}"; do
     > "$DEST/pg-$db.dump"
 done
 
+# --- Guard Postgres ---
+echo ">>> Guard Postgres dump..."
+"${DC[@]}" exec -T guard-postgres pg_dump -U guard -d guard --format=custom --no-owner \
+  > "$DEST/guard-pg.dump"
+
 # --- MongoDB ---
 echo ">>> MongoDB dump..."
 "${DC[@]}" exec -T mongodb mongodump \
@@ -48,16 +59,34 @@ echo ">>> MongoDB dump..."
   > "$DEST/mongo-ai_moderation.archive.gz"
 
 # --- MinIO (mirror tum public/private bucket'lar) ---
+# mc imajinda tar yok; bucket'lar host'taki gecici dizine mirror'lanir, tar host'ta yapilir.
+# Hata yutulmaz: mirror basarisizsa script durur.
 echo ">>> MinIO mirror..."
 mkdir -p "$DEST/minio"
-"${DC[@]}" run --rm --no-deps --entrypoint /bin/sh -T minio-init -c "
+# Host kullanicisi ile calistir: olusan dosyalar root'a ait olmasin (rm -rf calissin)
+"${DC[@]}" run --rm --no-deps -T --user "$(id -u):$(id -g)" -e MC_CONFIG_DIR=/tmp/.mc \
+  -v "$DEST/minio:/backup" --entrypoint /bin/sh minio-init -c "
+  set -e
   mc alias set local http://minio:9000 \"\$MINIO_ROOT_USER\" \"\$MINIO_ROOT_PASSWORD\" >/dev/null
   for b in ${MINIO_BUCKET_CONTENT:-dijitalatolye-content} ${MINIO_BUCKET_PUBLISHED:-dijitalatolye-content-published} ${MINIO_BUCKET_AVATARS:-dijitalatolye-avatars}; do
-    mc mirror --quiet --overwrite local/\$b /tmp/out/\$b || true
+    mkdir -p /backup/\$b
+    mc mirror --quiet --overwrite local/\$b /backup/\$b
   done
-  tar -C /tmp/out -czf /tmp/minio.tar.gz . 2>/dev/null
-  cat /tmp/minio.tar.gz
-" > "$DEST/minio.tar.gz" || echo "UYARI: MinIO yedegi basarisiz (bucket bos olabilir)"
+"
+tar -C "$DEST/minio" -czf "$DEST/minio.tar.gz" .
+rm -rf "$DEST/minio"
+
+# --- Guard veri volume'u (karantina/temiz dosyalar) ---
+echo ">>> Guard data volume..."
+GUARD_VOL="$(docker volume ls -q \
+  --filter "label=com.docker.compose.project=$PROJECT" \
+  --filter "label=com.docker.compose.volume=guard-data")"
+if [[ -z "$GUARD_VOL" ]]; then
+  echo "HATA: guard-data volume'u bulunamadi (proje: $PROJECT)." >&2
+  exit 1
+fi
+docker run --rm -v "$GUARD_VOL:/data:ro" --entrypoint tar "$HELPER_IMAGE" -C /data -czf - . \
+  > "$DEST/guard-data.tar.gz"
 
 # --- Imzala ve sikistir ---
 echo ">>> Boyutlar:"

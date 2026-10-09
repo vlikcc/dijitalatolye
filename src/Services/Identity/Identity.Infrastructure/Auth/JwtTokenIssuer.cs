@@ -13,6 +13,8 @@ namespace DijitalAtolye.Identity.Infrastructure.Auth;
 
 public sealed class JwtTokenIssuer : ITokenIssuer
 {
+    private static readonly TimeSpan ReuseGracePeriod = TimeSpan.FromSeconds(60);
+
     private readonly IdentityDbContext _db;
     private readonly JwtIssuerOptions _options;
 
@@ -58,12 +60,28 @@ public sealed class JwtTokenIssuer : ITokenIssuer
             .Include(t => t.User)
             .FirstOrDefaultAsync(t => t.TokenHash == hash, ct);
 
-        if (stored is null || !stored.IsActive)
+        var now = DateTime.UtcNow;
+        if (stored is null)
         {
             return null;
         }
 
-        var now = DateTime.UtcNow;
+        if (!stored.IsActive)
+        {
+            // Rotasyonla değiştirilmiş bir token tekrar kullanılıyorsa token çalınmış olabilir:
+            // kullanıcının tüm aktif oturumları iptal edilir. Kısa pencere içindeki tekrar, aynı
+            // çerezi aynı anda gönderen iki sekmenin yarışıdır — o durumda yalnızca reddedilir.
+            if (stored.ReplacedByTokenHash is not null
+                && stored.RevokedAtUtc is { } revokedAt
+                && now - revokedAt > ReuseGracePeriod)
+            {
+                await _db.RefreshTokens
+                    .Where(t => t.UserId == stored.UserId && t.RevokedAtUtc == null)
+                    .ExecuteUpdateAsync(u => u.SetProperty(t => t.RevokedAtUtc, now), ct);
+            }
+            return null;
+        }
+
         var accessExpiresAt = now.Add(_options.AccessTokenLifetime);
         var refreshExpiresAt = now.Add(_options.RefreshTokenLifetime);
 
@@ -89,6 +107,18 @@ public sealed class JwtTokenIssuer : ITokenIssuer
         await _db.SaveChangesAsync(ct);
 
         return new TokenPair(accessToken, newRaw, accessExpiresAt, refreshExpiresAt, roles);
+    }
+
+    public async Task RevokeAsync(string refreshToken, CancellationToken ct)
+    {
+        var hash = HashRefreshToken(refreshToken);
+        var stored = await _db.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == hash, ct);
+        if (stored is null || stored.RevokedAtUtc is not null)
+        {
+            return;
+        }
+        stored.RevokedAtUtc = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
     }
 
     private string CreateAccessToken(

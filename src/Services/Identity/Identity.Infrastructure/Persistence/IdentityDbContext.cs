@@ -10,6 +10,10 @@ public sealed class IdentityDbContext :
 {
     public IdentityDbContext(DbContextOptions<IdentityDbContext> options) : base(options) { }
 
+    /// <summary>Migration geçmişi kendi şemasında tutulur (aynı DB'yi paylaşan context'ler çakışmasın).</summary>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseNpgsql(o => o.MigrationsHistoryTable("__EFMigrationsHistory", "identity"));
+
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();

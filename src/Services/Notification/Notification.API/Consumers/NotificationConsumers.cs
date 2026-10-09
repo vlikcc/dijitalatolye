@@ -95,7 +95,7 @@ public sealed class UserRegisteredConsumer : BaseNotificationConsumer, IConsumer
         var html = await Templates.RenderAsync("UserRegistered", new Dictionary<string, string>
         {
             ["DisplayName"] = msg.DisplayName,
-            ["AppUrl"] = _configuration["App:Url"] ?? "http://localhost:5173",
+            ["AppUrl"] = _configuration["App:Url"] ?? "http://localhost:4200",
         }, context.CancellationToken);
         await SendEmailSafeAsync(msg.Email, "DijitalAtölye'ye Hoş Geldiniz", "user-registered", html, context.CancellationToken);
     }
@@ -122,7 +122,7 @@ public sealed class EmailVerificationRequestedConsumer : BaseNotificationConsume
     {
         var msg = context.Message;
         var urlBase = _configuration["EmailVerification:UrlBase"]
-            ?? "http://localhost:5173/verify-email";
+            ?? "http://localhost:4200/verify-email";
         var encodedToken = Uri.EscapeDataString(msg.Token);
         var encodedEmail = Uri.EscapeDataString(msg.Email);
         var verifyUrl = $"{urlBase}?email={encodedEmail}&token={encodedToken}";
@@ -136,6 +136,44 @@ public sealed class EmailVerificationRequestedConsumer : BaseNotificationConsume
             msg.Email,
             "E-posta adresinizi doğrulayın",
             "email-verification",
+            html,
+            context.CancellationToken);
+    }
+}
+
+public sealed class PasswordResetRequestedConsumer : BaseNotificationConsumer, IConsumer<PasswordResetRequestedV1>
+{
+    private readonly IConfiguration _configuration;
+
+    public PasswordResetRequestedConsumer(
+        NotificationDbContext db,
+        IEmailSender email,
+        IHtmlTemplateRenderer templates,
+        IHubContext<NotificationsHub> hub,
+        ILogger<PasswordResetRequestedConsumer> logger,
+        IConfiguration configuration,
+        DijitalAtolye.Notification.API.Push.IPushSender push)
+        : base(db, email, templates, hub, logger, push)
+    {
+        _configuration = configuration;
+    }
+
+    public async Task Consume(ConsumeContext<PasswordResetRequestedV1> context)
+    {
+        var msg = context.Message;
+        var urlBase = _configuration["PasswordReset:UrlBase"]
+            ?? "http://localhost:4200/reset-password";
+        var resetUrl = $"{urlBase}?email={Uri.EscapeDataString(msg.Email)}&token={Uri.EscapeDataString(msg.Token)}";
+
+        var html = await Templates.RenderAsync("PasswordReset", new Dictionary<string, string>
+        {
+            ["ResetUrl"] = resetUrl,
+        }, context.CancellationToken);
+
+        await SendEmailSafeAsync(
+            msg.Email,
+            "Şifre sıfırlama isteği",
+            "password-reset",
             html,
             context.CancellationToken);
     }

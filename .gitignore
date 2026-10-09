@@ -109,3 +109,4 @@ __pycache__/
 # Yerel skill şablonu (repo dışı)
 dijitalatolye_skill/
 dijitalatolye_skill.zip
+.wrongstack/

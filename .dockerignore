@@ -11,3 +11,10 @@
 .github
 docs
 tests
+**/.env.*
+!**/*.example
+**/.angular
+backups/
+# Build context'e gerekmeyen deploy/tasarim dosyalari (hicbir Dockerfile deploy/ altindan COPY yapmaz)
+deploy/
+Dijital Oyun At*lyesi Web Tasar*m G*rselleri/

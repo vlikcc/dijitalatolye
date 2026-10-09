@@ -14,6 +14,8 @@ builder.AddDijitalAtolyeServiceDefaults("search");
 var esUri = new Uri(builder.Configuration["Elasticsearch:Uri"] ?? "http://localhost:9200");
 var settings = new ElasticsearchClientSettings(esUri).DefaultIndex(ElasticSearchIndexer.IndexName);
 builder.Services.AddSingleton(new ElasticsearchClient(settings));
+builder.Services.AddHealthChecks()
+    .AddCheck<ElasticsearchHealthCheck>("elasticsearch", tags: ["ready"]);
 builder.Services.AddSingleton<ISearchIndexer, ElasticSearchIndexer>();
 
 builder.Services.AddScoped<ICurrentUser, CurrentUserAccessor>();

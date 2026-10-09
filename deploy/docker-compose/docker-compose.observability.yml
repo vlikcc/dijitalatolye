@@ -33,7 +33,7 @@ services:
     container_name: da-grafana
     profiles: [observability]
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-changeme}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required (make prod-env uretir)}
       GF_USERS_ALLOW_SIGN_UP: "false"
     ports:
       - "127.0.0.1:3000:3000"
@@ -48,7 +48,9 @@ volumes:
   prometheus-data:
   grafana-data:
 
+# prod compose ile ayni komutta (-f ... -f ...) birlestirilir: 'internal' agi prod.yml'deki
+# bridge ag ile merge olur. 'external: true' burada OLMAMALI — aksi halde birlesik komut
+# mevcut olmayan harici agi arar ve ilk kurulumda 'up' basarisiz olur.
 networks:
   internal:
-    external: true
-    name: dijitalatolye-prod_internal
+    driver: bridge

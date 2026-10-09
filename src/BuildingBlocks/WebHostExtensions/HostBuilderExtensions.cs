@@ -61,9 +61,16 @@ public static class HostBuilderExtensions
         });
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
-            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+            // Yalnızca iç ağdaki proxy'lere (Caddy, gateway, nginx — Docker/K8s private aralıkları) güven.
+            // X-Forwarded-Host bilinçli olarak işlenmez: Caddy Host'u zaten korur.
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            options.ForwardLimit = 2;
             options.KnownIPNetworks.Clear();
             options.KnownProxies.Clear();
+            foreach (var cidr in new[] { "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8", "::1/128", "fc00::/7" })
+            {
+                options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(cidr));
+            }
         });
 
         return builder;
@@ -71,6 +78,8 @@ public static class HostBuilderExtensions
 
     public static WebApplication UseDijitalAtolyeServiceDefaults(this WebApplication app)
     {
+        // Request log'ları gerçek istemci IP'sini görsün diye ilk sırada.
+        app.UseForwardedHeaders();
         app.UseSerilogRequestLogging();
         app.Use(CorrelationIdMiddleware);
 
@@ -79,7 +88,6 @@ public static class HostBuilderExtensions
             app.MapOpenApi();
         }
 
-        app.UseForwardedHeaders();
         app.UseExceptionHandler();
         app.UseStatusCodePages();
 
@@ -118,6 +126,10 @@ public static class HostBuilderExtensions
                 .Enrich.WithProperty("environment", ctx.HostingEnvironment.EnvironmentName)
                 .WriteTo.Console(outputTemplate:
                     "[{Timestamp:HH:mm:ss} {Level:u3}] {service} {Message:lj} {Properties:j}{NewLine}{Exception}");
+
+            // Seviyeler ortamdan ayarlanabilir, ör. Serilog__MinimumLevel__Default=Debug
+            // veya Serilog__MinimumLevel__Override__MassTransit=Information.
+            lc.ReadFrom.Configuration(ctx.Configuration);
 
             if (!string.IsNullOrWhiteSpace(otlpEndpoint))
             {

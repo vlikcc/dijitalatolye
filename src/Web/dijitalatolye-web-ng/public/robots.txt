@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /api/
+Disallow: /cdn/
+Disallow: /hubs/
+Disallow: /teacher
+Disallow: /editor
+Disallow: /admin
+Disallow: /account
+Disallow: /notifications
+Disallow: /progress
+Disallow: /assignments
+Allow: /

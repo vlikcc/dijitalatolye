@@ -3,13 +3,14 @@ FROM node:22-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci || npm install
+RUN npm ci --no-audit --no-fund
 
 COPY . .
 ENV NODE_ENV=production
 RUN npm run build
 
-FROM nginx:1.27-alpine AS runtime
+# Root olmayan nginx (uid 101); 8080'de dinler, pid/cache /tmp altinda
+FROM nginxinc/nginx-unprivileged:1.27-alpine AS runtime
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/dijitalatolye-web-ng/browser /usr/share/nginx/html
 EXPOSE 8080

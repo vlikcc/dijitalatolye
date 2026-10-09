@@ -7,6 +7,10 @@ public sealed class AnalyticsDbContext : DbContext
 {
     public AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : base(options) { }
 
+    /// <summary>Migration geçmişi kendi şemasında tutulur (aynı DB'yi paylaşan context'ler çakışmasın).</summary>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseNpgsql(o => o.MigrationsHistoryTable("__EFMigrationsHistory", "analytics"));
+
     public DbSet<AnalyticsEvent> Events => Set<AnalyticsEvent>();
     public DbSet<ContentDailyStats> DailyStats => Set<ContentDailyStats>();
     public DbSet<OutcomeDailyStats> OutcomeStats => Set<OutcomeDailyStats>();

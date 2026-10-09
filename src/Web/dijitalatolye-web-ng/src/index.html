@@ -5,26 +5,17 @@
   <title>DijitalAtölye</title>
   <base href="/" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="DijitalAtölye — öğretmenlerin hazırladığı, güvenlik ve editör onayından geçmiş eğitici oyun, simülasyon ve interaktif içerikler." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="DijitalAtölye" />
+  <meta property="og:title" content="DijitalAtölye" />
+  <meta property="og:description" content="MEB müfredatına uygun, kalite güvencesi sağlanmış eğitici oyun ve interaktif içerikler." />
+  <meta property="og:image" content="/assets/brand/logo.png" />
+  <meta name="twitter:card" content="summary" />
   <link rel="icon" type="image/png" href="assets/brand/logo.png" />
   <meta name="theme-color" content="#6f4ee0" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Dancing+Script:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Material+Icons&family=Material+Symbols+Outlined&display=swap"
-    rel="stylesheet"
-  />
-  <script>
-    // İlk boyamadan önce tema tercihini uygula (FOUC önleme)
-    (function () {
-      try {
-        var t = localStorage.getItem('da-theme');
-        if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', t);
-      } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'light');
-      }
-    })();
-  </script>
+  <!-- İlk boyamadan önce tema tercihini uygular (FOUC önleme). CSP 'unsafe-inline' gerektirmemesi için harici dosya. -->
+  <script src="theme-init.js"></script>
 </head>
 <body>
   <da-root>Yükleniyor…</da-root>

@@ -34,7 +34,10 @@ interface SearchResponse { items: SearchItem[]; total: number; }
     <section class="da-dream-bg relative overflow-hidden">
       <!-- Tam genişlik hero görseli — kenarlardan küçük marjla tek panel (hedef tasarımdaki gibi) -->
       <div class="relative w-full px-2 pt-2 sm:px-4 sm:pt-4">
-        <img src="assets/brand/hero-bg.png" alt="Dijital Oyun Atölyesi oyun ekranları"
+        <img src="assets/brand/hero-bg.webp"
+             srcset="assets/brand/hero-bg-960.webp 960w, assets/brand/hero-bg.webp 1918w"
+             sizes="100vw" width="1918" height="904" fetchpriority="high" decoding="async"
+             alt="Dijital Oyun Atölyesi oyun ekranları"
              class="block w-full h-auto select-none pointer-events-none rounded-lg" />
 
         <!-- lg+ : metin görselin sağındaki boş alana overlay -->

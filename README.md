@@ -60,7 +60,7 @@ make env          # .env + COMPOSE_DEV_SECRET + JWT_SIGNING_KEY
 # .env içine DEEPSEEK_API_KEY yazın
 
 make up           # Postgres, RabbitMQ, Redis, ES, MinIO, MongoDB, Mailhog
-make migrate
+# Migration'lar servis açılışında otomatik uygulanır
 make build
 
 # Ayrı terminallerde:
@@ -113,16 +113,16 @@ docker compose -f deploy/docker-compose/docker-compose.prod.yml --env-file .env.
 
 Detay: [`docs/runbooks/selfhost-prod.md`](docs/runbooks/selfhost-prod.md)
 
-### Varsayılan seed admin (Identity)
+### Seed admin (Identity)
 
-İlk migration/seed sonrası (Development veya `Database__AutoMigrate=true`):
+**Development**'ta ilk açılışta şu hesap oluşturulur:
 
 | Alan | Değer |
 |------|-------|
 | E-posta | `admin@dijitalatolye.local` |
 | Şifre | `Admin123!` |
 
-Production'da bu hesabı değiştirin veya devre dışı bırakın.
+**Production**'da varsayılan şifreli hesap **oluşturulmaz**. İlk admin için `.env.prod` içinde `SEED_ADMIN_EMAIL` ve en az 12 karakterli `SEED_ADMIN_PASSWORD` verin (Identity açılışta oluşturur; hesap zaten varsa dokunmaz). Eski bir kurulumdan kalan `admin@dijitalatolye.local / Admin123!` hesabı açılışta otomatik **kilitlenir** — aynı e-postayı `SEED_ADMIN_EMAIL` olarak verirseniz şifresi `SEED_ADMIN_PASSWORD` ile değiştirilir.
 
 ### Test
 

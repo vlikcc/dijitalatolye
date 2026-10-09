@@ -1,7 +1,8 @@
 {
-	# ACME e-postasi (real domain icin); 'internal' verilirse Caddy local CA kullanir
-	email {$ACME_EMAIL:internal}
-	# Lokal/staging icin --env'da PUBLIC_DOMAIN=localhost olunca otomatik internal-issued cert
+	# ACME (Let's Encrypt/ZeroSSL) hesap e-postasi — compose'da ZORUNLU (ACME_EMAIL).
+	# PUBLIC_DOMAIN=localhost (veya *.localhost / IP) iken Caddy bu adrese bakmadan otomatik
+	# olarak kendi internal CA'sindan sertifika verir; ACME'ye hic gidilmez.
+	email {$ACME_EMAIL}
 	servers {
 		protocols h1 h2 h3
 	}
@@ -27,11 +28,19 @@
 	#   - /cdn (untrusted ogretmen icerigi): siki CSP, connect-src none => disari veri sizmaz.
 	# postMessage CSP disidir; iframe sandbox allow-same-origin icermez (asil izolasyon katmani).
 	@notcdn not path /cdn/*
-	header @notcdn Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self' 'unsafe-inline'; connect-src 'self' wss: https:; frame-ancestors 'self'"
+	# SPA: script'ler yalnizca kendi origin'imizden ('unsafe-inline' yok — tema script'i harici dosya,
+	# critical CSS inline'lama kapali). Fontlar self-host. style 'unsafe-inline' Angular Material'in
+	# runtime style binding'leri icin gerekli. object/base kisitli.
+	header @notcdn Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
 	header /cdn/* Content-Security-Policy "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; frame-ancestors 'self'"
 
 	# API
 	handle /api/* {
+		# Icerik paketleri 50 MB'a kadar (Content.API BundleValidator) + multipart payi.
+		# Gateway/content/storage Kestrel limiti de kodda 60 MB (eslesir).
+		request_body {
+			max_size 60MB
+		}
 		reverse_proxy gateway:8080 {
 			header_up Host {host}
 			header_up X-Forwarded-Proto {scheme}
@@ -55,14 +64,27 @@
 		}
 	}
 
-	# MinIO (yayinlanan icerik + presigned upload/download) public proxy'si.
-	# MinIO presigned URL imzasi 'Host: minio:9000' ile hesaplanir; Caddy bu Host
-	# header'i icerideki MinIO'ya aynen iletmek zorunda yoksa 403 SignatureDoesNotMatch.
+	# MinIO public proxy'si — YALNIZCA yayinlanan icerik bucket'i (public-read), GET/HEAD.
+	# /play/{slug} ve editor onizlemesi {MINIO_PUBLIC_ENDPOINT}/<published-bucket>/<key> URL'i uretir.
+	# Presigned upload/download URL'leri /cdn'den GECMEZ: Storage/Content presign client'i
+	# PublicEndpoint'in yalnizca host'unu kullanir (path'i atar). Bu nedenle diger bucket'lar,
+	# bucket listeleme ve MinIO admin/metrics API'leri (/cdn/minio/...) burada 404 doner.
+	# Host header'i icerideki MinIO'ya 'minio:9000' olarak iletilir.
 	handle_path /cdn/* {
 		# CSP yukarida site seviyesindeki "header /cdn/*" ile sikilastirilir (connect-src none).
 		# Izolasyonun asil katmani: iframe sandbox allow-same-origin icermez (opaque origin).
-		reverse_proxy minio:9000 {
-			header_up Host minio:9000
+		@published {
+			method GET HEAD
+			path /{$MINIO_BUCKET_PUBLISHED:dijitalatolye-content-published}/*
+			not path_regexp (^|/)\.\.(/|$)
+		}
+		handle @published {
+			reverse_proxy minio:9000 {
+				header_up Host minio:9000
+			}
+		}
+		handle {
+			respond 404
 		}
 	}
 

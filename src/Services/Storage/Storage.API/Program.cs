@@ -5,11 +5,15 @@ using DijitalAtolye.Storage.API.Consumers;
 using DijitalAtolye.Storage.API.Endpoints;
 using DijitalAtolye.Storage.API.Guard;
 using DijitalAtolye.Storage.API.Storage;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Minio;
+using Minio.DataModel.Args;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddDijitalAtolyeServiceDefaults("storage");
+// İçerik paketleri 50 MB'a kadar (BundleValidator); Kestrel varsayılanı 30 MB olduğu için multipart payıyla 60 MB.
+builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = 60L * 1024 * 1024);
 
 var minioOpts = builder.Configuration.GetSection("Minio").Get<MinioOptions>()
     ?? throw new InvalidOperationException("Minio configuration missing.");
@@ -73,7 +77,27 @@ builder.Services.AddDijitalAtolyeEventBus(
     configureBus: null,
     typeof(GuardVettingConsumer).Assembly);
 
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddAsyncCheck("minio", async ct =>
+    {
+        try
+        {
+            var minio = new MinioClient()
+                .WithEndpoint(minioOpts.Endpoint)
+                .WithCredentials(minioOpts.AccessKey, minioOpts.SecretKey)
+                .WithSSL(minioOpts.UseSsl)
+                .Build();
+            // Servis kullanicisi bucket listeleyemez (en az yetki); kendi bucket'ina erisimi kontrol edilir.
+            var bucket = builder.Configuration["Minio:BucketContent"] ?? "dijitalatolye-content";
+            return await minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucket), ct)
+                ? HealthCheckResult.Healthy()
+                : HealthCheckResult.Unhealthy($"MinIO bucket '{bucket}' yok.");
+        }
+        catch (Exception ex)
+        {
+            return HealthCheckResult.Unhealthy("MinIO erişilemiyor.", ex);
+        }
+    }, tags: ["ready"]);
 
 var app = builder.Build();
 app.UseDijitalAtolyeServiceDefaults();

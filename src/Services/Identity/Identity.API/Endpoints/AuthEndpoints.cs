@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace DijitalAtolye.Identity.API.Endpoints;
@@ -60,9 +61,14 @@ public static class AuthEndpoints
                 payload: new { body.Email, success = result.IsSuccess, ip, twoFactor = !string.IsNullOrWhiteSpace(body.TwoFactorCode) },
                 severity: result.IsSuccess ? "Info" : "Warning",
                 ct: ct);
-            return result.ToHttpResult();
+            if (!result.IsSuccess)
+            {
+                return result.ToHttpResult();
+            }
+            RefreshTokenCookie.Append(http, result.Value);
+            return Results.Json(RefreshTokenCookie.ToSession(result.Value));
         }).RequireRateLimiting("login")
-          .Produces<TokenPair>()
+          .Produces<AuthSessionResponse>()
           .ProducesProblem(StatusCodes.Status401Unauthorized)
           .WithName("Login");
 
@@ -123,19 +129,47 @@ public static class AuthEndpoints
           .WithName("ResetPassword");
 
         auth.MapPost("/refresh", async (
-            [FromBody] RefreshRequest body,
+            [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] RefreshRequest? body,
             HttpContext http,
             [FromServices] ITokenIssuer issuer,
             CancellationToken ct) =>
         {
+            // Çerez birincil kaynak. Gövde yalnızca eski (localStorage'da refresh token tutan)
+            // istemcilerin tek seferlik çereze geçişi ve tarayıcı dışı istemciler için.
+            var refreshToken = RefreshTokenCookie.Read(http) ?? body?.RefreshToken;
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                return Results.Unauthorized();
+            }
+
             var ip = http.Connection.RemoteIpAddress?.ToString();
-            var pair = await issuer.RefreshAsync(body.RefreshToken, ip, ct);
-            return pair is null
-                ? Results.Unauthorized()
-                : Results.Json(pair);
-        }).Produces<TokenPair>()
+            var pair = await issuer.RefreshAsync(refreshToken, ip, ct);
+            if (pair is null)
+            {
+                RefreshTokenCookie.Delete(http);
+                return Results.Unauthorized();
+            }
+            RefreshTokenCookie.Append(http, pair);
+            return Results.Json(RefreshTokenCookie.ToSession(pair));
+        }).Produces<AuthSessionResponse>()
           .ProducesProblem(StatusCodes.Status401Unauthorized)
           .WithName("Refresh");
+
+        // Access token süresi dolmuş olabileceği için anonim; yalnızca çerezdeki token'ı iptal eder.
+        auth.MapPost("/logout", async (
+            HttpContext http,
+            [FromServices] ITokenIssuer issuer,
+            CancellationToken ct) =>
+        {
+            var refreshToken = RefreshTokenCookie.Read(http);
+            if (refreshToken is not null)
+            {
+                await issuer.RevokeAsync(refreshToken, ct);
+            }
+            RefreshTokenCookie.Delete(http);
+            return Results.NoContent();
+        }).Produces(StatusCodes.Status204NoContent)
+          .WithName("Logout");
 
         auth.MapGet("/google", (HttpContext http) =>
         {
@@ -281,11 +315,14 @@ public static class AuthEndpoints
             ct: ct);
 
         await http.SignOutAsync(GoogleDefaults.AuthenticationScheme);
-        return Results.Json(pair);
+        // Tarayıcı navigasyonu: token'ları gövdede göstermek yerine çereze yaz ve SPA'ya dön;
+        // SPA açılışta /api/auth/refresh ile access token alır.
+        RefreshTokenCookie.Append(http, pair);
+        return Results.Redirect("/");
     }
 }
 
 public sealed record LoginRequest(string Email, string Password, string? TwoFactorCode = null);
-public sealed record RefreshRequest(string RefreshToken);
+public sealed record RefreshRequest(string? RefreshToken);
 public sealed record TwoFactorVerifyRequest(string Code);
 public sealed record TwoFactorDisableRequest(string Password, string Code);

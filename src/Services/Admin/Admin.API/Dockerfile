@@ -1,15 +1,25 @@
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+ARG DOTNET_VERSION=10.0
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}-alpine AS build
+WORKDIR /src
+
+COPY DijitalAtolye.sln Directory.Build.props Directory.Packages.props NuGet.config global.json ./
+COPY src/BuildingBlocks/ ./src/BuildingBlocks/
+COPY src/Services/Admin/ ./src/Services/Admin/
+
+RUN dotnet restore src/Services/Admin/Admin.API/Admin.API.csproj
+RUN dotnet publish src/Services/Admin/Admin.API/Admin.API.csproj \
+    -c Release -o /app/publish --no-restore /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION}-alpine AS runtime
+RUN apk add --no-cache icu-libs tzdata curl
+ENV ASPNETCORE_URLS=http://+:8080 \
+    DOTNET_RUNNING_IN_CONTAINER=true \
+    TZ=Europe/Istanbul
 WORKDIR /app
 EXPOSE 8080
-
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-WORKDIR /src
-COPY . .
-RUN dotnet restore "src/Services/Admin/Admin.API/Admin.API.csproj"
-RUN dotnet publish "src/Services/Admin/Admin.API/Admin.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=build /app/publish .
-ENV ASPNETCORE_URLS=http://+:8080
+COPY --from=build /app/publish/ ./
+# Root olmayan kullanici (aspnet imajlarinda APP_UID=1654 tanimli)
+USER $APP_UID
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD curl -fsS http://localhost:8080/health/live || exit 1
 ENTRYPOINT ["dotnet", "DijitalAtolye.Admin.API.dll"]

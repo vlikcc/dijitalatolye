@@ -1,7 +1,6 @@
+using DijitalAtolye.BuildingBlocks.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -37,32 +36,14 @@ public static class AuditExtensions
         return services;
     }
 
-    public static async Task EnsureAuditSchemaAsync(this IServiceProvider services)
+    /// <summary>
+    /// Audit veritabanını EF migration'larıyla günceller. Eski <c>EnsureAuditSchemaAsync</c> ile kurulmuş
+    /// (migration geçmişi olmayan) DB'ler otomatik baseline'lanır; bkz. <see cref="EfMigrationExtensions"/>.
+    /// </summary>
+    public static async Task MigrateAuditDatabaseAsync(this IServiceProvider services, CancellationToken ct = default)
     {
         using var scope = services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AuditDbContext>();
-        var creator = (RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>();
-        if (!await creator.ExistsAsync().ConfigureAwait(false))
-        {
-            await creator.CreateAsync().ConfigureAwait(false);
-            return;
-        }
-        // DB var; tablolar yoksa sadece audit tablolarini olustur (DB'deki diger tablolari etkilemez)
-        await using var conn = db.Database.GetDbConnection();
-        await conn.OpenAsync().ConfigureAwait(false);
-        await using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'audit');";
-            var result = await cmd.ExecuteScalarAsync().ConfigureAwait(false);
-            if (result is bool b && b)
-            {
-                return;
-            }
-        }
-        await using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = creator.GenerateCreateScript();
-            await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
-        }
+        await db.MigrateDatabaseAsync(ct: ct).ConfigureAwait(false);
     }
 }

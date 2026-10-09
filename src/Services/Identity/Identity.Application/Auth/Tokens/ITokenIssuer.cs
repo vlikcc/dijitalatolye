@@ -12,6 +12,9 @@ public interface ITokenIssuer
         CancellationToken ct = default);
 
     Task<TokenPair?> RefreshAsync(string refreshToken, string? ipAddress, CancellationToken ct);
+
+    /// <summary>Refresh token'ı iptal eder (logout). Bilinmeyen/zaten iptal edilmiş token sessizce yok sayılır.</summary>
+    Task RevokeAsync(string refreshToken, CancellationToken ct);
 }
 
 public sealed record TokenPair(

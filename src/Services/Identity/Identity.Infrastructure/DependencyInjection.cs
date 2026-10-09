@@ -5,6 +5,7 @@ using DijitalAtolye.Identity.Domain.Entities;
 using DijitalAtolye.Identity.Infrastructure.Auth;
 using DijitalAtolye.Identity.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,7 +23,14 @@ public static class DependencyInjection
             opt.UseNpgsql(configuration.GetConnectionString("Postgres")
                 ?? throw new InvalidOperationException("Postgres connection string missing")));
 
-        services.AddDataProtection();
+        // Doğrulama / şifre sıfırlama token'ları DataProtection anahtarlarıyla imzalanır; anahtarlar kalıcı
+        // değilse her container yeniden başlatmasında gönderilmiş tüm linkler geçersiz olur.
+        var dataProtection = services.AddDataProtection().SetApplicationName("dijitalatolye-identity");
+        var keysPath = configuration["DataProtection:KeysPath"];
+        if (!string.IsNullOrWhiteSpace(keysPath))
+        {
+            dataProtection.PersistKeysToFileSystem(new DirectoryInfo(keysPath));
+        }
 
         services.AddIdentityCore<ApplicationUser>(opt =>
             {
@@ -46,8 +54,8 @@ public static class DependencyInjection
 
         services.Configure<JwtIssuerOptions>(configuration.GetSection("JwtIssuer"));
         services.AddScoped<ITokenIssuer, JwtTokenIssuer>();
-        services.AddScoped<IPasswordResetNotifier, LoggingPasswordResetNotifier>();
-        services.AddScoped<IOutboxWriter, EfCoreOutboxWriter<IdentityDbContext>>();
+        services.AddScoped<IPasswordResetNotifier, OutboxPasswordResetNotifier>();
+        services.AddScoped<IOutboxWriter, AutoSavingOutboxWriter>();
         services.AddHostedService<OutboxDispatcher<IdentityDbContext>>();
 
         return services;

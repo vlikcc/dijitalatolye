@@ -284,12 +284,14 @@ public static class ContentEndpoints
             return Results.NoContent();
         }).RequireAuthorization(Policies.EditorOrAbove);
 
-        contents.MapGet("/{id:guid}", async (Guid id, ContentDbContext db, CancellationToken ct) =>
+        contents.MapGet("/{id:guid}", async (Guid id, ContentDbContext db, ICurrentUser current, CancellationToken ct) =>
         {
             var content = await db.Contents.AsNoTracking()
                 .Include(c => c.Versions)
                 .FirstOrDefaultAsync(c => c.Id == id, ct);
-            return content is null ? Results.NotFound() : Results.Json(content);
+            if (content is null) return Results.NotFound();
+            if (!CanReadContent(content, current)) return Results.Forbid();
+            return Results.Json(content);
         });
 
         // Editör inceleme önizlemesi: yayınlanmamış (ama Guard-temiz) bundle'ı public-read bucket'a
@@ -751,6 +753,24 @@ public static class ContentEndpoints
             }), ct);
         ms.Position = 0;
         return ms;
+    }
+
+    /// <summary>
+    /// Yazar ve admin her durumda; herkes yayınlanmış/yayından kaldırılmış içeriği; editör gönderim
+    /// sonrası her içeriği okuyabilir. Taslaklar (AI önerileri dahil) başkalarına kapalıdır.
+    /// </summary>
+    public static bool CanReadContent(Domain.Content content, ICurrentUser current)
+    {
+        if (current.IsInRole(Roles.Admin) || current.IsInRole(Roles.SuperAdmin))
+            return true;
+        if (content.AuthorUserId == current.UserId)
+            return true;
+        if (content.State is ContentState.Published or ContentState.Unpublished)
+            return true;
+        // Editör kuyruk, karar ve geçmiş ekranları için gönderilmiş her içeriği görebilir.
+        if (current.IsInRole(Roles.Editor) && content.State is not ContentState.Draft)
+            return true;
+        return false;
     }
 
     private static string BuildSampleText(BundleSample sample)

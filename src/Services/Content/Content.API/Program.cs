@@ -12,6 +12,8 @@ using Minio;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddDijitalAtolyeServiceDefaults("content");
+// İçerik paketleri 50 MB'a kadar (BundleValidator); Kestrel varsayılanı 30 MB olduğu için multipart payıyla 60 MB.
+builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = 60L * 1024 * 1024);
 
 builder.Services.AddDbContext<ContentDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")
@@ -98,50 +100,8 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Databas
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<ContentDbContext>();
-
-    // EnsureSchemaAsync "ya hep ya hiç" davranır: yeni kolon eklenince mevcut DB'de var olan tablolar
-    // yüzünden 42P07 ile patlar. Bu durumu yakalayıp idempotent ALTER'a bırakıyoruz.
-    try
-    {
-        await db.EnsureSchemaAsync();
-    }
-    catch (Npgsql.PostgresException ex) when (ex.SqlState == "42P07")
-    {
-        // beklenen: mevcut DB'de tablolar zaten var; eksik kolonu DDL ekleyecek.
-    }
-
-    await db.Database.ExecuteSqlRawAsync(
-        """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "AiSuggestionJson" text;""");
-    await db.Database.ExecuteSqlRawAsync(
-        """ALTER TABLE content."ContentVersions" ADD COLUMN IF NOT EXISTS "GuardFileId" character varying(64);""");
-    await db.Database.ExecuteSqlRawAsync(
-        """ALTER TABLE content."ContentVersions" ADD COLUMN IF NOT EXISTS "GuardScanStatus" character varying(40);""");
-    await db.Database.ExecuteSqlRawAsync(
-        """ALTER TABLE content."ContentVersions" ADD COLUMN IF NOT EXISTS "GuardScannedAtUtc" timestamp with time zone;""");
-    await db.Database.ExecuteSqlRawAsync(
-        """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "Type" character varying(20) NOT NULL DEFAULT 'Game';""");
-    await db.Database.ExecuteSqlRawAsync(
-        """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "AutoRejectReason" text;""");
-    // EF ExecuteSqlRawAsync treats { } as format placeholders — PostgreSQL '{}' icin {{}} kullan.
-    await db.Database.ExecuteSqlRawAsync(
-        """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "Subjects" text[] NOT NULL DEFAULT '{{}}';""");
-    await db.Database.ExecuteSqlRawAsync(
-        """ALTER TABLE content."Contents" ADD COLUMN IF NOT EXISTS "GradeLevels" integer[] NOT NULL DEFAULT '{{}}';""");
-    await db.Database.ExecuteSqlRawAsync(
-        """
-        UPDATE content."Contents"
-        SET "Subjects" = ARRAY["Subject"]
-        WHERE cardinality("Subjects") = 0
-          AND "Subject" IS NOT NULL
-          AND btrim("Subject") <> '';
-        """);
-    await db.Database.ExecuteSqlRawAsync(
-        """
-        UPDATE content."Contents"
-        SET "GradeLevels" = ARRAY["GradeLevel"]
-        WHERE cardinality("GradeLevels") = 0
-          AND "GradeLevel" IS NOT NULL;
-        """);
+    // Eski kurulumlardaki ALTER/backfill SQL'i yalnızca legacy DB baseline'lanırken bir kez çalışır.
+    await db.MigrateDatabaseAsync(ContentLegacySchema.UpgradeAsync);
 }
 
 app.Run();

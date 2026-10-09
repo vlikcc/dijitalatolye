@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthStore } from '@core/auth/auth.store';
+import { AuthSession } from '@core/auth/auth-session.service';
 
 type Theme = 'light' | 'dark';
 
@@ -102,6 +103,7 @@ type Theme = 'light' | 'dark';
 })
 export class AppLayoutComponent {
   private readonly auth = inject(AuthStore);
+  private readonly session = inject(AuthSession);
   private readonly router = inject(Router);
 
   readonly email = this.auth.email;
@@ -127,7 +129,7 @@ export class AppLayoutComponent {
   }
 
   logout(): void {
-    this.auth.logout();
+    this.session.logout();
     this.router.navigate(['/login']);
   }
 }

@@ -20,10 +20,14 @@ public static class StorageEndpoints
             if (current.UserId is null) return Results.Unauthorized();
             var bucket = body.Purpose switch
             {
-                "content" => "dijitalatolye-content",
-                "avatar" => "dijitalatolye-avatars",
-                _ => "dijitalatolye-content",
+                "content" => ContentBucket,
+                "avatar" => AvatarBucket,
+                _ => null,
             };
+            if (bucket is null)
+            {
+                return Results.BadRequest(new { error = "Geçersiz purpose." });
+            }
             var key = $"{current.UserId:N}/{Guid.NewGuid():N}/{Sanitize(body.FileName)}";
             var url = await objectStorage.CreatePresignedUploadUrlAsync(bucket, key, TimeSpan.FromMinutes(15), body.ContentType, ct);
             return Results.Json(new PresignedUploadResponse(url, bucket, key, DateTime.UtcNow.AddMinutes(15)));
@@ -48,6 +52,10 @@ public static class StorageEndpoints
             {
                 return Results.BadRequest(new { error = "bucket ve key zorunlu." });
             }
+            if (!AllowedBuckets.Contains(bucket) || !IsSafeKey(key))
+            {
+                return Results.BadRequest(new { error = "Geçersiz bucket veya key." });
+            }
 
             await using var stream = file.OpenReadStream();
             var response = await vetting.SubmitAsync(new VettingSubmission(
@@ -64,7 +72,10 @@ public static class StorageEndpoints
                 response.Status,
                 response.Sha256,
                 response.FileSize));
-        }).DisableAntiforgery();
+        })
+        // Normal akış event tabanlıdır (GuardVettingConsumer); bu uç yalnızca operasyonel yeniden gönderim içindir.
+        .RequireAuthorization(Policies.AdminOnly)
+        .DisableAntiforgery();
 
         storage.MapGet("/download-url", async (
             [FromQuery] string bucket,
@@ -72,16 +83,34 @@ public static class StorageEndpoints
             IObjectStorage objectStorage,
             CancellationToken ct) =>
         {
+            if (!AllowedBuckets.Contains(bucket) || !IsSafeKey(key))
+            {
+                return Results.BadRequest(new { error = "Geçersiz bucket veya key." });
+            }
             if (!await objectStorage.ObjectExistsAsync(bucket, key, ct))
             {
                 return Results.NotFound();
             }
             var url = await objectStorage.CreatePresignedDownloadUrlAsync(bucket, key, TimeSpan.FromMinutes(10), ct);
             return Results.Json(new { url });
-        });
+        })
+        // bucket/key istemciden geldiği için sahiplik doğrulanamaz; yalnızca admin. Oynatma/kapak akışları Content.API üzerinden gider.
+        .RequireAuthorization(Policies.AdminOnly);
 
         return routes;
     }
+
+    private const string ContentBucket = "dijitalatolye-content";
+    private const string AvatarBucket = "dijitalatolye-avatars";
+    private const string PublishedBucket = "dijitalatolye-content-published";
+
+    private static readonly HashSet<string> AllowedBuckets = new(StringComparer.Ordinal)
+    {
+        ContentBucket, AvatarBucket, PublishedBucket,
+    };
+
+    private static bool IsSafeKey(string key) =>
+        key.Length <= 1024 && !key.StartsWith('/') && !key.Contains("..", StringComparison.Ordinal) && !key.Contains('\\');
 
     private static readonly Dictionary<char, string> TurkishMap = new()
     {

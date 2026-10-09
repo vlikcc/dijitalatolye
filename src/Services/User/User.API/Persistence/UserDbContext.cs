@@ -8,6 +8,10 @@ public sealed class UserDbContext : DbContext
 {
     public UserDbContext(DbContextOptions<UserDbContext> options) : base(options) { }
 
+    /// <summary>Migration geçmişi kendi şemasında tutulur (aynı DB'yi paylaşan context'ler çakışmasın).</summary>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseNpgsql(o => o.MigrationsHistoryTable("__EFMigrationsHistory", "user"));
+
     public DbSet<UserProfile> Profiles => Set<UserProfile>();
     public DbSet<UserCollection> Collections => Set<UserCollection>();
     public DbSet<CollectionItem> CollectionItems => Set<CollectionItem>();

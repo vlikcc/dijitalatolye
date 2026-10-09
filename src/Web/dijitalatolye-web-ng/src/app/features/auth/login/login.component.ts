@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '@core/api/api.service';
 import { AuthStore } from '@core/auth/auth.store';
-import { AuthTokens, LoginRequest } from '@core/api/contracts';
+import { AuthSessionResponse, LoginRequest } from '@core/api/contracts';
 
 @Component({
   selector: 'da-login',
@@ -92,11 +92,10 @@ export class LoginComponent {
     this.loading.set(true);
     this.error.set(null);
     const body: LoginRequest = { email: this.email, password: this.password };
-    this.api.post<AuthTokens>('/auth/login', body).subscribe({
+    this.api.post<AuthSessionResponse>('/auth/login', body).subscribe({
       next: (data) => {
-        this.auth.setTokens(data.accessToken, data.refreshToken);
-        const roles = data.roles ?? rolesFromJwt(data.accessToken);
-        this.auth.setUser(this.email, roles);
+        this.auth.setSession(data.accessToken, data.roles, this.email);
+        const roles = this.auth.roles();
         if (roles.some((r) => ['Admin', 'SuperAdmin'].includes(r))) this.router.navigate(['/admin']);
         else if (roles.includes('Editor')) this.router.navigate(['/editor/queue']);
         else this.router.navigate(['/teacher/contents/new']);
@@ -107,18 +106,6 @@ export class LoginComponent {
       },
       complete: () => this.loading.set(false),
     });
-  }
-}
-
-function rolesFromJwt(token: string): string[] {
-  try {
-    const payload = token.split('.')[1];
-    const padded = payload + '='.repeat((4 - (payload.length % 4)) % 4);
-    const json = JSON.parse(atob(padded.replace(/-/g, '+').replace(/_/g, '/')));
-    const claim = json.role ?? json.roles ?? [];
-    return Array.isArray(claim) ? claim : [claim];
-  } catch {
-    return [];
   }
 }
 

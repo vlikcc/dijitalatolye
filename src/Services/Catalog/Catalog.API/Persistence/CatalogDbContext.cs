@@ -7,6 +7,10 @@ public sealed class CatalogDbContext : DbContext
 {
     public CatalogDbContext(DbContextOptions<CatalogDbContext> options) : base(options) { }
 
+    /// <summary>Migration geçmişi kendi şemasında tutulur (aynı DB'yi paylaşan context'ler çakışmasın).</summary>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseNpgsql(o => o.MigrationsHistoryTable("__EFMigrationsHistory", "catalog"));
+
     public DbSet<Grade> Grades => Set<Grade>();
     public DbSet<Subject> Subjects => Set<Subject>();
     public DbSet<Unit> Units => Set<Unit>();

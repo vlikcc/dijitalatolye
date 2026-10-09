@@ -31,8 +31,12 @@ public sealed partial class FileHtmlTemplateRenderer : IHtmlTemplateRenderer
         }
 
         var html = Cache.GetOrAdd(path, static p => File.ReadAllText(p));
+        // Değerler kullanıcı girdisi içerebilir (ör. DisplayName) — HTML enjeksiyonuna karşı encode edilir.
         foreach (var (key, value) in variables)
-            html = PlaceholderRegex().Replace(html, m => m.Groups[1].Value == key ? value : m.Value);
+        {
+            var encoded = System.Net.WebUtility.HtmlEncode(value);
+            html = PlaceholderRegex().Replace(html, m => m.Groups[1].Value == key ? encoded : m.Value);
+        }
 
         await Task.CompletedTask;
         return html;

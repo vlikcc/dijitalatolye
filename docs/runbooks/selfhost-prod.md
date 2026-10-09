@@ -67,11 +67,22 @@ make prod-backup
 - Veri servisleri (Postgres/Mongo/...) `127.0.0.1` adresinde — sadece host içinden erişilir, dış ağa kapalı.
 
 ### TLS
-- `PUBLIC_DOMAIN=localhost` ve `ACME_EMAIL=internal` ise Caddy **internal CA** ile self-signed sertifika verir; tarayıcı uyarısını "Advanced → Proceed" ile geçin.
-- Gerçek alan adı için `PUBLIC_DOMAIN=dijitalatolye.example.com`, `ACME_EMAIL=admin@example.com`. Caddy otomatik Let's Encrypt aktive eder.
+- `ACME_EMAIL` **zorunludur** (boşsa compose başlamaz).
+- `PUBLIC_DOMAIN=localhost` ise Caddy e-postaya bakmadan **internal CA** ile self-signed sertifika verir (lokal test için `ACME_EMAIL=admin@localhost.test` gibi herhangi bir değer yeterli); tarayıcı uyarısını "Advanced → Proceed" ile geçin.
+- Gerçek alan adı için `PUBLIC_DOMAIN=dijitalatolye.example.com`, `ACME_EMAIL=gercek-adres@alanadi.com`. Caddy otomatik Let's Encrypt aktive eder.
+
+### Yönetim panelleri (public değil)
+- MinIO konsolu ve Guard paneli yalnızca `127.0.0.1`'e bağlıdır. Uzaktan SSH tüneli kullanın:
+  `ssh -L 9001:127.0.0.1:9001 -L 18000:127.0.0.1:18000 <sunucu>` → `http://localhost:9001`, `http://localhost:18000`
+- `/cdn/*` yalnızca yayınlanan içerik bucket'ına (`MINIO_BUCKET_PUBLISHED`) GET/HEAD izin verir.
 
 ### Migration & seed
-Servisler başlarken `Database__AutoMigrate=true` ortam değişkeni gördüğünde EF Core migration ve seed işlemlerini kendileri çalıştırır. Manuel `dotnet ef` adımı **gerekmez**.
+Servisler başlarken `Database__AutoMigrate=true` ortam değişkeni gördüğünde EF Core migration'larını (`MigrateDatabaseAsync`) ve ardından seed işlemlerini kendileri çalıştırır. Manuel `dotnet ef` adımı **gerekmez**.
+
+- Her context migration geçmişini kendi şemasında tutar (`identity."__EFMigrationsHistory"`, `audit."__EFMigrationsHistory"`, …); `audit` DB'sini paylaşan Admin ve Audit context'leri çakışmaz.
+- Migration sırasında context başına bir Postgres advisory lock alınır; aynı DB'ye bağlanan replikalar/servisler (ör. Identity ve Admin'in ikisi de audit'i migrate eder) sırayla çalışır.
+- **Eski kurulumlar (migration öncesi, `EnsureCreated` ile yaratılmış DB'ler):** geçmiş tablosu yok ama tablolar varsa servis DB'yi *legacy* sayar ve tek transaction içinde: servise özgü eski ALTER/backfill SQL'ini çalıştırır (`Persistence/*LegacySchema.cs`), `InitialCreate`'te olup eksik olan tablo/index'leri yaratır, tüm kolonları doğrular ve `InitialCreate`'i uygulanmış olarak işaretler (baseline). Eksik kolon varsa baseline yapılmaz, transaction geri alınır ve servis açılmaz — log'da eksik kolonlar listelenir. Bu dönüşüm DB başına yalnızca bir kez olur; loglarda `legacy DB ... baseline'lanıyor` / `baseline tamam` satırlarını görürsünüz.
+- İlk migration'lı sürümü deploy etmeden **önce** `make prod-backup` alın.
 
 ## Yedekleme
 
@@ -84,21 +95,17 @@ Cron önerisi (sunucuda):
 0 3 * * * cd /opt/dijitalatolye && BACKUP_DIR=/var/backups/dijitalatolye RETAIN_DAYS=30 make prod-backup >> /var/log/da-backup.log 2>&1
 ```
 
-Yedek içerikleri: tüm Postgres veritabanları (custom format), Mongo `ai_moderation` (gzip archive), tüm MinIO bucket'ları (tar.gz). 14 günden eski yedekler otomatik silinir (`RETAIN_DAYS` ile değiştirilebilir).
+Yedek içerikleri: tüm Postgres veritabanları (custom format), Guard Postgres (`guard-pg.dump`), Mongo `ai_moderation` (gzip archive), tüm MinIO bucket'ları (`minio.tar.gz`) ve Guard veri volume'u (`guard-data.tar.gz`). Herhangi bir adım başarısız olursa script hata koduyla çıkar (cron logunu izleyin). 14 günden eski yedekler otomatik silinir (`RETAIN_DAYS` ile değiştirilebilir).
 
-### Geri Yükleme (kabaca)
+### Geri Yükleme
 ```bash
-# Postgres
-docker compose -f deploy/docker-compose/docker-compose.prod.yml --env-file .env.prod \
-  exec -T postgres pg_restore -U $POSTGRES_USER -d identity --clean --if-exists < backups/<ts>/pg-identity.dump
-
-# Mongo
-... mongorestore --gzip --archive=... < backups/<ts>/mongo-ai_moderation.archive.gz
-
-# MinIO
-tar -xzf backups/<ts>/minio.tar.gz -C /tmp/minio-restore
-docker compose ... run --rm minio-init mc cp -r /tmp/minio-restore/<bucket> local/<bucket>
+./scripts/prod-restore.sh backups/<ts>
+# 'evet' onayı ister; uygulama + Guard servislerini durdurur, Postgres (ana + Guard),
+# Mongo, MinIO ve guard-data'yı geri yükler, sonra servisleri yeniden başlatır.
+#   SKIP_MINIO=1  -> MinIO adımını atla
+#   ASSUME_YES=1  -> onay sorma (otomasyon; DİKKAT)
 ```
+Not: MinIO geri yüklemesi `mc mirror --overwrite` kullanır; yedekte olmayan mevcut nesneler silinmez. Geri yüklemeyi düzenli olarak ayrı bir test host'unda deneyin.
 
 ## Gözlemlenebilirlik (opsiyonel profil)
 
@@ -142,6 +149,9 @@ make prod-nuke                     # TÜM verileri sil (onaylı)
 
 - [ ] `PUBLIC_DOMAIN` gerçek alan adına çekildi
 - [ ] `ACME_EMAIL` gerçek e-postaya çekildi (Let's Encrypt iletişim)
+- [ ] `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` (>= 12 karakter) ilk kurulum için dolduruldu; admin oluştuktan ve şifre değiştirildikten sonra boşaltıldı
+- [ ] `IMAGE_TAG` sabit bir sürüme (`latest` değil) çekildi
+- [ ] Geri yükleme (`scripts/prod-restore.sh`) test host'unda denendi
 - [ ] `CORS_ORIGINS` sadece üretim alan adı (virgülle birden fazla)
 - [ ] `SMTP_*` gerçek e-posta sağlayıcısına yönlendirildi (mailhog profili **kullanılmadı**)
 - [ ] `DEEPSEEK_API_KEY` üretim anahtarı
