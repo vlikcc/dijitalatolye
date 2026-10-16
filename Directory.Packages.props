@@ -7,7 +7,7 @@
     <AspNetCoreVersion>10.0.0</AspNetCoreVersion>
     <EfCoreVersion>10.0.0</EfCoreVersion>
     <OpenIddictVersion>6.0.0</OpenIddictVersion>
-    <MassTransitVersion>8.3.4</MassTransitVersion>
+    <MassTransitVersion>9.2.0</MassTransitVersion>
     <SerilogAspNetCoreVersion>8.0.3</SerilogAspNetCoreVersion>
     <OpenTelemetryVersion>1.12.0</OpenTelemetryVersion>
     <YarpVersion>2.2.0</YarpVersion>
