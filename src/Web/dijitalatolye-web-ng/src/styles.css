@@ -199,3 +199,17 @@ body {
 
 /* Material ikon hizası */
 .mat-icon { vertical-align: middle; }
+
+/* Material menü (prebuilt indigo-pink yalnız açık renk verir) — tema tokenlarına bağlanır.
+   :root seçicisi prebuilt temanın `html` kuralından daha özgüldür; overlay body içinde olduğundan değişkenleri devralır. */
+:root {
+  --mat-menu-container-color: rgb(var(--surface));
+  --mat-menu-item-label-text-color: rgb(var(--ink));
+  --mat-menu-item-icon-color: rgb(var(--muted));
+  --mat-menu-item-label-text-font: "Inter", system-ui, sans-serif;
+  --mat-menu-item-hover-state-layer-color: rgb(var(--ink) / 0.05);
+  --mat-menu-item-focus-state-layer-color: rgb(var(--ink) / 0.10);
+  --mat-menu-divider-color: rgb(var(--border) / 0.12);
+  --mat-menu-container-shape: 12px;
+}
+.mat-mdc-menu-panel { border: 1px solid rgb(var(--border) / 0.10); }

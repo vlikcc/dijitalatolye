@@ -25,33 +25,33 @@ type Theme = 'light' | 'dark';
 
           <nav class="flex items-center gap-1 overflow-x-auto">
             @if (isTeacher()) {
-              <a routerLink="/teacher/dashboard" routerLinkActive="!da-grad !text-white !rounded-full"
+              <a routerLink="/teacher/dashboard" routerLinkActive="da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Panel</a>
-              <a routerLink="/teacher/contents" routerLinkActive="!da-grad !text-white !rounded-full"
+              <a routerLink="/teacher/contents" routerLinkActive="da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">İçeriklerim</a>
-              <a routerLink="/teacher/contents/new" routerLinkActive="!da-grad !text-white !rounded-full"
+              <a routerLink="/teacher/contents/new" routerLinkActive="da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Yükle</a>
-              <a routerLink="/teacher/studio" routerLinkActive="!da-grad !text-white !rounded-full"
+              <a routerLink="/teacher/studio" routerLinkActive="da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition whitespace-nowrap">AI Stüdyo</a>
-              <a routerLink="/teacher/assignments" routerLinkActive="!da-grad !text-white !rounded-full"
+              <a routerLink="/teacher/assignments" routerLinkActive="da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Ödevler</a>
-              <a routerLink="/teacher/classes" routerLinkActive="!da-grad !text-white !rounded-full"
+              <a routerLink="/teacher/classes" routerLinkActive="da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Sınıflarım</a>
             }
             @if (isEditor()) {
-              <a routerLink="/editor" routerLinkActive="!da-grad !text-white !rounded-full" [routerLinkActiveOptions]="{ exact: true }"
+              <a routerLink="/editor" routerLinkActive="da-grad !text-white !rounded-full" [routerLinkActiveOptions]="{ exact: true }"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Editör</a>
-              <a routerLink="/editor/queue" routerLinkActive="!da-grad !text-white !rounded-full"
+              <a routerLink="/editor/queue" routerLinkActive="da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Kuyruk</a>
             }
             @if (isAdmin()) {
-              <a routerLink="/admin" routerLinkActive="!da-grad !text-white !rounded-full" [routerLinkActiveOptions]="{ exact: true }"
+              <a routerLink="/admin" routerLinkActive="da-grad !text-white !rounded-full" [routerLinkActiveOptions]="{ exact: true }"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Yönetim</a>
             }
             @if (isStudent()) {
-              <a routerLink="/assignments" routerLinkActive="!da-grad !text-white !rounded-full"
+              <a routerLink="/assignments" routerLinkActive="da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Ödevlerim</a>
-              <a routerLink="/progress" routerLinkActive="!da-grad !text-white !rounded-full"
+              <a routerLink="/progress" routerLinkActive="da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">İlerlemem</a>
             }
           </nav>
@@ -63,18 +63,21 @@ type Theme = 'light' | 'dark';
               <img [src]="theme() === 'dark' ? 'assets/brand/light-mode.png' : 'assets/brand/dark-mode.png'"
                    [alt]="theme() === 'dark' ? 'Gündüz modu' : 'Gece modu'" class="w-5 h-5" />
             </button>
-            <a routerLink="/notifications" routerLinkActive="!da-grad !text-white !rounded-full"
+            <a routerLink="/notifications" routerLinkActive="da-grad !text-white !rounded-full"
                class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-muted hover:bg-accent/5 hover:text-accent transition"
                aria-label="Bildirimler">
               <mat-icon style="font-size:18px;width:18px;height:18px">notifications</mat-icon>
             </a>
 
-            <button mat-button [matMenuTriggerFor]="userMenu" class="inline-flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-accent/5 text-ink">
-              <div class="w-7 h-7 rounded-full da-grad text-white text-xs font-bold flex items-center justify-center">
-                {{ initial() }}
-              </div>
-              <span class="hidden md:inline text-sm">{{ email() }}</span>
-              <mat-icon style="font-size:14px;width:14px;height:14px">expand_more</mat-icon>
+            <!-- mat-button doğrudan çocuk mat-icon'u etiketin önüne taşır; içerik tek satırlık flex sarmalayıcıda tutulur. -->
+            <button mat-button [matMenuTriggerFor]="userMenu" class="!px-2 !rounded-lg hover:bg-accent/5 !text-ink">
+              <span class="inline-flex items-center gap-2 whitespace-nowrap">
+                <span class="w-7 h-7 shrink-0 rounded-full da-grad text-white text-xs font-bold inline-flex items-center justify-center">
+                  {{ initial() }}
+                </span>
+                <span class="hidden lg:block text-sm max-w-[8rem] truncate" [attr.title]="email()">{{ email() }}</span>
+                <mat-icon class="text-dim" style="font-size:18px;width:18px;height:18px">expand_more</mat-icon>
+              </span>
             </button>
             <mat-menu #userMenu="matMenu">
               <div class="px-4 py-3 border-b border-line/10" style="min-width:220px">
@@ -91,8 +94,8 @@ type Theme = 'light' | 'dark';
               @if (isAdmin()) {
                 <a mat-menu-item routerLink="/admin/reports">Raporlar</a>
               }
-              <button mat-menu-item (click)="logout()" class="!text-rose-700">
-                <mat-icon class="!text-rose-700">logout</mat-icon>
+              <button mat-menu-item (click)="logout()" class="!text-rose-700 dark:!text-rose-400">
+                <mat-icon class="!text-rose-700 dark:!text-rose-400">logout</mat-icon>
                 <span>Çıkış</span>
               </button>
             </mat-menu>
