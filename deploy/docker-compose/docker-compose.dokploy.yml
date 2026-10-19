@@ -220,6 +220,8 @@ services:
       - "caddyfile"
     expose:
       - "80"
+    labels:
+      dijitalatolye.caddy-config-sha256: "46c36ca4ae2974e2"
   catalog:
     cpus: 1
     depends_on:

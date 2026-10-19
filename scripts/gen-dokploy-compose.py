@@ -17,6 +17,7 @@ Dönüşümler:
   - volume/network adları proje ön ekine bırakılır (Dokploy appName)
 ${VAR} yer tutucuları korunur; değerler Dokploy ortam değişkenlerinden gelir.
 """
+import hashlib
 import json
 import os
 import re
@@ -90,6 +91,10 @@ def transform(c: dict) -> dict:
     ]
     caddy["command"] = ["caddy", "run", "--config", "/etc/caddy/Caddyfile.dokploy", "--adapter", "caddyfile"]
     caddy["expose"] = ["80"]
+    # Caddy yapılandırması bind mount ile gelir; compose tanımı değişmediği için deploy'da container
+    # yeniden oluşturulmaz ve eski config bellekte kalır. Dosyaların hash'i etiket olarak eklenir:
+    # config değişince etiket değişir, compose container'ı yeniler.
+    caddy.setdefault("labels", {})["dijitalatolye.caddy-config-sha256"] = caddy_config_hash()
     caddy.get("environment", {}).pop("ACME_EMAIL", None)
 
     networks = {k: {key: val for key, val in v.items() if key != "name"} for k, v in c.get("networks", {}).items()}
@@ -98,6 +103,16 @@ def transform(c: dict) -> dict:
     }
     volumes = {k: {} for k in c.get("volumes", {}) if k in used_volumes}
     return {"services": services, "networks": networks, "volumes": volumes}
+
+
+def caddy_config_hash() -> str:
+    h = hashlib.sha256()
+    caddy_dir = os.path.join(COMPOSE_DIR, "caddy")
+    for name in sorted(os.listdir(caddy_dir)):
+        h.update(name.encode())
+        with open(os.path.join(caddy_dir, name), "rb") as f:
+            h.update(f.read())
+    return h.hexdigest()[:16]
 
 
 # --- Minimal YAML yazıcı (PyYAML gerektirmesin). Skalerler JSON biçiminde yazılır; JSON string'i
