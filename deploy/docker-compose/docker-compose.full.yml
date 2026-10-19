@@ -128,7 +128,9 @@ services:
     <<: *restart
 
   minio:
-    image: minio/minio:latest
+    # Resmi minio/minio ve minio/mc imajlari artik public degil (MinIO Ekim 2025'te community
+    # imaj yayinini durdurdu). Prod ile ayni pgsty fork'u; tag'leri prod compose ile birlikte guncelleyin.
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     container_name: da-minio
     command: server /data --console-address ":9001"
     environment:
@@ -140,14 +142,15 @@ services:
     volumes:
       - minio-data:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      # pgsty imajinda curl yok; server imaji mc icerir ("local" alias = http://localhost:9000)
+      test: ["CMD", "mc", "ready", "local"]
       interval: 15s
       timeout: 5s
       retries: 10
     <<: *restart
 
   minio-init:
-    image: minio/mc:latest
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
     container_name: da-minio-init
     depends_on:
       minio:
