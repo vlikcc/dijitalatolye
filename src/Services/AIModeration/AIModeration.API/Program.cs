@@ -1,6 +1,6 @@
 using DijitalAtolye.AIModeration.API.Consumers;
-using DijitalAtolye.AIModeration.API.Health;
 using DijitalAtolye.AIModeration.API.Endpoints;
+using DijitalAtolye.AIModeration.API.Health;
 using DijitalAtolye.AIModeration.API.Llm;
 using DijitalAtolye.AIModeration.API.Persistence;
 using DijitalAtolye.AIModeration.API.Pipeline;
