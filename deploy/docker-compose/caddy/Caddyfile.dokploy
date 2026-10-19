@@ -1,0 +1,12 @@
+{
+	# Dokploy: TLS'i Traefik sonlandirir; Caddy yalnizca ic agda duz HTTP dinler.
+	auto_https off
+	servers {
+		# Traefik (dokploy-network, ozel IP) X-Forwarded-For/Proto basliklarini dogru tasir.
+		trusted_proxies static private_ranges
+	}
+}
+
+:80 {
+	import site.caddy
+}

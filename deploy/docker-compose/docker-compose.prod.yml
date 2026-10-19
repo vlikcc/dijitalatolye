@@ -85,7 +85,8 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Klasor baglanir: Caddyfile ortak site govdesini (site.caddy) import eder.
+      - ./caddy:/etc/caddy:ro
       - caddy-data:/data
       - caddy-config:/config
     networks: [internal]

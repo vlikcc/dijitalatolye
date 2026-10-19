@@ -110,3 +110,6 @@ __pycache__/
 dijitalatolye_skill/
 dijitalatolye_skill.zip
 .wrongstack/
+
+# Dokploy canli ortam degiskenleri (sirlar)
+.env.dokploy
