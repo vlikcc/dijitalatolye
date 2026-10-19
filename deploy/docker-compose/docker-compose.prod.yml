@@ -235,6 +235,11 @@ services:
       timeout: 5s
       retries: 10
     mem_limit: 1g
+    # Benzersiz takma ad: Dokploy'da Caddy paylasimli dokploy-network'e de bagli; orada baska
+    # projelerin 'minio' servisleri var ve kisa ad yanlis container'a cozumlenebiliyor.
+    networks:
+      internal:
+        aliases: [da-minio]
     <<: *data-defaults
 
   minio-init:
@@ -565,6 +570,11 @@ services:
       ReverseProxy__Clusters__search__Destinations__primary__Address: http://search:8080
       ReverseProxy__Clusters__admin__Destinations__primary__Address: http://admin:8080
     expose: ["8080"]
+    # Benzersiz takma ad: Dokploy'da Caddy paylasimli dokploy-network'e de bagli; orada baska
+    # projelerin 'gateway' servisleri var ve kisa ad yanlis container'a cozumlenebiliyor.
+    networks:
+      internal:
+        aliases: [da-gateway]
     <<: *app-defaults
 
   web:
@@ -577,6 +587,11 @@ services:
     depends_on:
       gateway: { condition: service_healthy }
     expose: ["8080"]
+    # Benzersiz takma ad: Dokploy'da Caddy paylasimli dokploy-network'e de bagli; orada baska
+    # projelerin 'web' servisleri var ve kisa ad yanlis container'a cozumlenebiliyor.
+    networks:
+      internal:
+        aliases: [da-web]
     <<: *app-defaults
     # nginx'te /health/live yok; SPA kokunu kontrol et
     healthcheck:

@@ -30,7 +30,7 @@ handle /api/* {
 	request_body {
 		max_size 60MB
 	}
-	reverse_proxy gateway:8080 {
+	reverse_proxy da-gateway:8080 {
 		header_up X-Real-IP {client_ip}
 		transport http {
 			keepalive 30s
@@ -40,7 +40,7 @@ handle /api/* {
 
 # SignalR / WebSocket hub'lari
 handle /hubs/* {
-	reverse_proxy gateway:8080 {
+	reverse_proxy da-gateway:8080 {
 		header_up Connection {>Connection}
 		header_up Upgrade {>Upgrade}
 		transport http {
@@ -54,7 +54,7 @@ handle /hubs/* {
 # Presigned upload/download URL'leri /cdn'den GECMEZ: Storage/Content presign client'i
 # PublicEndpoint'in yalnizca host'unu kullanir (path'i atar). Bu nedenle diger bucket'lar,
 # bucket listeleme ve MinIO admin/metrics API'leri (/cdn/minio/...) burada 404 doner.
-# Host header'i icerideki MinIO'ya 'minio:9000' olarak iletilir.
+# Host header'i icerideki MinIO'ya 'minio:9000' olarak iletilir (upstream: benzersiz takma ad da-minio).
 handle_path /cdn/* {
 	# CSP yukarida site seviyesindeki "header /cdn/*" ile sikilastirilir (connect-src none).
 	# Izolasyonun asil katmani: iframe sandbox allow-same-origin icermez (opaque origin).
@@ -64,7 +64,7 @@ handle_path /cdn/* {
 		not path_regexp (^|/)\.\.(/|$)
 	}
 	handle @published {
-		reverse_proxy minio:9000 {
+		reverse_proxy da-minio:9000 {
 			header_up Host minio:9000
 		}
 	}
@@ -75,12 +75,12 @@ handle_path /cdn/* {
 
 # Health
 handle /health/* {
-	reverse_proxy gateway:8080
+	reverse_proxy da-gateway:8080
 }
 
 # SPA (frontend nginx — statik + fallback)
 handle {
-	reverse_proxy web:8080
+	reverse_proxy da-web:8080
 }
 
 # Loglama

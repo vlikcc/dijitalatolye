@@ -459,7 +459,9 @@ services:
     mem_limit: "768m"
     mem_reservation: "256m"
     networks:
-      internal: null
+      internal:
+        aliases:
+          - "da-gateway"
     restart: "unless-stopped"
   guard-beat:
     command:
@@ -1091,7 +1093,9 @@ services:
         max-size: "20m"
     mem_limit: "1g"
     networks:
-      internal: null
+      internal:
+        aliases:
+          - "da-minio"
     restart: "unless-stopped"
     volumes:
       - source: "minio-data"
@@ -1573,7 +1577,9 @@ services:
     mem_limit: "768m"
     mem_reservation: "256m"
     networks:
-      internal: null
+      internal:
+        aliases:
+          - "da-web"
     restart: "unless-stopped"
 networks:
   internal:
