@@ -67,7 +67,11 @@ make build
 make run-gateway  # :5000
 make run-identity # :5001
 # ... diğer servisler (make help)
+```
 
+> **macOS / port 5000:** AirPlay Receiver (ControlCenter) `*:5000`'i dinler. Gateway `localhost:5000`'e yine bağlanır, ama gateway kapalıyken `:5000` `AirTunes` imzalı 403 döner (gateway hatası sanılmasın). Çakışma sorun olursa AirPlay Receiver'ı kapatın (Sistem Ayarları › Genel › AirDrop ve Handoff) veya `make run-gateway GATEWAY_PORT=5100` ile başlatıp `src/Web/dijitalatolye-web-ng/proxy.conf.json` hedeflerini aynı porta çekin.
+
+```bash
 make web          # Angular dev server — http://localhost:4200
 ```
 

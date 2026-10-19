@@ -92,9 +92,15 @@ migration-check:  ## Tum context'lerde model ile son migration senkron mu (CI'da
 
 # === Servisleri calistir ===
 
+# macOS: AirPlay Receiver (ControlCenter) *:5000'i dinler. Gateway localhost:5000'e yine de
+# baglanir ve localhost istekleri gateway'e gider; ama gateway kapaliyken :5000 'AirTunes' 403
+# doner. Cakisma sorun olursa: AirPlay Receiver'i kapatin (Sistem Ayarlari > Genel > AirDrop ve
+# Handoff) ya da 'make run-gateway GATEWAY_PORT=5100' + proxy.conf.json hedefini ayni porta cekin.
+GATEWAY_PORT ?= 5000
+
 .PHONY: run-gateway
-run-gateway:  ## API Gateway'i baslat (port 5000)
-	dotnet run --project src/ApiGateway/ApiGateway.csproj
+run-gateway:  ## API Gateway'i baslat (port 5000; macOS AirPlay cakismasi: GATEWAY_PORT=5100)
+	Kestrel__Endpoints__Http__Url=http://localhost:$(GATEWAY_PORT) dotnet run --project src/ApiGateway/ApiGateway.csproj
 
 .PHONY: run-identity
 run-identity:  ## Identity servisini baslat (port 5001)

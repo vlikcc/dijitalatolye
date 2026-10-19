@@ -10,7 +10,7 @@
     <MassTransitVersion>8.3.4</MassTransitVersion>
     <SerilogAspNetCoreVersion>8.0.3</SerilogAspNetCoreVersion>
     <OpenTelemetryVersion>1.12.0</OpenTelemetryVersion>
-    <YarpVersion>2.2.0</YarpVersion>
+    <YarpVersion>2.3.0</YarpVersion>
   </PropertyGroup>
 
   <ItemGroup Label="ASP.NET Core / EF Core">
