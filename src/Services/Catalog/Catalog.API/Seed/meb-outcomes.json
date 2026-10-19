@@ -4991,15 +4991,6 @@
   "subjectName": "Fizik",
   "unitName": "FİZİK BİLİMİ VE KARİYER KEŞFİ",
   "unitOrder": 1,
-  "outcomeCode": "FİZ.9.2.2",
-  "outcomeDescription": "Skaler ve vektörel nicelikleri karşılaştırabilme"
- },
- {
-  "gradeCode": "9",
-  "subjectCode": "fizik",
-  "subjectName": "Fizik",
-  "unitName": "FİZİK BİLİMİ VE KARİYER KEŞFİ",
-  "unitOrder": 1,
   "outcomeCode": "FİZ.9.1.1",
   "outcomeDescription": "Fizik biliminin tanımına yönelik tümevarımsal akıl yürütebilme"
  },
@@ -5025,8 +5016,8 @@
   "gradeCode": "9",
   "subjectCode": "fizik",
   "subjectName": "Fizik",
-  "unitName": "KUVVET VE HAREKET",
-  "unitOrder": 2,
+  "unitName": "FİZİK BİLİMİ VE KARİYER KEŞFİ",
+  "unitOrder": 1,
   "outcomeCode": "FİZ.9.1.4",
   "outcomeDescription": "Bilim ve teknoloji alanında faaliyet gösteren kurum veya kuruluşlarda fizik bilimi ile ilişkili kariyer olanaklarını sorgulayabilme"
  },
@@ -5083,6 +5074,15 @@
   "unitOrder": 2,
   "outcomeCode": "FİZ.9.2.7",
   "outcomeDescription": "Hareket türlerini sınıflandırabilme"
+ },
+ {
+  "gradeCode": "9",
+  "subjectCode": "fizik",
+  "subjectName": "Fizik",
+  "unitName": "KUVVET VE HAREKET",
+  "unitOrder": 2,
+  "outcomeCode": "FİZ.9.2.2",
+  "outcomeDescription": "Skaler ve vektörel nicelikleri karşılaştırabilme"
  },
  {
   "gradeCode": "9",

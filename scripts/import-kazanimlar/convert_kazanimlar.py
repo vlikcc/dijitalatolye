@@ -69,6 +69,33 @@ def resolve_subject(filename):
 
 TR_LOWER = str.maketrans("İIÇĞÖŞÜ", "iıçğöşü")
 
+# Kaynak Excel'deki bilinen satır kaymaları: kazanım kodu -> doğru ünite adı.
+# "Fizik 9-12.xlsx" / 9. Sınıf: FİZ.9.2.2 1. ünite satırında, FİZ.9.1.4 2. ünite satırında duruyor
+# (kodun ünite hanesi ve öğrenme çıktısı metni diğerini doğruluyor).
+UNIT_CORRECTIONS = {
+    "FİZ.9.1.4": "FİZİK BİLİMİ VE KARİYER KEŞFİ",
+    "FİZ.9.2.2": "KUVVET VE HAREKET",
+}
+
+
+def apply_unit_corrections(rows):
+    """Düzeltilen satırı hedef ünitenin son satırının arkasına taşır.
+
+    Importer üniteleri ilk görüldükleri sırayla numaralandırdığından satır sırası da önemlidir.
+    """
+    for code, unit in UNIT_CORRECTIONS.items():
+        row = next((r for r in rows if r["outcomeCode"] == code), None)
+        if row is None or row["unitName"] == unit:
+            continue
+        rows.remove(row)
+        same = lambda r: (r["gradeCode"], r["subjectCode"], r["unitName"]) == (row["gradeCode"], row["subjectCode"], unit)
+        target = [i for i, r in enumerate(rows) if same(r)]
+        if not target:
+            sys.exit(f"Düzeltme hedef ünitesi bulunamadı: {code} -> {unit}")
+        first = rows[target[0]]
+        row.update(unitName=unit, unitOrder=first["unitOrder"])
+        rows.insert(target[-1] + 1, row)
+
 
 def slugify(s: str) -> str:
     s = (s or "").translate(TR_LOWER).lower()
@@ -236,6 +263,8 @@ def main():
                     "outcomeDescription": desc,
                 })
         wb.close()
+
+    apply_unit_corrections(rows)
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as f:
