@@ -25,6 +25,19 @@ interface SearchItem {
   likes?: number;
 }
 
+type FilterName = 'subject' | 'grade' | 'tag' | 'outcome';
+type FacetKey = 'subject' | 'gradeLevel' | 'tags' | 'outcome';
+
+/** Filtre paneli bölümü: list = tekli seçim satırları, chips = sarmalanan çip butonlar. */
+interface FilterSection {
+  name: FilterName;
+  facet: FacetKey;
+  title: string;
+  view: 'list' | 'chips';
+  mono?: boolean;
+  empty: string;
+}
+
 interface SearchResponse {
   items: SearchItem[];
   total: number;
@@ -48,150 +61,79 @@ interface SearchResponse {
 
       <div class="max-w-7xl mx-auto px-4 pb-16 flex flex-col md:flex-row gap-8">
         <aside class="w-full md:w-72 shrink-0">
-          <div class="da-card p-4 md:sticky md:top-24">
-            <div class="flex items-center justify-between px-1 pb-3 mb-1 border-b border-line/10">
-              <span class="font-display font-semibold text-ink inline-flex items-center gap-2">
-                <mat-icon class="!text-accent2" style="font-size:18px;width:18px;height:18px">tune</mat-icon>
-                Filtreler
-              </span>
+          <!-- Not: Tailwind preflight kapalı; button/ul tarayıcı varsayılanları burada elle sıfırlanır. -->
+          <div class="da-card overflow-hidden md:sticky md:top-24 md:max-h-[calc(100vh-7rem)] md:overflow-y-auto [scrollbar-width:thin] [scrollbar-color:rgb(var(--border)/0.18)_transparent]">
+            <div class="flex items-center gap-2 px-4 py-3.5">
+              <button type="button" (click)="filtersOpen.set(!filtersOpen())"
+                class="flex-1 min-w-0 flex items-center gap-2.5 m-0 p-0 bg-transparent border-0 text-left font-sans text-ink cursor-pointer md:cursor-default"
+                [attr.aria-expanded]="filtersOpen()" aria-controls="da-filter-body">
+                <span class="w-8 h-8 rounded-xl bg-accent2/10 text-accent2 inline-flex items-center justify-center shrink-0">
+                  <mat-icon style="font-size:18px;width:18px;height:18px">tune</mat-icon>
+                </span>
+                <span class="font-display font-semibold">Filtreler</span>
+                @if (activeCount()) {
+                  <span class="min-w-[20px] h-5 px-1.5 rounded-full da-grad text-[11px] font-semibold inline-flex items-center justify-center">{{ activeCount() }}</span>
+                }
+                <mat-icon class="md:!hidden ml-auto !text-dim transition-transform duration-200" [class.rotate-180]="filtersOpen()"
+                  style="font-size:20px;width:20px;height:20px">expand_more</mat-icon>
+              </button>
               @if (hasAnyFilter()) {
-                <button type="button" (click)="clearAll()" class="text-xs font-medium text-accent2 hover:underline">Tümünü temizle</button>
+                <button type="button" (click)="clearAll()"
+                  class="shrink-0 m-0 px-2.5 py-1 rounded-lg bg-transparent border-0 font-sans text-xs font-medium text-accent2 hover:bg-accent2/10 cursor-pointer transition">
+                  Tümünü temizle
+                </button>
               }
             </div>
 
-            <!-- Dersler -->
-            <div class="border-b border-line/10">
-              <button type="button" (click)="toggleSection('subject')"
-                class="w-full flex items-center justify-between py-3 px-1 text-left group"
-                [attr.aria-expanded]="isOpen('subject')">
-                <span class="flex items-center gap-2 font-display font-semibold text-sm text-ink">
-                  Dersler
-                  @if (subject()) {
-                    <span class="px-2 py-0.5 rounded-full da-grad text-[10px] font-semibold">{{ subject() }}</span>
-                  }
-                </span>
-                <mat-icon class="!text-dim transition-transform duration-200" [class.rotate-180]="isOpen('subject')"
-                  style="font-size:20px;width:20px;height:20px">expand_more</mat-icon>
-              </button>
-              @if (isOpen('subject')) {
-                <ul class="pb-3 space-y-0.5 text-sm">
-                  @for (f of facetList('subject'); track f.value) {
-                    <li>
-                      <button type="button" (click)="pick('subject', f.value)"
-                        class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition text-left"
-                        [class]="isActive('subject', f.value) ? 'bg-accent2/10 text-accent2 font-semibold' : 'text-muted hover:bg-panel hover:text-ink'">
-                        <span class="w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center"
-                          [class]="isActive('subject', f.value) ? 'border-accent2' : 'border-line/30'">
-                          @if (isActive('subject', f.value)) { <span class="w-1.5 h-1.5 rounded-full bg-accent2"></span> }
-                        </span>
-                        <span class="flex-1 truncate">{{ f.value }}</span>
-                        <span class="text-dim font-mono text-[11px]">{{ f.count }}</span>
-                      </button>
-                    </li>
-                  } @empty {
-                    <li class="text-dim text-xs px-2 py-1">Seçenek bulunamadı</li>
-                  }
-                </ul>
-              }
-            </div>
+            <div id="da-filter-body" class="md:block border-0 border-t border-solid border-line/10" [class.hidden]="!filtersOpen()">
+              @for (s of sections; track s.name; let last = $last) {
+                <div class="border-0 border-solid border-line/10" [class.border-b]="!last">
+                  <button type="button" (click)="toggleSection(s.name)"
+                    class="w-full flex items-center gap-2 m-0 px-4 py-3 bg-transparent border-0 text-left font-sans text-ink cursor-pointer hover:bg-panel/70 transition"
+                    [attr.aria-expanded]="isOpen(s.name)">
+                    <span class="font-display font-semibold text-sm shrink-0">{{ s.title }}</span>
+                    @if (activeValue(s.name); as v) {
+                      <span class="min-w-0 truncate px-2 py-0.5 rounded-full da-grad text-[10px] font-semibold" [class.font-mono]="s.mono">{{ optionLabel(s, v) }}</span>
+                    }
+                    <mat-icon class="ml-auto shrink-0 !text-dim transition-transform duration-200" [class.rotate-180]="isOpen(s.name)"
+                      style="font-size:20px;width:20px;height:20px">expand_more</mat-icon>
+                  </button>
 
-            <!-- Sınıf Seviyesi -->
-            <div class="border-b border-line/10">
-              <button type="button" (click)="toggleSection('grade')"
-                class="w-full flex items-center justify-between py-3 px-1 text-left"
-                [attr.aria-expanded]="isOpen('grade')">
-                <span class="flex items-center gap-2 font-display font-semibold text-sm text-ink">
-                  Sınıf Seviyesi
-                  @if (grade()) {
-                    <span class="px-2 py-0.5 rounded-full da-grad text-[10px] font-semibold">{{ grade() }}. Sınıf</span>
-                  }
-                </span>
-                <mat-icon class="!text-dim transition-transform duration-200" [class.rotate-180]="isOpen('grade')"
-                  style="font-size:20px;width:20px;height:20px">expand_more</mat-icon>
-              </button>
-              @if (isOpen('grade')) {
-                <ul class="pb-3 space-y-0.5 text-sm">
-                  @for (f of facetList('gradeLevel'); track f.value) {
-                    <li>
-                      <button type="button" (click)="pick('grade', f.value)"
-                        class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition text-left"
-                        [class]="isActive('grade', f.value) ? 'bg-accent2/10 text-accent2 font-semibold' : 'text-muted hover:bg-panel hover:text-ink'">
-                        <span class="w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center"
-                          [class]="isActive('grade', f.value) ? 'border-accent2' : 'border-line/30'">
-                          @if (isActive('grade', f.value)) { <span class="w-1.5 h-1.5 rounded-full bg-accent2"></span> }
-                        </span>
-                        <span class="flex-1 truncate">{{ f.value }}. Sınıf</span>
-                        <span class="text-dim font-mono text-[11px]">{{ f.count }}</span>
-                      </button>
-                    </li>
-                  } @empty {
-                    <li class="text-dim text-xs px-2 py-1">Seçenek bulunamadı</li>
-                  }
-                </ul>
-              }
-            </div>
-
-            <!-- Kazanımlar -->
-            <div class="border-b border-line/10">
-              <button type="button" (click)="toggleSection('outcome')"
-                class="w-full flex items-center justify-between py-3 px-1 text-left"
-                [attr.aria-expanded]="isOpen('outcome')">
-                <span class="flex items-center gap-2 font-display font-semibold text-sm text-ink">
-                  Kazanımlar
-                  @if (outcome()) {
-                    <span class="px-2 py-0.5 rounded-full da-grad text-[10px] font-semibold font-mono">{{ outcome() }}</span>
-                  }
-                </span>
-                <mat-icon class="!text-dim transition-transform duration-200" [class.rotate-180]="isOpen('outcome')"
-                  style="font-size:20px;width:20px;height:20px">expand_more</mat-icon>
-              </button>
-              @if (isOpen('outcome')) {
-                <ul class="pb-3 space-y-0.5 text-sm max-h-64 overflow-y-auto">
-                  @for (f of facetList('outcome'); track f.value) {
-                    <li>
-                      <button type="button" (click)="pick('outcome', f.value)"
-                        class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition text-left"
-                        [class]="isActive('outcome', f.value) ? 'bg-accent2/10 text-accent2 font-semibold' : 'text-muted hover:bg-panel hover:text-ink'">
-                        <span class="w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center"
-                          [class]="isActive('outcome', f.value) ? 'border-accent2' : 'border-line/30'">
-                          @if (isActive('outcome', f.value)) { <span class="w-1.5 h-1.5 rounded-full bg-accent2"></span> }
-                        </span>
-                        <span class="flex-1 truncate font-mono text-xs">{{ f.value }}</span>
-                        <span class="text-dim font-mono text-[11px]">{{ f.count }}</span>
-                      </button>
-                    </li>
-                  } @empty {
-                    <li class="text-dim text-xs px-2 py-1">Seçenek bulunamadı</li>
-                  }
-                </ul>
-              }
-            </div>
-
-            <!-- Etiketler -->
-            <div>
-              <button type="button" (click)="toggleSection('tag')"
-                class="w-full flex items-center justify-between py-3 px-1 text-left"
-                [attr.aria-expanded]="isOpen('tag')">
-                <span class="flex items-center gap-2 font-display font-semibold text-sm text-ink">
-                  Etiketler
-                  @if (tag()) {
-                    <span class="px-2 py-0.5 rounded-full da-grad text-[10px] font-semibold">{{ tag() }}</span>
-                  }
-                </span>
-                <mat-icon class="!text-dim transition-transform duration-200" [class.rotate-180]="isOpen('tag')"
-                  style="font-size:20px;width:20px;height:20px">expand_more</mat-icon>
-              </button>
-              @if (isOpen('tag')) {
-                <div class="pb-3 flex flex-wrap gap-1.5">
-                  @for (f of facetList('tags'); track f.value) {
-                    <button type="button" (click)="pick('tag', f.value)"
-                      [class]="isActive('tag', f.value)
-                        ? 'text-xs px-2.5 py-1 rounded-full da-grad font-semibold'
-                        : 'text-xs px-2.5 py-1 rounded-full bg-panel text-muted border border-line/10 hover:border-accent2/40 hover:text-accent2 transition'">
-                      {{ f.value }}
-                    </button>
-                  } @empty {
-                    <span class="text-dim text-xs px-1">Etiket bulunamadı</span>
+                  @if (isOpen(s.name)) {
+                    @if (s.view === 'list') {
+                      <ul class="list-none m-0 px-2 pb-3 space-y-0.5 [scrollbar-width:thin]" [class.max-h-64]="s.mono" [class.overflow-y-auto]="s.mono">
+                        @for (f of facetList(s.facet); track f.value) {
+                          <li>
+                            <button type="button" (click)="pick(s.name, f.value)" [attr.aria-pressed]="isActive(s.name, f.value)"
+                              class="w-full flex items-center gap-2.5 m-0 px-2.5 py-2 rounded-xl border-0 text-left font-sans text-sm cursor-pointer transition"
+                              [class]="isActive(s.name, f.value) ? 'bg-accent2/10 text-accent2 font-semibold' : 'bg-transparent text-muted hover:bg-panel hover:text-ink'">
+                              <span class="w-4 h-4 rounded-full border-2 border-solid shrink-0 inline-flex items-center justify-center transition"
+                                [class]="isActive(s.name, f.value) ? 'border-accent2' : 'border-line/25'">
+                                @if (isActive(s.name, f.value)) { <span class="w-2 h-2 rounded-full bg-accent2"></span> }
+                              </span>
+                              <span class="flex-1 min-w-0 truncate" [class.font-mono]="s.mono" [class.text-xs]="s.mono">{{ optionLabel(s, f.value) }}</span>
+                              <span class="shrink-0 min-w-[24px] px-1.5 py-px rounded-md text-center font-mono text-[11px] font-normal"
+                                [class]="isActive(s.name, f.value) ? 'bg-accent2/15 text-accent2' : 'bg-panel text-dim'">{{ f.count }}</span>
+                            </button>
+                          </li>
+                        } @empty {
+                          <li class="px-2.5 py-1 text-xs text-dim">{{ s.empty }}</li>
+                        }
+                      </ul>
+                    } @else {
+                      <div class="px-4 pb-4 flex flex-wrap gap-1.5">
+                        @for (f of facetList(s.facet); track f.value) {
+                          <button type="button" (click)="pick(s.name, f.value)" [attr.aria-pressed]="isActive(s.name, f.value)"
+                            class="inline-flex items-center gap-1.5 m-0 px-3 py-1.5 rounded-lg border border-solid font-sans text-xs font-medium cursor-pointer transition"
+                            [class]="isActive(s.name, f.value) ? 'border-accent2/50 bg-accent2/10 text-accent2' : 'border-line/15 bg-bg text-muted hover:border-accent2/40 hover:text-ink'">
+                            {{ optionLabel(s, f.value) }}
+                            <span class="font-mono text-[10px] opacity-60">{{ f.count }}</span>
+                          </button>
+                        } @empty {
+                          <span class="text-xs text-dim">{{ s.empty }}</span>
+                        }
+                      </div>
+                    }
                   }
                 </div>
               }
@@ -204,7 +146,7 @@ interface SearchResponse {
             <div class="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 text-accent border border-accent/20 text-sm">
               <mat-icon style="font-size:16px;width:16px;height:16px">school</mat-icon>
               <span>Kazanım: <span class="font-mono">{{ outcome() }}</span></span>
-              <button type="button" (click)="setFilter('outcome', null)" class="ml-1 hover:text-accent2" aria-label="Kazanım filtresini temizle">
+              <button type="button" (click)="setFilter('outcome', null)" class="ml-1 m-0 p-0 inline-flex bg-transparent border-0 text-inherit cursor-pointer hover:text-accent2" aria-label="Kazanım filtresini temizle">
                 <mat-icon style="font-size:16px;width:16px;height:16px">close</mat-icon>
               </button>
             </div>
@@ -295,6 +237,17 @@ export class DiscoverComponent implements OnInit {
   readonly total = signal(0);
   readonly loading = signal(false);
 
+  readonly sections: FilterSection[] = [
+    { name: 'subject', facet: 'subject', title: 'Dersler', view: 'list', empty: 'Seçenek bulunamadı' },
+    { name: 'grade', facet: 'gradeLevel', title: 'Sınıf Seviyesi', view: 'chips', empty: 'Seçenek bulunamadı' },
+    { name: 'outcome', facet: 'outcome', title: 'Kazanımlar', view: 'list', mono: true, empty: 'Seçenek bulunamadı' },
+    { name: 'tag', facet: 'tags', title: 'Etiketler', view: 'chips', empty: 'Etiket bulunamadı' },
+  ];
+
+  /** Mobilde filtre paneli varsayılan kapalı (md ve üstünde her zaman açık). */
+  readonly filtersOpen = signal(false);
+  readonly activeCount = computed(() => [this.subject(), this.grade(), this.tag(), this.outcome()].filter(Boolean).length);
+
   /** Açık/kapalı filtre bölümleri (accordion). Dersler varsayılan açık. */
   readonly openSections = signal<Record<string, boolean>>({ subject: true, grade: false, outcome: false, tag: false });
 
@@ -304,23 +257,27 @@ export class DiscoverComponent implements OnInit {
   }
 
   /** facets() içinden ilgili listeyi döndürür (backend anahtarları: subject/gradeLevel/tags/outcome). */
-  facetList(key: 'subject' | 'gradeLevel' | 'tags' | 'outcome'): Array<{ value: string | number; count: number }> {
+  facetList(key: FacetKey): Array<{ value: string | number; count: number }> {
     return this.facets()[key] ?? [];
   }
 
-  private activeValue(name: 'subject' | 'grade' | 'tag' | 'outcome'): string | null {
+  activeValue(name: FilterName): string | null {
     return name === 'subject' ? this.subject()
       : name === 'grade' ? this.grade()
       : name === 'tag' ? this.tag()
       : this.outcome();
   }
 
-  isActive(name: 'subject' | 'grade' | 'tag' | 'outcome', value: string | number): boolean {
+  optionLabel(section: FilterSection, value: string | number): string {
+    return section.name === 'grade' ? `${value}. Sınıf` : String(value);
+  }
+
+  isActive(name: FilterName, value: string | number): boolean {
     return this.activeValue(name) === String(value);
   }
 
   /** Bir değeri seçer; zaten seçiliyse kaldırır (kümülatif: diğer filtreler korunur). */
-  pick(name: 'subject' | 'grade' | 'tag' | 'outcome', value: string | number): void {
+  pick(name: FilterName, value: string | number): void {
     const v = String(value);
     this.setFilter(name, this.isActive(name, value) ? null : v);
   }
@@ -367,7 +324,7 @@ export class DiscoverComponent implements OnInit {
     });
   }
 
-  setFilter(name: 'subject' | 'grade' | 'tag' | 'outcome', value: string | null): void {
+  setFilter(name: FilterName, value: string | null): void {
     const qp = { ...this.route.snapshot.queryParams, [name]: value ?? undefined };
     this.router.navigate([], { queryParams: qp });
   }
