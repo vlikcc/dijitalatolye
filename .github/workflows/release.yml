@@ -147,3 +147,61 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
           provenance: false
+
+  # main'e push'ta tum imajlar :main etiketiyle yayinlaninca Dokploy'u tetikler (Dokploy'da IMAGE_TAG=main,
+  # git otomatik deploy'u kapali). Imaj build'lerinden biri bile basarisizsa bu adim calismaz.
+  # Geri donus: Dokploy env'de IMAGE_TAG'i onceki sha-<commit> etiketine cekip Deploy.
+  deploy:
+    name: Deploy (Dokploy)
+    needs: [build-images]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions: {}
+    concurrency:
+      group: dokploy-deploy
+      cancel-in-progress: false
+    env:
+      DOKPLOY_URL: ${{ vars.DOKPLOY_URL }}
+      DOKPLOY_COMPOSE_ID: ${{ vars.DOKPLOY_COMPOSE_ID }}
+      DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+      PUBLIC_URL: ${{ vars.PUBLIC_URL || 'https://dijitalatolye.velikececi.com' }}
+    steps:
+      - name: Dokploy deploy tetikle ve sonucu bekle
+        run: |
+          set -euo pipefail
+          if [ -z "${DOKPLOY_API_KEY}" ] || [ -z "${DOKPLOY_URL}" ] || [ -z "${DOKPLOY_COMPOSE_ID}" ]; then
+            echo "::warning::DOKPLOY_URL / DOKPLOY_COMPOSE_ID / DOKPLOY_API_KEY tanimli degil; deploy atlandi."
+            exit 0
+          fi
+          api() { curl -sS --fail-with-body -m 30 -H "x-api-key: ${DOKPLOY_API_KEY}" "$@"; }
+
+          # Saat kaymasina karsi 30 sn pay.
+          started=$(date -u -d '-30 seconds' +%Y-%m-%dT%H:%M:%S)
+          api -X POST "${DOKPLOY_URL}/api/compose.deploy" -H "Content-Type: application/json" \
+            -d "{\"composeId\":\"${DOKPLOY_COMPOSE_ID}\"}"
+          echo
+
+          # Dokploy deploy'u kuyruga alir; bu tetiklemeden sonra baslayan en yeni deployment'i izle.
+          for i in $(seq 1 60); do
+            sleep 15
+            status=$(api "${DOKPLOY_URL}/api/compose.one?composeId=${DOKPLOY_COMPOSE_ID}" \
+              | jq -r --arg s "$started" '[.deployments[] | select(.createdAt >= $s)] | sort_by(.createdAt) | last | .status // "pending"')
+            echo "deployment: ${status}"
+            case "$status" in
+              done) exit 0 ;;
+              error) echo "::error::Dokploy deployment basarisiz (Dokploy panelindeki deployment loguna bakin)."; exit 1 ;;
+            esac
+          done
+          echo "::error::Dokploy deployment 15 dakikada tamamlanmadi."
+          exit 1
+
+      - name: Canli saglik kontrolu
+        if: env.DOKPLOY_API_KEY != ''
+        run: |
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -m 10 "${PUBLIC_URL}/health" || true)
+            [ "$code" = "200" ] && { echo "health 200"; exit 0; }
+            sleep 15
+          done
+          echo "::error::${PUBLIC_URL}/health 200 donmedi."
+          exit 1

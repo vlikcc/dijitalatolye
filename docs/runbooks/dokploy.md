@@ -20,9 +20,27 @@ Dokploy (Traefik) üzerinde tek compose uygulaması olarak çalışır. TLS'i Tr
 
 ## Sürüm yükseltme / geri dönüş
 
-İmajları GitHub Actions (`release.yml`) derleyip `ghcr.io/vlikcc/dijitalatolye-<servis>:sha-<commit>` olarak yayınlar.
-Dokploy ortamında `IMAGE_TAG`'i yeni `sha-…` etiketine çekip **Deploy** edin; geri dönmek için önceki etikete çekin.
-Sunucuda derleme yapılmaz.
+İmajları GitHub Actions (`release.yml`) derleyip `ghcr.io/vlikcc/dijitalatolye-<servis>` altında `main`, `latest` ve
+`sha-<commit>` etiketleriyle yayınlar. Sunucuda derleme yapılmaz.
+
+**Otomatik deploy (varsayılan):** Dokploy ortamında `IMAGE_TAG=main`, Dokploy'un git otomatik deploy'u **kapalı**.
+`main`'e her push'ta testler ve 13 imajın hepsi başarılıysa `release.yml` içindeki **Deploy (Dokploy)** işi Dokploy API'sini
+çağırır, deployment'ın bitmesini bekler ve `/health`'i kontrol eder. Git otomatik deploy'u açık olursa Dokploy push anında,
+imajlar daha derlenmeden deploy eder ve bir önceki sürümü çeker — açmayın.
+
+GitHub ayarları (Settings → Secrets and variables → Actions):
+
+| Ad | Tür | Değer |
+|---|---|---|
+| `DOKPLOY_API_KEY` | secret | Dokploy → Settings → API keys |
+| `DOKPLOY_URL` | variable | `https://dokploy.yargisalzeka.com` |
+| `DOKPLOY_COMPOSE_ID` | variable | `dijitalatolye` compose'unun kimliği (`/api/project.all`) |
+| `PUBLIC_URL` | variable (isteğe bağlı) | Sağlık kontrolü adresi; varsayılan `https://dijitalatolye.velikececi.com` |
+
+Bunlardan biri eksikse deploy işi uyarı verip atlanır (imajlar yine yayınlanır).
+
+**Geri dönüş:** Dokploy ortamında `IMAGE_TAG`'i önceki `sha-…` etiketine çekip **Deploy** edin. Sonraki `main` push'u
+`IMAGE_TAG=main`'e dönülene kadar yine o sabit etiketi deploy eder; düzeltme yayınlanınca `IMAGE_TAG=main`'e geri alın.
 
 ## Erişim
 
