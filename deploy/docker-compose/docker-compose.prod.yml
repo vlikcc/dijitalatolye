@@ -147,7 +147,10 @@ services:
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      # rabbitmq-diagnostics healthcheck'te root olarak calisir; broker yavas acilirsa .erlang.cookie'yi
+      # root sahipli olusturur ve broker onu okuyamayip cokar (eacces). AMQP portu yalnizca broker tamamen
+      # acildiginda dinlenir; cerez gerektirmeyen bu kontrol yeterli.
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 5672"]
       interval: 30s
       timeout: 10s
       retries: 10

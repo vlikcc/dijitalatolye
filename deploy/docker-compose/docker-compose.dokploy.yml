@@ -1266,10 +1266,8 @@ services:
       retries: 10
       start_period: "60s"
       test:
-        - "CMD"
-        - "rabbitmq-diagnostics"
-        - "-q"
-        - "ping"
+        - "CMD-SHELL"
+        - "nc -z 127.0.0.1 5672"
       timeout: "10s"
     image: "rabbitmq:3.13-management-alpine"
     logging:
