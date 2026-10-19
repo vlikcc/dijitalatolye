@@ -316,6 +316,10 @@ services:
       Minio__AccessKey: ${POSTGRES_USER}
       Minio__SecretKey: ${COMPOSE_DEV_SECRET}
       Minio__UseSsl: "false"
+      Llm__Provider: ${AIMODERATION_PROVIDER:-evren}
+      Llm__EvrenApiKey: ${EVREN_API_KEY:-}
+      Llm__EvrenEndpoint: ${EVREN_BASE_URL:-https://evren-llmapi.ssyz.org.tr/v1}
+      Llm__EvrenModels: ${EVREN_MODERATION_MODELS:-deepseek-v4.1-flash,glm-5.3}
       Llm__DeepSeekApiKey: ${DEEPSEEK_API_KEY:-}
       Llm__DeepSeekModel: deepseek-chat
       Llm__DeepSeekEndpoint: https://api.deepseek.com/v1

@@ -20,7 +20,8 @@ make prod-env
 # .env.prod dosyası oluştu, parolalar otomatik üretildi (chmod 600).
 # Şimdi .env.prod'u açın:
 #   - PUBLIC_DOMAIN  (lokal test: 'localhost' kalsın)
-#   - DEEPSEEK_API_KEY (zorunlu — AI moderasyon için)
+#   - EVREN_API_KEY (zorunlu — AI moderasyon ve AI Oyun Stüdyosu için)
+#   - DEEPSEEK_API_KEY (AI metadata önerisi için; AIMODERATION_PROVIDER=deepseek ise moderasyon için de)
 #   - GOOGLE_OAUTH_CLIENT_ID / SECRET (opsiyonel)
 #   - SMTP_* (lokalde mailhog profili kullanılabilir)
 
@@ -141,7 +142,7 @@ make prod-nuke                     # TÜM verileri sil (onaylı)
 | `make prod-up` "POSTGRES_PASSWORD is required" | `.env.prod` içinde secret'lar boş — `make prod-env` tekrar koşun |
 | Tarayıcı `NET::ERR_CERT_AUTHORITY_INVALID` (lokalde) | Beklenen: Caddy local CA. Continue'a basın |
 | Identity 503 / migrate hatası | `docker compose ... logs identity` — Postgres `healthy` mi? |
-| AI moderation cevap vermiyor | `.env.prod`'da `DEEPSEEK_API_KEY` boş olabilir |
+| AI moderation cevap vermiyor / her içerik 30 puanla AutoRejected | `aimoderation` loglarında `EVREN API error` (veya `DeepSeek API error`) arayın: 401 → anahtar geçersiz, 503 → model kullanılamıyor (`EVREN_MODERATION_MODELS` listesindeki sıradaki model denenir) |
 | 502 / SignalR kopma | Caddy log + gateway log: cluster destination hostname'leri (`identity:8080`) çözülüyor mu |
 | ClamAV 5 dakika boyunca unhealthy | Normal: virüs imza veritabanı ilk indirme (start_period: 5m) |
 
@@ -154,7 +155,7 @@ make prod-nuke                     # TÜM verileri sil (onaylı)
 - [ ] Geri yükleme (`scripts/prod-restore.sh`) test host'unda denendi
 - [ ] `CORS_ORIGINS` sadece üretim alan adı (virgülle birden fazla)
 - [ ] `SMTP_*` gerçek e-posta sağlayıcısına yönlendirildi (mailhog profili **kullanılmadı**)
-- [ ] `DEEPSEEK_API_KEY` üretim anahtarı
+- [ ] `EVREN_API_KEY` üretim anahtarı (`AIMODERATION_PROVIDER=evren`)
 - [ ] `GOOGLE_OAUTH_CLIENT_ID/SECRET` üretim Google Cloud projesinden
 - [ ] Sunucuda firewall (ufw) sadece 22, 80, 443 açık
 - [ ] `.env.prod` `chmod 600`, sunucuda `/opt/dijitalatolye/` altında, repo'ya commit edilmedi

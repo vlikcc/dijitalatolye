@@ -8,7 +8,6 @@ using DijitalAtolye.AIModeration.API.StaticAnalysis;
 using DijitalAtolye.BuildingBlocks.Authentication;
 using DijitalAtolye.BuildingBlocks.EventBus.Configuration;
 using DijitalAtolye.BuildingBlocks.WebHostExtensions;
-using Microsoft.Extensions.Http.Resilience;
 using Minio;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -38,16 +37,8 @@ builder.Services.AddMinio(c => c
     .WithSSL(bool.Parse(minio["UseSsl"] ?? "false"))
     .Build());
 
-// LLM
-builder.Services.Configure<LlmProviderOptions>(builder.Configuration.GetSection("Llm"));
-builder.Services.AddHttpClient<ILlmProvider, DeepSeekProvider>()
-    .AddStandardResilienceHandler(o =>
-    {
-        o.Retry.MaxRetryAttempts = 3;
-        o.AttemptTimeout.Timeout = TimeSpan.FromSeconds(60);
-        o.TotalRequestTimeout.Timeout = TimeSpan.FromMinutes(3);
-        o.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(120);
-    });
+// LLM — Llm:Provider ile seçilir (evren | deepseek).
+builder.Services.AddModerationLlm(builder.Configuration);
 
 builder.Services.AddSingleton<IStaticAnalyzer, HtmlJsStaticAnalyzer>();
 builder.Services.AddScoped<ModerationPipeline>();

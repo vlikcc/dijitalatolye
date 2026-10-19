@@ -16,7 +16,7 @@ MEB müfredatına uygun (sınıf, ders, kazanım) içerik kataloğu sunan, kalit
 - **Auth:** ASP.NET Core Identity + JWT (OpenIddict uyumlu yol haritası)
 - **Object storage:** MinIO (S3 uyumlu)
 - **Dosya güvenliği:** [Guard](https://github.com/gorkemio/guard) — ClamAV/YARA tarama, admin onayı, HMAC imzalı teslim (`ghcr.io/gorkemio/guard`)
-- **LLM:** DeepSeek (birincil), Gemini + Claude (fallback)
+- **LLM:** EVREN (AI moderasyon + AI Oyun Stüdyosu), DeepSeek (AI metadata önerisi; isteğe bağlı moderasyon)
 - **Arama:** Elasticsearch
 - **Prod deploy:** Docker Compose + Caddy (TLS), opsiyonel K3s/Helm
 - **Observability:** OpenTelemetry, Sentry; opsiyonel Loki/Prometheus/Grafana stack
@@ -51,13 +51,14 @@ Detaylar: [`02-Sistem-Mimarisi.md`](02-Sistem-Mimarisi.md), [`docs/adr/`](docs/a
 - [Docker Desktop](https://www.docker.com/products/docker-desktop) veya Podman
 - [Node.js 22+](https://nodejs.org/) (frontend geliştirme için)
 - [GNU Make](https://www.gnu.org/software/make/) (opsiyonel)
-- **DeepSeek API key** — AI moderasyon ve içerik metadata çıkarımı için
+- **EVREN API key** — AI moderasyon ve AI Oyun Stüdyosu için
+- **DeepSeek API key** — içerik metadata çıkarımı için
 
 ### Seçenek A — Sadece altyapı + `dotnet run` (günlük geliştirme)
 
 ```bash
 make env          # .env + COMPOSE_DEV_SECRET + JWT_SIGNING_KEY
-# .env içine DEEPSEEK_API_KEY yazın
+# .env içine EVREN_API_KEY ve DEEPSEEK_API_KEY yazın
 
 make up           # Postgres, RabbitMQ, Redis, ES, MinIO, MongoDB, Mailhog
 # Migration'lar servis açılışında otomatik uygulanır
@@ -92,7 +93,7 @@ Tek sunucuda production konfigürasyonu — Caddy 80/443, kapalı veri portları
 
 ```bash
 make prod-env       # .env.prod oluşturur, temel secret'ları üretir
-# .env.prod: DEEPSEEK_API_KEY + GUARD_HMAC_SECRET, GUARD_HMAC_SECRETS, vb.
+# .env.prod: EVREN_API_KEY, DEEPSEEK_API_KEY + GUARD_HMAC_SECRET, GUARD_HMAC_SECRETS, vb.
 
 make prod-up-mail   # SMTP testi için Mailhog profili ile
 # veya: make prod-up
