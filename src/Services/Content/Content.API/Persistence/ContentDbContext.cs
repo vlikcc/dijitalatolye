@@ -18,6 +18,9 @@ public sealed class ContentDbContext : DbContext
     public DbSet<ContentFavorite> Favorites => Set<ContentFavorite>();
     public DbSet<ContentComment> Comments => Set<ContentComment>();
     public DbSet<ContentRating> Ratings => Set<ContentRating>();
+    public DbSet<GameStudioSession> StudioSessions => Set<GameStudioSession>();
+    public DbSet<GameStudioTurn> StudioTurns => Set<GameStudioTurn>();
+    public DbSet<UserAiCredential> AiCredentials => Set<UserAiCredential>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -45,6 +48,8 @@ public sealed class ContentDbContext : DbContext
             b.Property(c => c.Tags).HasColumnType("text[]");
             b.Property(c => c.AiSuggestionJson).HasColumnType("text");
             b.Property(c => c.AutoRejectReason).HasColumnType("text");
+            b.Property(c => c.Source).HasConversion<string>().HasMaxLength(20).HasDefaultValue(ContentSource.Upload);
+            b.Property(c => c.GeneratedByModel).HasMaxLength(100);
             b.HasIndex(c => c.AuthorUserId);
             b.HasIndex(c => c.State);
             b.HasIndex(c => c.Type);
@@ -89,6 +94,49 @@ public sealed class ContentDbContext : DbContext
             b.ToTable("ContentRatings");
             b.HasKey(x => x.Id);
             b.HasIndex(x => new { x.ContentId, x.UserId }).IsUnique();
+        });
+
+        modelBuilder.Entity<GameStudioSession>(b =>
+        {
+            b.ToTable("StudioSessions");
+            b.HasKey(s => s.Id);
+            b.Property(s => s.Title).HasMaxLength(200).IsRequired();
+            b.Property(s => s.Idea).HasMaxLength(4000).IsRequired();
+            b.Property(s => s.Subjects).HasColumnType("text[]");
+            b.Property(s => s.GradeLevels).HasColumnType("integer[]");
+            b.Property(s => s.OutcomeCodes).HasColumnType("text[]");
+            b.Property(s => s.Model).HasMaxLength(100).IsRequired();
+            b.Property(s => s.KeySource).HasConversion<string>().HasMaxLength(20);
+            b.HasIndex(s => s.OwnerUserId);
+            b.HasMany(s => s.Turns).WithOne()
+                .HasForeignKey(t => t.SessionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<GameStudioTurn>(b =>
+        {
+            b.ToTable("StudioTurns");
+            b.HasKey(t => t.Id);
+            b.Property(t => t.UserPrompt).HasMaxLength(4000).IsRequired();
+            b.Property(t => t.Status).HasConversion<string>().HasMaxLength(20);
+            b.Property(t => t.Model).HasMaxLength(100).IsRequired();
+            b.Property(t => t.KeySource).HasConversion<string>().HasMaxLength(20);
+            b.Property(t => t.Html).HasColumnType("text");
+            b.Property(t => t.ChangeSummary).HasMaxLength(2000);
+            b.Property(t => t.Error).HasMaxLength(1000);
+            b.Property(t => t.PreviewKey).HasMaxLength(500);
+            b.HasIndex(t => new { t.SessionId, t.Seq }).IsUnique();
+            // Günlük kota sayımı: kullanıcının bugünkü platform anahtarlı turları.
+            b.HasIndex(t => new { t.OwnerUserId, t.CreatedAtUtc });
+            b.HasIndex(t => t.Status);
+        });
+
+        modelBuilder.Entity<UserAiCredential>(b =>
+        {
+            b.ToTable("UserAiCredentials");
+            b.HasKey(c => c.UserId);
+            b.Property(c => c.Provider).HasMaxLength(40).IsRequired();
+            b.Property(c => c.EncryptedApiKey).HasColumnType("text").IsRequired();
+            b.Property(c => c.KeyLast4).HasMaxLength(8).IsRequired();
         });
 
         modelBuilder.ApplyConfiguration(new OutboxMessageEntityConfiguration());

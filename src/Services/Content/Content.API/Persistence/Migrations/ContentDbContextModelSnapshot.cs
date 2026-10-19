@@ -103,6 +103,10 @@ namespace DijitalAtolye.Content.API.Persistence.Migrations
                     b.Property<int?>("DurationMinutes")
                         .HasColumnType("integer");
 
+                    b.Property<string>("GeneratedByModel")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.PrimitiveCollection<List<int>>("GradeLevels")
                         .IsRequired()
                         .HasColumnType("integer[]");
@@ -125,6 +129,13 @@ namespace DijitalAtolye.Content.API.Persistence.Migrations
                     b.Property<string>("Slug")
                         .HasMaxLength(220)
                         .HasColumnType("character varying(220)");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Upload");
 
                     b.Property<string>("State")
                         .IsRequired()
@@ -342,6 +353,177 @@ namespace DijitalAtolye.Content.API.Persistence.Migrations
                     b.ToTable("ContentVersions", "content");
                 });
 
+            modelBuilder.Entity("DijitalAtolye.Content.API.Domain.GameStudioSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ContentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.PrimitiveCollection<List<int>>("GradeLevels")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.Property<string>("Idea")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("KeySource")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.PrimitiveCollection<List<string>>("OutcomeCodes")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("SelectedTurnId")
+                        .HasColumnType("uuid");
+
+                    b.PrimitiveCollection<List<string>>("Subjects")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerUserId");
+
+                    b.ToTable("StudioSessions", "content");
+                });
+
+            modelBuilder.Entity("DijitalAtolye.Content.API.Domain.GameStudioTurn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ChangeSummary")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CompletionTokens")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Html")
+                        .HasColumnType("text");
+
+                    b.Property<string>("KeySource")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PreviewKey")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("ProgressChars")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PromptTokens")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("UserPrompt")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("OwnerUserId", "CreatedAtUtc");
+
+                    b.HasIndex("SessionId", "Seq")
+                        .IsUnique();
+
+                    b.ToTable("StudioTurns", "content");
+                });
+
+            modelBuilder.Entity("DijitalAtolye.Content.API.Domain.UserAiCredential", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EncryptedApiKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("KeyLast4")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("UserAiCredentials", "content");
+                });
+
             modelBuilder.Entity("DijitalAtolye.Content.API.Domain.ContentVersion", b =>
                 {
                     b.HasOne("DijitalAtolye.Content.API.Domain.Content", null)
@@ -351,9 +533,23 @@ namespace DijitalAtolye.Content.API.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("DijitalAtolye.Content.API.Domain.GameStudioTurn", b =>
+                {
+                    b.HasOne("DijitalAtolye.Content.API.Domain.GameStudioSession", null)
+                        .WithMany("Turns")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DijitalAtolye.Content.API.Domain.Content", b =>
                 {
                     b.Navigation("Versions");
+                });
+
+            modelBuilder.Entity("DijitalAtolye.Content.API.Domain.GameStudioSession", b =>
+                {
+                    b.Navigation("Turns");
                 });
 #pragma warning restore 612, 618
         }

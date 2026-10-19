@@ -54,6 +54,12 @@ public sealed class Content
     /// <summary>İçerik oluşturulurken yakalanan AI metadata önerisi (serileştirilmiş). Editör inceleme karşılaştırması için.</summary>
     public string? AiSuggestionJson { get; set; }
 
+    /// <summary>Yükleme mi, AI Oyun Stüdyosu üretimi mi.</summary>
+    public ContentSource Source { get; set; } = ContentSource.Upload;
+
+    /// <summary>AI Stüdyo içeriklerinde oyunu üreten EVREN modeli.</summary>
+    public string? GeneratedByModel { get; set; }
+
     public ICollection<ContentVersion> Versions { get; init; } = [];
 
     public bool CanTransitionTo(ContentState target) =>

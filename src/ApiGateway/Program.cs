@@ -56,7 +56,20 @@ builder.Services.AddRateLimiter(options =>
                 AutoReplenishment = true,
             }));
 
-    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(http =>
+    // AI Oyun Stüdyosu yazma istekleri (/api/contents/studio POST/PUT): her biri EVREN'de dakikalar süren
+    // üretim başlatabilir. Asıl sınır servisteki günlük kota + tek aktif tur kuralıdır; bu, ani patlamaya karşı.
+    options.AddPolicy("ai-generate", http =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: PartitionKey(http),
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true,
+            }));
+
+    options.GlobalLimiter =PartitionedRateLimiter.Create<HttpContext, string>(http =>
     {
         var key = PartitionKey(http);
         return RateLimitPartition.GetFixedWindowLimiter(

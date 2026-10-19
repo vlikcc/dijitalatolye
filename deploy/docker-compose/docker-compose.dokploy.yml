@@ -293,9 +293,14 @@ services:
       AiExtraction__DeepSeek__ApiKey: "${DEEPSEEK_API_KEY:-}"
       AiExtraction__DeepSeek__Endpoint: "${DEEPSEEK_BASE_URL:-https://api.deepseek.com}/v1"
       AiExtraction__DeepSeek__Model: "${DEEPSEEK_MODEL:-deepseek-chat}"
+      AiStudio__Evren__BaseUrl: "${EVREN_BASE_URL:-https://evren-llmapi.ssyz.org.tr/v1}"
+      AiStudio__Evren__DailyGenerationsPerUser: "${EVREN_DAILY_GENERATIONS_PER_USER:-20}"
+      AiStudio__Evren__DefaultModel: "${EVREN_MODEL:-qwen3.8-flash-next}"
+      AiStudio__Evren__PlatformApiKey: "${EVREN_API_KEY:-}"
       Catalog__BaseUrl: "http://catalog:8080"
       ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=content;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       DOTNET_RUNNING_IN_CONTAINER: "true"
+      DataProtection__KeysPath: "/app/dp-keys"
       Database__AutoMigrate: "true"
       Jwt__Audience: "${JWT_AUDIENCE:-dijitalatolye-api}"
       Jwt__Authority: "http://identity:8080"
@@ -339,6 +344,11 @@ services:
     networks:
       internal: null
     restart: "unless-stopped"
+    volumes:
+      - source: "content-dpkeys"
+        target: "/app/dp-keys"
+        type: "volume"
+        volume: {}
   elasticsearch:
     environment:
       - "discovery.type=single-node"
@@ -1589,6 +1599,7 @@ networks:
 volumes:
   caddy-config: {}
   caddy-data: {}
+  content-dpkeys: {}
   es-data: {}
   guard-clamav-data: {}
   guard-data: {}

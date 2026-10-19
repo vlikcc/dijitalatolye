@@ -28,6 +28,7 @@ interface ModerationReport {
 interface ContentMeta {
   id: string; subjects?: string[]; gradeLevels?: number[]; difficulty?: string | null;
   outcomeCodes: string[]; tags: string[]; aiSuggestionJson?: string | null;
+  source?: 'Upload' | 'AiStudio'; generatedByModel?: string | null;
 }
 
 interface AiSuggestion {
@@ -49,6 +50,11 @@ type Decision = 'Approved' | 'Rejected' | 'RevisionRequested';
       <section class="grid lg:grid-cols-2 gap-6">
         <div>
           <h1 class="text-xl font-bold mb-4 text-ink">{{ item()!.title }}</h1>
+          @if (content()?.source === 'AiStudio') {
+            <p class="-mt-2 mb-4 inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-800 border border-violet-200">
+              ✨ AI Oyun Stüdyosu ile üretildi{{ content()!.generatedByModel ? ' · ' + content()!.generatedByModel : '' }}
+            </p>
+          }
           <div class="bg-surface border border-line/10 rounded p-4 mb-4">
             <h2 class="font-semibold mb-2">AI Raporu</h2>
             @if (report()) {

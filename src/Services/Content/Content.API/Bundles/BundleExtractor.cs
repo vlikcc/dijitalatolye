@@ -105,6 +105,13 @@ public sealed class BundleExtractor
         return new ExtractResult(entryKey, fileCount);
     }
 
+    /// <summary>Tek dosyayı public-read bucket'a yazar (AI Stüdyo önizlemeleri: studio-preview/{oturum}/{tur}/index.html).</summary>
+    public async Task PublishFileAsync(string publishedBucket, string key, byte[] data, CancellationToken ct)
+    {
+        await EnsurePublicBucketAsync(publishedBucket, ct);
+        await UploadAsync(publishedBucket, key, data, GetContentType(Path.GetExtension(key)), ct);
+    }
+
     private async Task UploadAsync(string bucket, string key, byte[] data, string contentType, CancellationToken ct)
     {
         using var stream = new MemoryStream(data);

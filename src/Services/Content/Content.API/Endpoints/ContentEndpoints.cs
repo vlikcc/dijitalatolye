@@ -679,7 +679,7 @@ public static class ContentEndpoints
         return routes;
     }
 
-    private sealed record BundleUploadAttempt(
+    internal sealed record BundleUploadAttempt(
         string? Bucket,
         string? Key,
         BundleValidationResult? Validation,
@@ -710,10 +710,21 @@ public static class ContentEndpoints
         await using var input = file.OpenReadStream();
         using var buffer = new MemoryStream();
         await input.CopyToAsync(buffer, ct);
-        var bytes = buffer.ToArray();
+        return await StoreBundleBytesAsync(buffer.ToArray(), file.FileName, file.ContentType, userId, minio, validator, ct);
+    }
 
+    /// <summary>Bundle baytlarını içerik bucket'ına yazar ve doğrular. Yükleme ve AI Stüdyo gönderimi ortak yolu.</summary>
+    internal static async Task<BundleUploadAttempt> StoreBundleBytesAsync(
+        byte[] bytes,
+        string fileName,
+        string? contentType,
+        Guid userId,
+        IMinioClient minio,
+        BundleValidator validator,
+        CancellationToken ct)
+    {
         const string bucket = "dijitalatolye-content";
-        var key = $"{userId:N}/{Guid.NewGuid():N}/{SanitizeFileName(file.FileName)}";
+        var key = $"{userId:N}/{Guid.NewGuid():N}/{SanitizeFileName(fileName)}";
 
         await EnsureBucketAsync(minio, bucket, ct);
         using (var putStream = new MemoryStream(bytes))
@@ -723,7 +734,7 @@ public static class ContentEndpoints
                 .WithObject(key)
                 .WithStreamData(putStream)
                 .WithObjectSize(bytes.LongLength)
-                .WithContentType(file.ContentType ?? "application/octet-stream"), ct);
+                .WithContentType(contentType ?? "application/octet-stream"), ct);
         }
 
         try
@@ -860,7 +871,7 @@ public static class ContentEndpoints
         };
     }
 
-    private static List<string> NormalizeSubjects(IReadOnlyCollection<string>? values) =>
+    internal static List<string> NormalizeSubjects(IReadOnlyCollection<string>? values) =>
         values is null
             ? []
             : values
@@ -869,7 +880,7 @@ public static class ContentEndpoints
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-    private static List<int> NormalizeGradeLevels(IReadOnlyCollection<int>? values) =>
+    internal static List<int> NormalizeGradeLevels(IReadOnlyCollection<int>? values) =>
         values is null
             ? []
             : values

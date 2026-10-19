@@ -6,6 +6,8 @@ using DijitalAtolye.BuildingBlocks.WebHostExtensions;
 using DijitalAtolye.Content.API.Consumers;
 using DijitalAtolye.Content.API.Endpoints;
 using DijitalAtolye.Content.API.Persistence;
+using DijitalAtolye.Content.API.Studio;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Minio;
 
@@ -63,6 +65,22 @@ builder.Services.AddHttpClient<DijitalAtolye.Content.API.AiExtraction.IContentMe
     c.Timeout = TimeSpan.FromSeconds(60);
 });
 
+// AI Oyun Stüdyosu (EVREN LLM). Kullanıcı anahtarları DataProtection ile şifrelenir; anahtarlar kalıcı
+// değilse container yeniden başlatıldığında kayıtlı anahtarlar çözülemez.
+var dataProtection = builder.Services.AddDataProtection().SetApplicationName("dijitalatolye-content");
+var dpKeysPath = builder.Configuration["DataProtection:KeysPath"];
+if (!string.IsNullOrWhiteSpace(dpKeysPath))
+{
+    dataProtection.PersistKeysToFileSystem(new DirectoryInfo(dpKeysPath));
+}
+builder.Services.AddMemoryCache();
+builder.Services.Configure<StudioOptions>(builder.Configuration.GetSection(StudioOptions.SectionName));
+builder.Services.AddSingleton<StudioKeyProtector>();
+builder.Services.AddSingleton<GameGenerationQueue>();
+builder.Services.AddHostedService<GameGenerationWorker>();
+// Üretim dakikalar sürebilir: zaman aşımı istemci içinde (StudioOptions.TimeoutSeconds) yönetilir; retry yok.
+builder.Services.AddHttpClient<IEvrenChatClient, EvrenChatClient>(c => c.Timeout = Timeout.InfiniteTimeSpan);
+
 builder.Services.AddSingleton<DijitalAtolye.Content.API.Endpoints.PlayPresignClient>(_ =>
 {
     var publicUri = !string.IsNullOrWhiteSpace(minioOpts.PublicEndpoint)
@@ -95,6 +113,7 @@ app.MapContentEndpoints();
 app.MapEngagementEndpoints();
 app.MapPlayEndpoints();
 app.MapContentStatsEndpoints();
+app.MapStudioEndpoints();
 
 if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {

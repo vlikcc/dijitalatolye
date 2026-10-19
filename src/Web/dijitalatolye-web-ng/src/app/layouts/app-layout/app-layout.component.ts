@@ -31,6 +31,8 @@ type Theme = 'light' | 'dark';
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">İçeriklerim</a>
               <a routerLink="/teacher/contents/new" routerLinkActive="!da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Yükle</a>
+              <a routerLink="/teacher/studio" routerLinkActive="!da-grad !text-white !rounded-full"
+                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition whitespace-nowrap">AI Stüdyo</a>
               <a routerLink="/teacher/assignments" routerLinkActive="!da-grad !text-white !rounded-full"
                  class="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-accent hover:bg-accent/5 transition">Ödevler</a>
               <a routerLink="/teacher/classes" routerLinkActive="!da-grad !text-white !rounded-full"

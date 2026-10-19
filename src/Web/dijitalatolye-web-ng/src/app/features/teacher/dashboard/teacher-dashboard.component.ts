@@ -29,11 +29,18 @@ interface ContentItem {
             <h1 class="text-2xl font-extrabold text-ink">Kontrol Paneli</h1>
             <p class="text-sm text-muted mt-1">İçeriklerinize ait güncel durum özeti.</p>
           </div>
-          <a routerLink="/teacher/contents/new"
-             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold shadow-md shadow-brand-600/20">
-            <mat-icon style="font-size:20px;width:20px;height:20px">add_circle</mat-icon>
-            Yeni İçerik Yükle
-          </a>
+          <div class="flex flex-wrap gap-2 justify-end">
+            <a routerLink="/teacher/studio"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-brand-300 bg-brand-50 text-brand-800 font-semibold">
+              <mat-icon style="font-size:20px;width:20px;height:20px">auto_awesome</mat-icon>
+              AI ile Oyun Üret
+            </a>
+            <a routerLink="/teacher/contents/new"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl da-grad text-white font-semibold shadow-md shadow-brand-600/20">
+              <mat-icon style="font-size:20px;width:20px;height:20px">add_circle</mat-icon>
+              Yeni İçerik Yükle
+            </a>
+          </div>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

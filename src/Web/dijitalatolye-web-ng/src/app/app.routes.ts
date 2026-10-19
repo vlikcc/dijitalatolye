@@ -74,6 +74,16 @@ export const APP_ROUTES: Routes = [
         loadComponent: () => import('./features/teacher/content-detail/teacher-content-detail.component').then((m) => m.TeacherContentDetailComponent),
       },
       {
+        path: 'teacher/studio',
+        canActivate: [roleGuard(['Teacher', 'Editor', 'Admin', 'SuperAdmin'])],
+        loadComponent: () => import('./features/teacher/studio/studio-list.component').then((m) => m.StudioListComponent),
+      },
+      {
+        path: 'teacher/studio/:id',
+        canActivate: [roleGuard(['Teacher', 'Editor', 'Admin', 'SuperAdmin'])],
+        loadComponent: () => import('./features/teacher/studio/studio-session.component').then((m) => m.StudioSessionComponent),
+      },
+      {
         path: 'teacher/collections',
         redirectTo: '/collections',
         pathMatch: 'full',

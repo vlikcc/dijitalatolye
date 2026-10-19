@@ -410,6 +410,14 @@ services:
       AiExtraction__DeepSeek__ApiKey: ${DEEPSEEK_API_KEY:-}
       AiExtraction__DeepSeek__Endpoint: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}/v1
       AiExtraction__DeepSeek__Model: ${DEEPSEEK_MODEL:-deepseek-chat}
+      AiStudio__Evren__BaseUrl: ${EVREN_BASE_URL:-https://evren-llmapi.ssyz.org.tr/v1}
+      AiStudio__Evren__PlatformApiKey: ${EVREN_API_KEY:-}
+      AiStudio__Evren__DefaultModel: ${EVREN_MODEL:-qwen3.8-flash-next}
+      AiStudio__Evren__DailyGenerationsPerUser: ${EVREN_DAILY_GENERATIONS_PER_USER:-20}
+      # AI Stüdyo kullanıcı EVREN anahtarlarını şifreleyen anahtarlar restart'lar arasında korunur
+      DataProtection__KeysPath: /app/dp-keys
+    volumes:
+      - content-dpkeys:/app/dp-keys
     expose: ["8080"]
     <<: *app-defaults
 
@@ -690,6 +698,7 @@ services:
 volumes:
   postgres-data:
   identity-dpkeys:
+  content-dpkeys:
   mongo-data:
   rabbitmq-data:
   redis-data:

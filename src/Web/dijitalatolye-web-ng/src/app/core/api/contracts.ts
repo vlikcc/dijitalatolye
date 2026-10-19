@@ -47,6 +47,9 @@ export interface ContentDetail extends ContentSummary {
   coverImageBucket?: string | null;
   coverImageKey?: string | null;
   aiSuggestionJson?: string | null;
+  /** Yükleme mi, AI Oyun Stüdyosu üretimi mi. */
+  source?: 'Upload' | 'AiStudio';
+  generatedByModel?: string | null;
 }
 
 export interface AiSuggestionInput {

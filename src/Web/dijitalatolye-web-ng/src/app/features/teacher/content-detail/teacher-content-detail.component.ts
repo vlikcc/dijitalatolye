@@ -50,6 +50,11 @@ interface OutcomeStat {
             <div>
               <p class="text-xs font-semibold uppercase tracking-wide text-dim">İçerik detayı</p>
               <h1 class="text-2xl font-extrabold text-ink mt-1">{{ content()!.title }}</h1>
+              @if (content()!.source === 'AiStudio') {
+                <p class="mt-2 inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-800 border border-violet-200">
+                  ✨ AI Oyun Stüdyosu ile üretildi{{ content()!.generatedByModel ? ' · ' + content()!.generatedByModel : '' }}
+                </p>
+              }
               <p class="text-sm text-muted mt-2">
                 {{ formatContentSubjects(content()!.subjects) }}
                 @if (content()!.gradeLevels?.length) { · {{ formatContentGradeLevels(content()!.gradeLevels) }} }

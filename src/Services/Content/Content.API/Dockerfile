@@ -12,6 +12,8 @@ ENV ASPNETCORE_URLS=http://+:8080 TZ=Europe/Istanbul
 WORKDIR /app
 EXPOSE 8080
 COPY --from=build /app/publish/ ./
+# DataProtection anahtar dizini (AI Stüdyo kullanıcı anahtarları; compose volume buraya baglanir)
+RUN mkdir -p /app/dp-keys && chown $APP_UID /app/dp-keys
 # Root olmayan kullanici (aspnet imajlarinda APP_UID=1654 tanimli)
 USER $APP_UID
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
