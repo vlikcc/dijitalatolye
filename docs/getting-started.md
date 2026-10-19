@@ -84,6 +84,8 @@ make run-notification     # http://localhost:5008
 make run-gateway          # http://localhost:5000  (tüm istekler buraya gelir)
 ```
 
+> **macOS / port 5000:** AirPlay Receiver (ControlCenter) `*:5000`'i dinler. Gateway `localhost:5000`'e yine bağlanır ve `localhost` istekleri gateway'e gider; ancak gateway kapalıyken `curl localhost:5000/...` `Server: AirTunes` başlıklı **403** döner. Bunu görürsen gateway çalışmıyor demektir. Kalıcı çözüm: AirPlay Receiver'ı kapat (Sistem Ayarları › Genel › AirDrop ve Handoff) ya da gateway'i başka portta çalıştır: `make run-gateway GATEWAY_PORT=5100` ve `src/Web/dijitalatolye-web-ng/proxy.conf.json` içindeki `target` değerlerini aynı porta güncelle.
+
 > **İpucu:** [Tilt](https://tilt.dev), [Aspire](https://learn.microsoft.com/dotnet/aspire/) veya [tmux](https://github.com/tmux/tmux) ile hepsini tek komutla yönetebilirsin. Bkz. `Tiltfile` (Faz 1'de eklenir).
 
 ## 7. Frontend
