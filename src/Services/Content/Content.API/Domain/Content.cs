@@ -60,6 +60,9 @@ public sealed class Content
     /// <summary>AI Stüdyo içeriklerinde oyunu üreten EVREN modeli.</summary>
     public string? GeneratedByModel { get; set; }
 
+    /// <summary>Submitted'da takılıp AI moderasyona yeniden gönderilme sayısı (bkz. StuckModerationRequeuer).</summary>
+    public int ModerationRequeueCount { get; set; }
+
     public ICollection<ContentVersion> Versions { get; init; } = [];
 
     public bool CanTransitionTo(ContentState target) =>

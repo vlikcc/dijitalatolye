@@ -111,6 +111,9 @@ namespace DijitalAtolye.Content.API.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("integer[]");
 
+                    b.Property<int>("ModerationRequeueCount")
+                        .HasColumnType("integer");
+
                     b.PrimitiveCollection<List<string>>("OutcomeCodes")
                         .IsRequired()
                         .HasColumnType("text[]");

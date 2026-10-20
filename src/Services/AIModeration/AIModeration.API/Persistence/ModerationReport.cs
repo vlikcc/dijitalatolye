@@ -9,7 +9,8 @@ public sealed class ModerationReport
 {
     [BsonId]
     [BsonGuidRepresentation(GuidRepresentation.Standard)]
-    public Guid Id { get; init; } = Guid.NewGuid();
+    /// <summary>Aynı içerik sürümü yeniden analiz edilirse depo mevcut kaydın kimliğini korur (bkz. SaveAsync).</summary>
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [BsonRepresentation(BsonType.String)]
     public Guid ContentId { get; init; }

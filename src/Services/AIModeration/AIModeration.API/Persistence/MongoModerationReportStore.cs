@@ -17,8 +17,22 @@ public sealed class MongoModerationReportStore : IModerationReportStore
         ]);
     }
 
-    public Task SaveAsync(ModerationReport report, CancellationToken ct = default) =>
-        _col.InsertOneAsync(report, cancellationToken: ct);
+    /// <summary>
+    /// (ContentId, VersionId) başına tek rapor: aynı sürüm yeniden analiz edilirse (mesaj yeniden teslimi,
+    /// takılan içeriğin yeniden kuyruğa alınması) rapor kimliği korunarak güncellenir. Insert tekrar
+    /// teslimde duplicate key ile düşüp mesajı hata kuyruğuna gönderiyor, içeriği Submitted'da bırakıyordu.
+    /// </summary>
+    public async Task SaveAsync(ModerationReport report, CancellationToken ct = default)
+    {
+        var existing = await GetByContentVersionAsync(report.ContentId, report.VersionId, ct);
+        if (existing is not null)
+            report.Id = existing.Id;
+        await _col.ReplaceOneAsync(
+            r => r.ContentId == report.ContentId && r.VersionId == report.VersionId,
+            report,
+            new ReplaceOptions { IsUpsert = true },
+            ct);
+    }
 
     public async Task<ModerationReport?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         await _col.Find(r => r.Id == id).FirstOrDefaultAsync(ct);

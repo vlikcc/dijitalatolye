@@ -24,6 +24,7 @@ builder.Services.AddDbContext<ContentDbContext>(opt =>
 builder.Services.AddScoped<ICurrentUser, CurrentUserAccessor>();
 builder.Services.AddScoped<IOutboxWriter, EfCoreOutboxWriter<ContentDbContext>>();
 builder.Services.AddHostedService<OutboxDispatcher<ContentDbContext>>();
+builder.Services.AddHostedService<StuckModerationRequeuer>();
 builder.Services.AddDijitalAtolyeJwtAuth(builder.Configuration);
 builder.Services.AddDijitalAtolyeEventBus(
     builder.Configuration,
