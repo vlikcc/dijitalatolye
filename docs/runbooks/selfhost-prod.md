@@ -142,7 +142,7 @@ make prod-nuke                     # TÜM verileri sil (onaylı)
 | `make prod-up` "POSTGRES_PASSWORD is required" | `.env.prod` içinde secret'lar boş — `make prod-env` tekrar koşun |
 | Tarayıcı `NET::ERR_CERT_AUTHORITY_INVALID` (lokalde) | Beklenen: Caddy local CA. Continue'a basın |
 | Identity 503 / migrate hatası | `docker compose ... logs identity` — Postgres `healthy` mi? |
-| AI moderation cevap vermiyor / her içerik 30 puanla AutoRejected | `aimoderation` loglarında `EVREN API error` (veya `DeepSeek API error`) arayın: 401 → anahtar geçersiz, 503 → model kullanılamıyor (`EVREN_MODERATION_MODELS` listesindeki sıradaki model denenir) |
+| AI moderation cevap vermiyor / içerikler "Gönderildi"de bekliyor | `aimoderation` loglarında `EVREN API error` (veya `DeepSeek API error`) arayın: 401 → anahtar geçersiz, 503 → model kullanılamıyor (`EVREN_MODERATION_MODELS` listesindeki sıradaki model denenir) |
 | 502 / SignalR kopma | Caddy log + gateway log: cluster destination hostname'leri (`identity:8080`) çözülüyor mu |
 | ClamAV 5 dakika boyunca unhealthy | Normal: virüs imza veritabanı ilk indirme (start_period: 5m) |
 

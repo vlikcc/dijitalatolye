@@ -54,15 +54,18 @@ public sealed class ModerationPipeline
         // 4) LLM analiz (Türkçe pedagojik + güvenlik)
         var systemPrompt = BuildSystemPrompt();
         var userPrompt = BuildUserPrompt(submitted, staticReport, entryHtml, jsFiles);
+        // LLM'e ulaşılamazsa (kota, zaman aşımı, model kesintisi) içerik reddedilmez: istisna yukarı çıkar,
+        // MassTransit mesajı yeniden dener; o da tükenirse Content'teki StuckModerationRequeuer içeriği
+        // daha sonra tekrar gönderir. Rapor kaydı (ContentId, VersionId) başına idempotent olduğundan güvenli.
         LlmResponse llmResponse;
         try
         {
             llmResponse = await _llm.CompleteJsonAsync(systemPrompt, userPrompt, ct);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
         {
-            _logger.LogError(ex, "LLM call failed; AutoReject olarak işaretlenecek");
-            llmResponse = new LlmResponse("{\"score\":30,\"summary\":\"LLM error\",\"flags\":[]}", 0, 0, 0m);
+            _logger.LogWarning(ex, "LLM çağrısı başarısız; moderasyon yeniden denenecek: content={Content}", submitted.ContentId);
+            throw;
         }
 
         // 5) Karar matrisi

@@ -25,7 +25,7 @@ public sealed class LlmProviderOptions
     public string EvrenEndpoint { get; set; } = "https://evren-llmapi.ssyz.org.tr/v1";
 
     /// <summary>Virgülle ayrılmış, öncelik sırasıyla denenecek EVREN modelleri.</summary>
-    public string EvrenModels { get; set; } = "deepseek-v4.1-flash,glm-5.3";
+    public string EvrenModels { get; set; } = "deepseek-v4.1-flash,glm-5.3,qwen3.8-flash-next";
     public int EvrenMaxTokens { get; set; } = 2048;
 
     public IReadOnlyList<string> EvrenModelList =>

@@ -88,7 +88,7 @@ services:
       Llm__DeepSeekModel: "${DEEPSEEK_MODEL:-deepseek-chat}"
       Llm__EvrenApiKey: "${EVREN_API_KEY:-}"
       Llm__EvrenEndpoint: "${EVREN_BASE_URL:-https://evren-llmapi.ssyz.org.tr/v1}"
-      Llm__EvrenModels: "${EVREN_MODERATION_MODELS:-deepseek-v4.1-flash,glm-5.3}"
+      Llm__EvrenModels: "${EVREN_MODERATION_MODELS:-deepseek-v4.1-flash,glm-5.3,qwen3.8-flash-next}"
       Llm__GeminiApiKey: "${GEMINI_API_KEY:-}"
       Llm__GeminiModel: "${GEMINI_MODEL:-gemini-1.5-pro}"
       Llm__Provider: "${AIMODERATION_PROVIDER:-evren}"
