@@ -10,6 +10,8 @@ Dokploy'a uyarlar. Tek kaynak prod compose'dur — orada değişiklik yaptıktan
 
 Dönüşümler:
   - build / container_name kaldırılır: imajlar CI'ın yayınladığı ${IMAGE_REPO}-<svc>:${IMAGE_TAG}
+  - CI imajlarına pull_policy: always eklenir: IMAGE_TAG=main sabit kaldığı için compose aksi halde
+    yeni imajı çekmez ve deploy eski container'ları korur
   - host portları kaldırılır (paylaşımlı sunucuda çakışma olmasın); yalnızca Guard paneli
     127.0.0.1'de kalır (SSH tüneli ile erişim)
   - yalnızca profil ile açılan servisler (mailhog, prometheus, grafana) çıkarılır
@@ -65,7 +67,9 @@ def transform(c: dict) -> dict:
     for name, svc in c["services"].items():
         if name in DROP_SERVICES:
             continue
-        svc.pop("build", None)
+        if svc.pop("build", None) is not None:
+            # Etiket sabit (IMAGE_TAG=main); her deploy'da registry'deki güncel imajı çek.
+            svc["pull_policy"] = "always"
         svc.pop("container_name", None)
         svc.pop("profiles", None)
         if name in KEEP_LOCAL_PORTS:

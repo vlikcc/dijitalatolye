@@ -56,6 +56,7 @@ services:
     networks:
       internal: null
     restart: "unless-stopped"
+    pull_policy: "always"
   aimoderation:
     cpus: 1
     depends_on:
@@ -128,6 +129,7 @@ services:
     networks:
       internal: null
     restart: "unless-stopped"
+    pull_policy: "always"
   analytics:
     cpus: 1
     depends_on:
@@ -180,6 +182,7 @@ services:
     networks:
       internal: null
     restart: "unless-stopped"
+    pull_policy: "always"
   caddy:
     depends_on:
       gateway:
@@ -278,6 +281,7 @@ services:
     networks:
       internal: null
     restart: "unless-stopped"
+    pull_policy: "always"
   content:
     cpus: 1
     depends_on:
@@ -352,6 +356,7 @@ services:
         target: "/app/dp-keys"
         type: "volume"
         volume: {}
+    pull_policy: "always"
   elasticsearch:
     environment:
       - "discovery.type=single-node"
@@ -478,6 +483,7 @@ services:
         aliases:
           - "da-gateway"
     restart: "unless-stopped"
+    pull_policy: "always"
   guard-beat:
     command:
       - "beat"
@@ -1085,6 +1091,7 @@ services:
         target: "/app/dp-keys"
         type: "volume"
         volume: {}
+    pull_policy: "always"
   minio:
     command: "server /data --console-address \":9001\""
     environment:
@@ -1241,6 +1248,7 @@ services:
     networks:
       internal: null
     restart: "unless-stopped"
+    pull_policy: "always"
   postgres:
     environment:
       POSTGRES_MULTIPLE_DATABASES: "identity,user,catalog,content,review,notification,analytics,audit"
@@ -1392,6 +1400,7 @@ services:
     networks:
       internal: null
     restart: "unless-stopped"
+    pull_policy: "always"
   search:
     cpus: 1
     depends_on:
@@ -1444,6 +1453,7 @@ services:
     networks:
       internal: null
     restart: "unless-stopped"
+    pull_policy: "always"
   storage:
     cpus: 1
     depends_on:
@@ -1511,6 +1521,7 @@ services:
     networks:
       internal: null
     restart: "unless-stopped"
+    pull_policy: "always"
   user:
     cpus: 1
     depends_on:
@@ -1566,6 +1577,7 @@ services:
     networks:
       internal: null
     restart: "unless-stopped"
+    pull_policy: "always"
   web:
     cpus: 1
     depends_on:
@@ -1596,6 +1608,7 @@ services:
         aliases:
           - "da-web"
     restart: "unless-stopped"
+    pull_policy: "always"
 networks:
   internal:
     driver: "bridge"

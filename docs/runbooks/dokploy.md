@@ -26,7 +26,9 @@ Dokploy (Traefik) üzerinde tek compose uygulaması olarak çalışır. TLS'i Tr
 **Otomatik deploy (varsayılan):** Dokploy ortamında `IMAGE_TAG=main`, Dokploy'un git otomatik deploy'u **kapalı**.
 `main`'e her push'ta testler ve 13 imajın hepsi başarılıysa `release.yml` içindeki **Deploy (Dokploy)** işi Dokploy API'sini
 çağırır, deployment'ın bitmesini bekler ve `/health`'i kontrol eder. Git otomatik deploy'u açık olursa Dokploy push anında,
-imajlar daha derlenmeden deploy eder ve bir önceki sürümü çeker — açmayın.
+imajlar daha derlenmeden deploy eder ve bir önceki sürümü çeker — açmayın. Etiket sabit (`main`) olduğundan
+Dokploy compose'unda CI imajları `pull_policy: always` taşır (üretici script ekler); bu olmadan `compose up` yeni
+imajı çekmez ve eski container'lar çalışmaya devam eder.
 
 GitHub ayarları (Settings → Secrets and variables → Actions):
 
