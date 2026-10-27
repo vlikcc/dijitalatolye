@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0.0",
+  "collection": "applicability",
+  "generatedAt": "2026-10-26T00:00:00Z",
+  "items": [
+    {
+      "programId": "program-mufredat-2024",
+      "academicYear": "2026–2027",
+      "grades": [
+        5,
+        6
+      ],
+      "schoolTypes": [
+        "Ortaokul",
+        "İmam Hatip Ortaokulu"
+      ],
+      "status": "in_force",
+      "sourceRefs": [
+        {
+          "sourceId": "source-794ad1f3a2703e36",
+          "pdfPage": 1,
+          "printedPage": null,
+          "section": "Kurul kararı / uygulama hükmü",
+          "anchor": null
+        }
+      ],
+      "reason": "İlgili programın kararında belirtilen sınıf başlangıcı esas alındı. 2025–2026 başlangıcından 2026–2027 yılına bir sınıf ilerleme çıkarımı açıkça kaydedildi; diğer derslere genellenmedi.",
+      "basis": "T.C. MİLLÎ EĞİTİM BAKANLIĞI Talim ve Terbiye Kurulu Başkanlığı Sayı 87 Konu: Bilişim Teknolojileri ve Yazılım Dersi Öğretim Programı Tarih 10/09/2025 Kurulda Görüşülme Tarihi 28/08/2025 Önceki Kararın Tarih ve Sayısı 24/01/2018-47 Temel Eğitim Genel Müdürlüğünün 21/08/2025 tarihli ve E-43769797-101.01.01-138718914 sayılı yazısı üzerine Kurulumuzda görüşülen Bilişim Teknolojileri ve Yazılım Dersi Öğretim Programı’nın 2025-2026 eğitim ve öğretim yılından itibaren 5. sınıftan başlamak üzere kademeli olarak ekli örneğine göre uygulanması, Kurulumuzun 24/01/2018 tarihli ve 47 sayılı Kararı ile kabul edilen Ortaokul ve İmam Hatip Ortaokulu Bilişim Teknolojileri ve Yazılım Dersi (5 ve 6. Sınıflar) Öğretim Programı’nın 2025-2026 eğitim ve öğretim yılından itibaren 5. sınıftan başlamak üzere kademeli olarak uygulamadan kaldırılması hususunu uygun görüşle arz ederiz. ",
+      "isInference": true,
+      "conditions": null,
+      "populationScope": null,
+      "lifecycleStatus": null,
+      "supersededByProgramId": null,
+      "scheduleStatus": "in_force",
+      "scopeResolutionIssues": [],
+      "scopeResolved": true
+    }
+  ]
+}

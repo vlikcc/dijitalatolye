@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0.0",
+  "collection": "programs",
+  "generatedAt": "2026-10-26T00:00:00Z",
+  "items": [
+    {
+      "id": "program-mufredat-2024",
+      "officialName": "[TYMM] BİLİŞİM TEKNOLOJİLERİ VE YAZILIM DERSİ (5-6) (2025)",
+      "subjectName": "BİLİŞİM TEKNOLOJİLERİ VE YAZILIM DERSİ",
+      "curriculumFamily": "tymm",
+      "versionLabel": "2025",
+      "approvalDate": "2025-09-10",
+      "approvalNumber": "87",
+      "schoolTypes": [
+        "Ortaokul",
+        "İmam Hatip Ortaokulu"
+      ],
+      "grades": [
+        5,
+        6
+      ],
+      "sourceIds": [
+        "source-2b78d932184d649e",
+        "source-01f71001e97d1c16",
+        "source-ab68b04857b89189",
+        "source-794ad1f3a2703e36"
+      ],
+      "catalogueId": "2024",
+      "catalogueSection": "TYMM Temel Eğitim",
+      "gradeScopeText": "(5 VE 6. SINIFLAR)",
+      "gradeScopeSourceRefs": [
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 1,
+          "printedPage": null,
+          "section": "Program kapak / sınıf kapsamı",
+          "anchor": null
+        }
+      ],
+      "schoolTypeSourceRefs": [
+        {
+          "sourceId": "source-794ad1f3a2703e36",
+          "pdfPage": 1,
+          "printedPage": null,
+          "section": "Kurul kararı / uygulama hükmü",
+          "anchor": null
+        }
+      ],
+      "courseType": null,
+      "excludedReason": null,
+      "extractionStatus": "complete",
+      "approvalSourceRefs": [
+        {
+          "sourceId": "source-794ad1f3a2703e36",
+          "pdfPage": 1,
+          "printedPage": null,
+          "section": "Kurul kararı / uygulama hükmü",
+          "anchor": null
+        }
+      ]
+    }
+  ]
+}

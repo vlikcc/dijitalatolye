@@ -1,0 +1,327 @@
+.overview {
+  max-width: 960px;
+  margin: 0 auto;
+  padding-block: 48px 64px;
+}
+
+.intro {
+  display: grid;
+  gap: 16px;
+}
+
+.overview .intro h1 {
+  font-size: 32px;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+}
+
+.lead {
+  font-size: 22px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.intro > p:not(.lead),
+.journey p,
+.classroom p,
+.roles dd,
+.sectionDescription,
+.detailBody {
+  color: var(--muted);
+}
+
+.sharing {
+  margin-top: 8px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feedback {
+  min-height: 24px;
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+.copyFallback {
+  display: grid;
+  gap: 8px;
+  max-width: 520px;
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+.copyFallback input {
+  width: 100%;
+  min-width: 0;
+}
+
+.section {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+
+.section h2 {
+  margin-bottom: 24px;
+}
+
+.journey {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journey li {
+  display: grid;
+  grid-template-columns: 32px minmax(160px, 0.7fr) minmax(0, 1.7fr);
+  gap: 16px;
+  align-items: start;
+  padding-block: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.journey li:first-child {
+  padding-top: 0;
+}
+
+.journey li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.stepNumber {
+  display: grid;
+  place-items: center;
+  min-height: 32px;
+  border-radius: 50%;
+  background: var(--interactive-hover);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.journey h3 {
+  padding-top: 3px;
+  text-wrap: initial;
+}
+
+.note {
+  max-width: none;
+  margin-top: 24px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  background: var(--interactive-hover);
+  font-size: 16px;
+}
+
+.sectionHeading h2 {
+  margin-bottom: 12px;
+}
+
+.availability {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.classroom {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 40px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.classroom h3 {
+  margin-bottom: 8px;
+}
+
+.roles {
+  margin: 0;
+}
+
+.roles > div {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.7fr) minmax(0, 1.7fr);
+  gap: 24px;
+  padding-block: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.roles > div:first-child {
+  padding-top: 0;
+}
+
+.roles > div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.roles dt {
+  font-weight: 600;
+}
+
+.roles dd {
+  margin: 0;
+}
+
+.section:has(.sectionDescription) h2 {
+  margin-bottom: 12px;
+}
+
+.sectionDescription {
+  margin-bottom: 20px;
+}
+
+.details details {
+  border-bottom: 1px solid var(--border);
+}
+
+.details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding-block: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.details summary::-webkit-details-marker {
+  display: none;
+}
+
+.details summary:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.details details[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.detailBody {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 20px;
+}
+
+.closing {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  padding-top: 32px;
+  font-size: 16px;
+}
+
+.closing p {
+  max-width: 58ch;
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .overview {
+    padding-block: 32px 48px;
+  }
+
+  .overview .intro h1 {
+    font-size: 28px;
+  }
+
+  .lead {
+    font-size: 19px;
+  }
+
+  .journey li {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 8px 12px;
+  }
+
+  .journey p {
+    grid-column: 2;
+  }
+
+  .classroom {
+    grid-template-columns: 1fr;
+  }
+
+  .roles > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .note {
+    padding: 16px;
+  }
+}
+
+@media print {
+  :global(body):has(.overview) :global(.header-shell),
+  :global(body):has(.overview) :global(.footer-shell),
+  :global(body):has(.overview) :global(.skip-link),
+  .sharing,
+  .closing a,
+  .sectionDescription,
+  .details summary svg {
+    display: none !important;
+  }
+
+  :global(body):has(.overview) {
+    background: white;
+    font-size: 11pt;
+  }
+
+  :global(body):has(.overview) :global(main.container) {
+    max-width: none;
+    padding: 0;
+  }
+
+  .overview {
+    max-width: none;
+    padding: 0;
+  }
+
+  .section {
+    margin-top: 20px;
+    padding-top: 20px;
+  }
+
+  .section h2 {
+    font-size: 18pt;
+    break-after: avoid;
+  }
+
+  .journey li,
+  .classroom li,
+  .roles > div,
+  .details details,
+  .note {
+    break-inside: avoid;
+  }
+
+  .details details::details-content {
+    content-visibility: visible;
+    display: block;
+  }
+
+  .details .detailBody {
+    display: grid !important;
+  }
+
+  .intro > p,
+  .journey p,
+  .classroom p,
+  .roles dd,
+  .availability,
+  .detailBody {
+    color: var(--foreground);
+  }
+}

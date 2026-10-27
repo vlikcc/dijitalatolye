@@ -1,0 +1,19 @@
+# Approved direction: Keşif Atlası
+
+Mode: Operate. Code-led implementation. The user approved this replacement world for Dijital Oyun Atölyesi; the earlier warm-paper, green-action, Source Sans/Serif classroom-library identity is superseded. `DESIGN.md` and `.impeccable/design.json` record the implemented tokens and components. The first-surface contract remains `.impeccable/surfaces/src-app-page-tsx.md`.
+
+THESIS: A working discovery atlas with real game content visible early and subject colour linking discovery, activity metadata, and practical teacher notes.
+
+OWN-WORLD: Navy ink on pale lavender and white. Violet for primary actions and Mathematics, coral for Turkish, teal for Science, and amber-brown on pale amber for Life Studies. Locally served Manrope headings and Source Sans 3 controls and scene labels. The refined four-piece circular puzzle mark is the identity signature. Light classroom and home-study surfaces, compact controls, rounded bordered cards, and occasional soft elevation. The atlas is expressed through the labelled collection and subject relationships, without ornamental map UI.
+
+STORY: Choose a subject or search, inspect a real game scene, play a short activity, then save it in this browser or copy its link. A teacher can read a practical note and reach the existing upload flow. Two public screen types are implemented: discovery and combined detail/player. Sixteen bundled playable examples for grades 3–8 are explicitly labelled Demo; published teacher games remain distinct and can increase the real collection count.
+
+FIRST VIEWPORT: Compact white brand header; a lavender introduction with a short Manrope title and discovery action beside an actual fraction-game scene; search, subject tabs, result count, and the beginning of a four-column collection. On mobile the introduction stacks, the scene remains visible, and the card grid becomes one column. Detail places a wide player beside a concise information rail, then stacks the rail beneath at tablet widths.
+
+FORM: The user-pinned Keşif Atlası direction takes precedence. Planning associated it with grounded candidate 6, a contemporary colour-coded school atlas. The installed engine had no newer seed-reference field, and the raw roll output was not persisted. This record makes no claim of seed-reference or replay validation. The chosen world and its final implementation are evidenced by the approved surface contract, source, and final captures.
+
+SIGNATURE: The same subject colour and written label connect discovery tabs, card metadata, detail, and teacher notes. Actual 720 × 440 game scenes are preserved in cards and player previews. Manrope and Source Sans 3 also ship inside standalone demos with embedded Latin/Latin Extended faces and licences; the completion check is inline SVG. Saving is browser-local, share failure has a selectable-link fallback, and reduced motion removes host transitions and animations.
+
+BOUNDARY: Existing teacher sign-in, upload, moderation, and isolated-game delivery remain available. New student/user-account systems, class/assignment features, and public deployment were outside this approved demo scope. No invented metrics, decorative map controls, or implied moderation approval for bundled examples.
+
+EVIDENCE: The implementation is documented from `src/app/globals.css`, catalogue/card/player/navigation/save components, the detail page, and bundled demo/scene sources. Final render evidence is under `.impeccable/review/`; logo and game-cover provenance is under `.impeccable/assets/` and adjacent asset records. The final review disposition is `ship` for the two scored corrections (embedded game typography and the SVG completion icon); it is not a fresh unqualified review of the entire surface. No approved image composition or quality-bar card is claimed for this code-led direction.

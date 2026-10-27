@@ -1,0 +1,19 @@
+# Optional: run the production web image instead of the host development server.
+services:
+  web:
+    image: dijital-next-web:dev
+    env_file: ../.env
+    environment:
+      NODE_ENV: production
+      DEPLOYMENT_ENV: local-test
+      APP_URL: http://localhost:3000
+      DATABASE_URL: postgresql://app:local-only@postgres:5432/dijital
+      DATA_DIR: /data
+      SMTP_HOST: mailpit
+      SMTP_PORT: '1025'
+    ports: ['127.0.0.1:3000:3000']
+    volumes: ['../.data:/data']
+    depends_on: [postgres,mailpit]
+  games:
+    environment:
+      WEB_UPSTREAM: web:3000

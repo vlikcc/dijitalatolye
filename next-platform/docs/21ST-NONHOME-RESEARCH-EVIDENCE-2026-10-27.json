@@ -1,0 +1,1296 @@
+{
+  "date": "2026-10-27",
+  "timezone": "Europe/Istanbul",
+  "scope": "Ana sayfa dışındaki sayfalar için araştırma; uygulama kodu değişikliği yok.",
+  "skills": [
+    "21st-ui-build",
+    "21st-cli-use"
+  ],
+  "method": "MCP katalog araması, kaynak kodu ve bağımlılık incelemesi; yerel route/component/CSS incelemesi; IAB'de kamu ekranları; korumalı yüzeylerde mevcut kayıtlı test ekran görüntüleri.",
+  "catalog": {
+    "searchCount": 20,
+    "resultCount": 104,
+    "uniqueDemoIds": 104,
+    "sourceRetrievalCount": 13,
+    "tier": "paid",
+    "aiGenerationEnabled": false,
+    "hostedGenerationUsed": false,
+    "codeInstalledOrCopied": false
+  },
+  "searches": [
+    {
+      "query": "copy button success feedback",
+      "results": [
+        {
+          "id": 28469,
+          "name": "Copy Button",
+          "author": "ncdai",
+          "url": "https://21st.dev/@ncdai/components/copy-button",
+          "description": "A button that copies text to the clipboard on click, with an animated icon swap plus haptic and audio feedback confirming success or failure.",
+          "previewUrl": "https://cdn.21st.dev/user_2xinnI75Qf12K3Et3dvJlqCNjMq/copy-button/default/preview.1789991785552.webp"
+        },
+        {
+          "id": 36536,
+          "name": "Copy With Confirmation",
+          "author": "ibrandify",
+          "url": "https://21st.dev/@ibrandify/components/copy-with-confirmation",
+          "description": "A copy button that confirms success with a checkmark and seamlessly reverts.",
+          "previewUrl": "https://cdn.21st.dev/user_3K8GSYF91kjaGwg40OUV71wFUh3/copy-with-confirmation/default/preview.1791468224736.png"
+        },
+        {
+          "id": 27896,
+          "name": "Copy Button",
+          "author": "cubby-ui",
+          "url": "https://21st.dev/@cubby-ui/components/copy-button",
+          "description": "A button that copies given text to the clipboard and shows an animated check/error icon confirmation, with optional toast feedback.",
+          "previewUrl": "https://cdn.21st.dev/user_registry_cubby-ui_1783508641970/copy-button/default/preview.1789998833503.png"
+        },
+        {
+          "id": 10224,
+          "name": "Copy Button",
+          "author": "tom_ui",
+          "url": "https://21st.dev/@tom_ui/components/copy-button",
+          "description": "A copy-to-clipboard button with blur transition effect.",
+          "previewUrl": "https://cdn.21st.dev/larsen66/copy-button/default/preview.1773078316663.png"
+        },
+        {
+          "id": 24659,
+          "name": "Copy Button",
+          "author": "motiondotdev",
+          "url": "https://21st.dev/@motiondotdev/components/motion-copy-button",
+          "description": "Animated copy-to-clipboard button with icon swap, blur transitions, and pathLength checkmark draw",
+          "previewUrl": "https://cdn.21st.dev/user_motion.dev/motion-copy-button/default/preview.1787592056066.webp"
+        },
+        {
+          "id": 9528,
+          "name": "Copy Button - Variants",
+          "author": "zochory",
+          "url": "https://21st.dev/@zochory/components/copy-button-variants",
+          "description": "CopyButton with crossfade animation between two state/content",
+          "previewUrl": "https://cdn.21st.dev/user_2sQo8r2YFyrsQaT4wWYj57b4XKl/copy-button-variants/default/preview.1786647262730.png"
+        }
+      ]
+    },
+    {
+      "query": "empty state action",
+      "results": [
+        {
+          "id": 1435,
+          "name": "Empty State",
+          "author": "serafimcloud",
+          "url": "https://21st.dev/@serafimcloud/components/empty-state",
+          "description": "Empty state card with shadcn/ui buttons.\n\nInspired by @AndyRyanWeir",
+          "previewUrl": "https://cdn.21st.dev/user_2nElBLvklOKlAURm6W1PTu6yYFh/empty-state/default/preview.png"
+        },
+        {
+          "id": 18266,
+          "name": "Empty Background",
+          "author": "uiable",
+          "url": "https://21st.dev/@uiable/components/empty-background",
+          "description": "An empty state placeholder with a muted background surface, icon, title, description and refresh action for pages or panels with no content.",
+          "previewUrl": "https://cdn.21st.dev/uiable/empty-background/default/preview.1784710202666-b46a9c58-534c-43ed-9eb4-cffefa81c320.png"
+        },
+        {
+          "id": 27024,
+          "name": "Empty State Kit",
+          "author": "laziekiki",
+          "url": "https://21st.dev/@laziekiki/components/empty-state-kit",
+          "description": "Six polished empty states for inboxes, search, carts, missing pages, restricted access, and blank product surfaces, with customizable copy and actions.",
+          "previewUrl": "https://cdn.21st.dev/laziekiki/empty-state-kit/default/preview.1789224779108-0845da13-7c56-4bfb-9528-ef9a767831e9.png"
+        },
+        {
+          "id": 19377,
+          "name": "Empty State with Marquee",
+          "author": "shadcnui-blocks",
+          "url": "https://21st.dev/@shadcnui-blocks/components/empty-state-04",
+          "description": "An empty state block showing a vertically scrolling marquee of skeleton rows with a title, description, and create/import action buttons for when no data exists yet.",
+          "previewUrl": "https://cdn.21st.dev/shadcnui-blocks/empty-state-04/default/preview.1783732164200.png"
+        },
+        {
+          "id": 19376,
+          "name": "Error Empty State",
+          "author": "olewandowski1",
+          "url": "https://21st.dev/@olewandowski1/components/empty-states-4",
+          "description": "An empty state for a failed data load, with a destructive accent and retry and contact-support actions.",
+          "previewUrl": "https://cdn.21st.dev/7ovr/empty-states-4/default/preview.1783731323740.png"
+        },
+        {
+          "id": 22301,
+          "name": "Interactive Empty State",
+          "author": "remcostoeten",
+          "url": "https://21st.dev/@remcostoeten/components/interactive-empty-state",
+          "description": "Beautiful and modular empty state components based of  https://21st.dev/serafimcloud/empty-state/default",
+          "previewUrl": "https://cdn.21st.dev/remcostoeten/interactive-empty-state/dark/preview.1785208904939-62c68052-ce16-464e-8241-07d97d46b516.png"
+        }
+      ]
+    },
+    {
+      "query": "file upload progress dropzone",
+      "results": [
+        {
+          "id": 18847,
+          "name": "UploadThing Dropzone",
+          "author": "elements-",
+          "url": "https://21st.dev/@elements-/components/uploadthing-dropzone",
+          "description": "A drag-and-drop file upload zone with progress tracking, validation, and uploaded-file management that works with any upload backend.",
+          "previewUrl": "https://cdn.21st.dev/elements-/uploadthing-dropzone/default/preview.1784756358475-55119eaa-82bb-446f-ae7a-12b91558d60c.png"
+        },
+        {
+          "id": 29988,
+          "name": "Upload Dropzone Empty State",
+          "author": "arihantcodes_1f7b8c4d",
+          "url": "https://21st.dev/@arihantcodes_1f7b8c4d/components/upload-empty",
+          "description": "A file upload panel showing an animated empty state with a real HTML5 drag-and-drop zone and per-file upload progress meters.",
+          "previewUrl": "https://cdn.21st.dev/arihantcodes_1f7b8c4d/upload-empty/default/preview.1790148248864-a873c9df-3528-4d11-91b5-21aed1c4fe06.png"
+        },
+        {
+          "id": 19201,
+          "name": "File Dropzone",
+          "author": "joyco",
+          "url": "https://21st.dev/@joyco/components/file-dropzone",
+          "description": "A drag-and-drop file upload area with image preview, file-type and size validation, single or multiple file support, and error handling.",
+          "previewUrl": "https://cdn.21st.dev/joyco/file-dropzone/default/preview.1783712252441.png"
+        },
+        {
+          "id": 40107,
+          "name": "Illos Upload Dropzone",
+          "author": "navedux",
+          "url": "https://21st.dev/@navedux/components/illos-upload-dropzone",
+          "description": "File upload dropzone with drag and drop, a browse button and a list of chosen files, built around an animated isometric uploads illustration from Illos. Light and dark with your theme tokens. Code is MIT; the illustration is under the Illos free license (illos.dev/license).",
+          "previewUrl": "https://cdn.21st.dev/user_3KuGvWdbc75gTjMpiJs4KqUW0K0/illos-upload-dropzone/default/preview.1792590876801.webp"
+        },
+        {
+          "id": 27137,
+          "name": "File Upload",
+          "author": "uvain",
+          "url": "https://21st.dev/@uvain/components/file-upload",
+          "description": "Most upload widgets fall over on the three things that really happen: wrong file type, file too big, transfer fails halfway. This one handles all three — per-file progress, retry, and guards that explain themselves. Part of Documents & Signing: layro.vercel.app",
+          "previewUrl": "https://cdn.21st.dev/user_3AAcYdXInfTxs5akkUBbQIUQdhX/file-upload/default/preview.1789406886621.png"
+        },
+        {
+          "id": 18108,
+          "name": "File Upload with Preview",
+          "author": "ephraimduncan",
+          "url": "https://21st.dev/@ephraimduncan/components/file-upload-01",
+          "description": "A file upload card with a drag-and-drop dropzone, image preview, upload progress bars, and a project details form.",
+          "previewUrl": "https://cdn.21st.dev/ephraimduncan/file-upload-01/default/preview.1784719369603-f0bff071-76e5-4dcf-804e-900e18a38188.png"
+        }
+      ]
+    },
+    {
+      "query": "stepper status progress",
+      "results": [
+        {
+          "id": 769,
+          "name": "Stepper",
+          "author": "originui",
+          "url": "https://21st.dev/@originui/components/stepper",
+          "description": "Stepper UI component.",
+          "previewUrl": "https://cdn.21st.dev/user_originui/stepper/progress/preview.png?v=1"
+        },
+        {
+          "id": 29815,
+          "name": "Vertical Titled Stepper",
+          "author": "sean0205",
+          "url": "https://21st.dev/@sean0205/components/c-stepper-15",
+          "description": "A vertical multi-step progress stepper that shows numbered steps with titles, a connecting line, and a check/loading indicator for completed or active steps.",
+          "previewUrl": "https://cdn.21st.dev/sean0205/c-stepper-15/default/preview.1790123323203-6cdc11c5-9929-4a80-81c7-8bc17d3c1a9e.png"
+        },
+        {
+          "id": 28565,
+          "name": "Stepper",
+          "author": "corr",
+          "url": "https://21st.dev/@corr/components/stepper",
+          "description": "A horizontal or vertical step indicator that shows progress through install, publish, or multi-step form flows.",
+          "previewUrl": "https://cdn.21st.dev/corr/stepper/default/preview.1789988654749-0893ec09-b0ac-420d-be3a-3b7111baa958.png"
+        },
+        {
+          "id": 35237,
+          "name": "Stepper",
+          "author": "kevingirelli",
+          "url": "https://21st.dev/@kevingirelli/components/stepper",
+          "description": "An accessible multi-step progress indicator for flows like checkout or onboarding, showing which steps are complete, current, or upcoming, with optional clickable triggers.",
+          "previewUrl": "https://cdn.21st.dev/user_registry_kevingirelli_1790903224160/stepper/default/preview.1791206206769.webp"
+        },
+        {
+          "id": 29925,
+          "name": "Basic Stepper",
+          "author": "sean0205",
+          "url": "https://21st.dev/@sean0205/components/c-stepper-1",
+          "description": "A horizontal multi-step progress indicator with numbered circle indicators and separators, used to guide users through a sequence of steps like a checkout or onboarding flow.",
+          "previewUrl": "https://cdn.21st.dev/sean0205/c-stepper-1/default/preview.1790140579944-e8d24f3b-9e74-4eb7-b83a-9271009b1b68.png"
+        },
+        {
+          "id": 19143,
+          "name": "Onboarding Stepper Progress",
+          "author": "shadcnspace",
+          "url": "https://21st.dev/@shadcnspace/components/progress-02",
+          "description": "An onboarding progress tracker with a step counter, percentage completion bar, and back/next navigation buttons.",
+          "previewUrl": "https://cdn.21st.dev/shadcnspace/progress-02/default/preview.1783694619073.png"
+        }
+      ]
+    },
+    {
+      "query": "inline form validation password requirements",
+      "results": [
+        {
+          "id": 6280,
+          "name": "Password Input",
+          "author": "anubra266",
+          "url": "https://21st.dev/@anubra266/components/password-input",
+          "description": "Here is Password Input component",
+          "previewUrl": "https://cdn.21st.dev/user_anubra266/password-input/password-with-requirements/preview.1787913497176.png"
+        },
+        {
+          "id": 23542,
+          "name": "Password Strength",
+          "author": "ddoemonn",
+          "url": "https://21st.dev/@ddoemonn/components/password-strength",
+          "description": "An animated password strength meter with segmented bars, a live requirements checklist, and common-pattern detection for signup and reset forms.",
+          "previewUrl": "https://cdn.21st.dev/ddoemonn/password-strength/default/preview.1785473762054-e047da03-12ac-4a4b-919f-d509448c8f77.png"
+        },
+        {
+          "id": 25261,
+          "name": "Auth Change Password",
+          "author": "preetsuthar17",
+          "url": "https://21st.dev/@preetsuthar17/components/auth-change-password",
+          "description": "A change password form card with current password, new password, and confirmation fields, inline validation, show/hide toggles, loading and success states.",
+          "previewUrl": "https://cdn.21st.dev/user_2rWolCuRnJW3DRiuQ5JHrl5kj8a/auth-change-password/default/preview.1787265338101.webp"
+        },
+        {
+          "id": 29799,
+          "name": "Password Strength Input",
+          "author": "sean0205",
+          "url": "https://21st.dev/@sean0205/components/c-input-22",
+          "description": "A password input field that shows a live strength hint with a status icon as the user types, based on length, digit and special-character requirements.",
+          "previewUrl": "https://cdn.21st.dev/sean0205/c-input-22/default/preview.1790121819688-b38cff49-18a9-45e5-b377-15759da123b9.png"
+        },
+        {
+          "id": 8043,
+          "name": "Password update Block",
+          "author": "preetsuthar17",
+          "url": "https://21st.dev/@preetsuthar17/components/password-update-block",
+          "description": "Secure password update form with validation and confirmation fields.",
+          "previewUrl": "https://cdn.21st.dev/user_2rWolCuRnJW3DRiuQ5JHrl5kj8a/password-update-block/default/preview.1788206138961.png"
+        }
+      ]
+    },
+    {
+      "query": "status badge",
+      "results": [
+        {
+          "id": 521,
+          "name": "Status Badge",
+          "author": "serafimcloud",
+          "url": "https://21st.dev/@serafimcloud/components/status-badge",
+          "description": "Status Badge inspired by Tremor",
+          "previewUrl": "https://cdn.21st.dev/user_2nElBLvklOKlAURm6W1PTu6yYFh/status-badge/default/preview.png?v=1"
+        },
+        {
+          "id": 4869,
+          "name": "Status Badge",
+          "author": "arihantcodes_1f7b8c4d",
+          "url": "https://21st.dev/@arihantcodes_1f7b8c4d/components/status-badge",
+          "description": "Here is Status Badge component",
+          "previewUrl": "https://cdn.21st.dev/larsen66/status-badge/default/preview.1754081067637.png"
+        },
+        {
+          "id": 3556,
+          "name": "Badge",
+          "author": "sean0205",
+          "url": "https://21st.dev/@sean0205/components/badge-2",
+          "description": "A Badge is a small, visually distinct element used to display contextual metadata, such as status, category, or notifications, enhancing the clarity and organization of your design.",
+          "previewUrl": "https://cdn.21st.dev/sean0205/badge-1/circle/preview.1751391624600.png"
+        },
+        {
+          "id": 29986,
+          "name": "Styled Badges",
+          "author": "ai2",
+          "url": "https://21st.dev/@ai2/components/badges-styled",
+          "description": "A set of five decorative status/label badges (dot indicator, gradient fill, glow, live pulse, and gradient outline) themed on design tokens, with a reduced-motion-aware pulsing animation for live indicators.",
+          "previewUrl": "https://cdn.21st.dev/user_3Am7aVs8YHTnEQ9BsH0hazqlJFu/badges-styled/default/preview.1790150329494.webp"
+        },
+        {
+          "id": 25393,
+          "name": "Status",
+          "author": "diceui",
+          "url": "https://21st.dev/@diceui/components/status",
+          "description": "A pill-shaped status badge with a pulsing indicator dot and color variants for signaling online, error, warning, info, and idle states.",
+          "previewUrl": "https://cdn.21st.dev/user_diceui/status/default/preview.1787679783441.png"
+        }
+      ]
+    },
+    {
+      "query": "timeline activity log",
+      "results": [
+        {
+          "id": 25163,
+          "name": "Audit Log",
+          "author": "corr",
+          "url": "https://21st.dev/@corr/components/audit-log",
+          "description": "A timestamped activity log that lists product and registry events with actor, type and status tags, per-row context menu actions, and optional field filters.",
+          "previewUrl": "https://cdn.21st.dev/corr/audit-log/default/preview.1787190208435-bada1e39-cde7-423a-91de-e5778ee577a6.png"
+        },
+        {
+          "id": 28340,
+          "name": "Activity Timeline",
+          "author": "olewandowski1",
+          "url": "https://21st.dev/@olewandowski1/components/timeline-3",
+          "description": "A vertical timeline that groups a team's recent activity by day, showing each actor's avatar, action, target, and relative timestamp connected by a rail.",
+          "previewUrl": "https://cdn.21st.dev/user_registry_7ovr_1782691739820/timeline-3/default/preview.1789994227656.png"
+        },
+        {
+          "id": 35051,
+          "name": "Timeline",
+          "author": "kuratlielia",
+          "url": "https://21st.dev/@kuratlielia/components/timeline",
+          "description": "A vertical activity feed grouped by day, with expandable rows, an animated drawing connector line, and smooth insert animations for new updates — used for project history, audit logs, and deploy streams.",
+          "previewUrl": "https://cdn.21st.dev/user_registry_kuratlielia_1790903117010/timeline/default/preview.1790977806085.webp"
+        },
+        {
+          "id": 28483,
+          "name": "Audit Log With Icon Tiles",
+          "author": "olewandowski1",
+          "url": "https://21st.dev/@olewandowski1/components/activity-3",
+          "description": "An audit log feed listing recent account/workspace actions with icon tiles, a two-line title and detail, a type tag, and a relative timestamp.",
+          "previewUrl": "https://cdn.21st.dev/user_registry_7ovr_1782691739820/activity-3/default/preview.1789990180982.png"
+        },
+        {
+          "id": 29318,
+          "name": "Agent Activity",
+          "author": "starc007",
+          "url": "https://21st.dev/@starc007/components/agent-activity",
+          "description": "An adaptive activity stream that shows an AI agent's reasoning, tool calls, web searches, or execution steps as a collapsible, animated timeline.",
+          "previewUrl": "https://cdn.21st.dev/starc007/agent-activity/default/preview.1790063812973-6253e0e8-fb55-4566-b8bb-9db64165aacd.png"
+        }
+      ]
+    },
+    {
+      "query": "table of contents scroll spy",
+      "results": [
+        {
+          "id": 34517,
+          "name": "Table of Contents",
+          "author": "appica-dev",
+          "url": "https://21st.dev/@appica-dev/components/toc",
+          "description": "A scroll-spy \"on this page\" navigation sidebar that highlights the heading currently in view as the user scrolls the article.",
+          "previewUrl": "https://cdn.21st.dev/user_registry_appica-dev_1790790016927/toc/nested-headings/preview.1790808483289.webp"
+        },
+        {
+          "id": 18123,
+          "name": "Table of Contents",
+          "author": "inference-sh",
+          "url": "https://21st.dev/@inference-sh/components/table-of-contents",
+          "description": "An auto-scrolling table of contents that highlights the active section using an intersection observer as the reader scrolls.",
+          "previewUrl": "https://cdn.21st.dev/inference-sh/table-of-contents/default/preview.1784718030348-03461537-ce39-4fc3-bf13-9623dd5e947b.png"
+        },
+        {
+          "id": 23554,
+          "name": "Scroll Spy",
+          "author": "ddoemonn",
+          "url": "https://21st.dev/@ddoemonn/components/scroll-spy",
+          "description": "A scroll-spy navigation bar that tracks the section currently in view and highlights it with an animated sliding pill, with smooth click-to-scroll for both the window and a scrollable container. Includes a useScrollSpy hook.",
+          "previewUrl": "https://cdn.21st.dev/user_2y2pjLtk7oS33zts6BqhEIOHrAj/scroll-spy/default/preview.1785527266612.webp"
+        },
+        {
+          "id": 22596,
+          "name": "Table of Content",
+          "author": "zanwei",
+          "url": "https://21st.dev/@zanwei/components/table-of-content",
+          "description": "A dependency-free vertical table of content with pointer scrubbing, keyboard navigation, spring-driven tick magnification, and floating section previews.",
+          "previewUrl": "https://cdn.21st.dev/user_2wdgsmfD3BNOOm4oOqUDUS9IXZI/table-of-content/default/preview.1785324110932.png"
+        },
+        {
+          "id": 33300,
+          "name": "TOC Minimap Mercury",
+          "author": "nikolas-sapa",
+          "url": "https://21st.dev/@nikolas-sapa/components/toc-minimap-mercury",
+          "description": "A fixed-position table-of-contents rail where scroll progress renders as a gooey liquid blob that climbs the track, merges with each section marker it reaches, stretches into a teardrop on fast scrolls, and bulges toward whichever marker the cursor is near.",
+          "previewUrl": "https://cdn.21st.dev/nikolas-sapa/toc-minimap-mercury/default/preview.1790530329279-7e10e351-8bf0-4f2a-bc3b-86e0d5cf2324.png"
+        }
+      ]
+    },
+    {
+      "query": "skeleton loading",
+      "results": [
+        {
+          "id": 1767,
+          "name": "Skeleton",
+          "author": "shugar",
+          "url": "https://21st.dev/@shugar/components/skeleton",
+          "description": "Display a skeleton whilst another component is loading.",
+          "previewUrl": "https://cdn.21st.dev/user_2uAqrF8oLIpxBVD9ZqYRYLfhKZ1/skeleton/default/preview.png?v=1"
+        },
+        {
+          "id": 23557,
+          "name": "Skeleton Swap",
+          "author": "ddoemonn",
+          "url": "https://21st.dev/@ddoemonn/components/skeleton-swap",
+          "description": "A loading placeholder that crossfades skeleton bars into real content with zero layout shift, holding a reserved box until data is ready.",
+          "previewUrl": "https://cdn.21st.dev/user_2y2pjLtk7oS33zts6BqhEIOHrAj/skeleton-swap/default/preview.1786651222523.png"
+        },
+        {
+          "id": 29863,
+          "name": "Shapes Skeleton",
+          "author": "ai2",
+          "url": "https://21st.dev/@ai2/components/skeleton-shapes",
+          "description": "A set of decorative loading placeholders (circle, square, rounded square, pill, and bar) that pulse calmly while content loads, with sizes from sm to xl and reduced-motion support.",
+          "previewUrl": "https://cdn.21st.dev/ai2/skeleton-shapes/default/preview.1790130146935-0f9eb2ba-dfe4-43c0-a233-d32d0c8386b0.png"
+        },
+        {
+          "id": 19999,
+          "name": "Skeleton Loader",
+          "author": "animbits",
+          "url": "https://21st.dev/@animbits/components/loaders-skeleton",
+          "description": "A shimmer skeleton placeholder that animates a moving highlight to indicate loading content.",
+          "previewUrl": "https://cdn.21st.dev/user_registry_animbits_1783710080732/loaders-skeleton/default/preview.1788369892385.png"
+        },
+        {
+          "id": 11895,
+          "name": "Skeleton",
+          "author": "jshguo",
+          "url": "https://21st.dev/@jshguo/components/interfaces-skeleton",
+          "description": "Skeleton loading placeholder with avatar, title, text, and media variants.",
+          "previewUrl": "https://cdn.21st.dev/reapollo/interfaces-skeleton/title/preview.1775135255672.png"
+        }
+      ]
+    },
+    {
+      "query": "toast notification promise",
+      "results": [
+        {
+          "id": 24420,
+          "name": "Promise Toast",
+          "author": "cnippet-dev",
+          "url": "https://21st.dev/@cnippet-dev/components/promise-toast",
+          "description": "A button that triggers a promise-based toast notification, cycling through loading, success, and error states as an async task resolves.",
+          "previewUrl": "https://cdn.21st.dev/cnippet.dev/promise-toast/default/preview.1786660993010-c3261deb-756b-476d-8ffa-bb9ca19cb35a.png"
+        },
+        {
+          "id": 28242,
+          "name": "Animated Toast",
+          "author": "dev.shejanmahamud",
+          "url": "https://21st.dev/@dev.shejanmahamud/components/animated-toast",
+          "description": "A set of animated toast notification components (success/error/warning/info variants, undo, promise-based, stacked, and minimal styles) for showing transient feedback in a React app.",
+          "previewUrl": "https://cdn.21st.dev/dev.shejanmahamud/animated-toast/animated-toast-promise-demo/preview.1789957029966-c2c6a637-430f-44ac-a21c-f008f9fef933.png"
+        },
+        {
+          "id": 19940,
+          "name": "Sonner Promise Toast",
+          "author": "bundui",
+          "url": "https://21st.dev/@bundui/components/toast8",
+          "description": "A button that triggers a promise-based Sonner toast, showing loading, success, and error states for async actions like syncing data.",
+          "previewUrl": "https://cdn.21st.dev/user_bundui/toast8/default/preview.1784802370597.png"
+        },
+        {
+          "id": 24297,
+          "name": "Toast",
+          "author": "cnippet-dev",
+          "url": "https://21st.dev/@cnippet-dev/components/toast",
+          "description": "Stacked toast notification system with auto-dismiss timeouts, action buttons, status icons, and configurable positions built on Base UI.",
+          "previewUrl": "https://cdn.21st.dev/user_36Tbt0v8JdD4jEycmBFhR8tojnR/toast/default/preview.1786656804488.webp"
+        },
+        {
+          "id": 3979,
+          "name": "Toast",
+          "author": "shugar",
+          "url": "https://21st.dev/@shugar/components/toast",
+          "description": "A succinct message that is displayed temporarily.",
+          "previewUrl": "https://cdn.21st.dev/shugar/toast/warning/preview.1752230648566.png"
+        }
+      ]
+    },
+    {
+      "query": "loading button success state",
+      "results": [
+        {
+          "id": 23536,
+          "name": "Loading Button",
+          "author": "ddoemonn",
+          "url": "https://21st.dev/@ddoemonn/components/loading-button",
+          "description": "A button that morphs its label through pending, success, and error states without layout shift when running an async action.",
+          "previewUrl": "https://cdn.21st.dev/user_2y2pjLtk7oS33zts6BqhEIOHrAj/loading-button/default/preview.1787346991751.png"
+        },
+        {
+          "id": 4996,
+          "name": "Loading Button",
+          "author": "arihantcodes_1f7b8c4d",
+          "url": "https://21st.dev/@arihantcodes_1f7b8c4d/components/loading-button",
+          "description": "Here is Loading Button component",
+          "previewUrl": "https://cdn.21st.dev/user_2xmIUPynCyYHPXZPBwS1EDV1Aq8/loading-button/default/preview.1788884624876.webp"
+        },
+        {
+          "id": 34553,
+          "name": "Download Button",
+          "author": "bidyut10",
+          "url": "https://21st.dev/@bidyut10/components/download-button",
+          "description": "A button that morphs through download, downloading, and downloaded states with a crossfading icon and label so users get inline progress feedback without a separate progress bar.",
+          "previewUrl": "https://cdn.21st.dev/user_registry_bidyut10_1790790084027/download-button/default/preview.1790890362397.webp"
+        },
+        {
+          "id": 146,
+          "name": "Button",
+          "author": "originui",
+          "url": "https://21st.dev/@originui/components/button",
+          "description": "Enhanced shadcn/ui button",
+          "previewUrl": "https://cdn.21st.dev/user_originui/button/loading-button-1/preview.1786740824981.png"
+        },
+        {
+          "id": 7910,
+          "name": "Progress Button",
+          "author": "ruixen.ui",
+          "url": "https://21st.dev/@ruixen.ui/components/progress-button",
+          "description": "The ProgressButton is a versatile shadcn/ui-based component that enhances the user experience for asynchronous actions like Submit, Pay, or Upload. Unlike a regular button, it provides immediate visual feedback by showing either a spinner or a progress bar after being clicked. It supports customizable labels for loading and success states, giving users clear confirmation of action progress and completion. The progress bar mode is especially useful for longer operations such as file uploads, while the spinner mode fits quick async tasks. With built-in accessibility, smooth animations, and configurable duration, this button helps reduce uncertainty for users during wait times and makes critical interactions feel more responsive and reliable.",
+          "previewUrl": "https://cdn.21st.dev/ruixen.ui/progress-button/default/preview.1758555306091.png"
+        }
+      ]
+    },
+    {
+      "query": "breadcrumb navigation",
+      "results": [
+        {
+          "id": 23681,
+          "name": "Breadcrumb",
+          "author": "cnippet-dev",
+          "url": "https://21st.dev/@cnippet-dev/components/breadcrumb",
+          "description": "Accessible breadcrumb navigation with links, a current page, separators, and an ellipsis for collapsed paths.",
+          "previewUrl": "https://cdn.21st.dev/cnippet.dev/breadcrumb/default/preview.1785545920408.png"
+        },
+        {
+          "id": 13807,
+          "name": "Breadcrumbs",
+          "author": "hero_ui",
+          "url": "https://21st.dev/@hero_ui/components/heroui-breadcrumbs",
+          "description": "Display the current page location within a navigational hierarchy.",
+          "previewUrl": "https://cdn.21st.dev/reapollo/heroui-breadcrumbs/level-2/preview.1780254281824.png"
+        },
+        {
+          "id": 29229,
+          "name": "Breadcrumb with Folder Menu",
+          "author": "coss.com",
+          "url": "https://21st.dev/@coss.com/components/p-breadcrumb-4",
+          "description": "A breadcrumb trail that collapses intermediate pages into a folder-icon dropdown menu instead of showing every crumb.",
+          "previewUrl": "https://cdn.21st.dev/coss.com/p-breadcrumb-4/default/preview.1790053986625-61b1339a-07d9-4e77-80e0-90bbac7780a5.png"
+        },
+        {
+          "id": 32938,
+          "name": "Breadcrumb Fold",
+          "author": "nikolas-sapa",
+          "url": "https://21st.dev/@nikolas-sapa/components/breadcrumb-fold",
+          "description": "A breadcrumb trail that compresses ancestor segments into narrow pleated slivers so an unbounded number of levels fits a fixed width, with hover or focus expanding any segment back to its full label while neighbors redistribute space.",
+          "previewUrl": "https://cdn.21st.dev/nikolas-sapa/breadcrumb-fold/default/preview.1790477658824-e46c24e7-5f6f-4b8f-9d51-fa13344bfcec.png"
+        },
+        {
+          "id": 808,
+          "name": "Navigation menu",
+          "author": "shadcn",
+          "url": "https://21st.dev/@shadcn/components/navigation-menu",
+          "description": "A collection of links for navigating websites.",
+          "previewUrl": "https://cdn.21st.dev/user_shadcn/navigation-menu/808/preview.png"
+        }
+      ]
+    },
+    {
+      "query": "minimal accordion",
+      "results": [
+        {
+          "id": 23530,
+          "name": "Accordion",
+          "author": "ddoemonn",
+          "url": "https://21st.dev/@ddoemonn/components/accordion",
+          "description": "An accessible, spring-animated accordion with single or multiple open panels, keyboard navigation, and auto-measured content height.",
+          "previewUrl": "https://cdn.21st.dev/ddoemonn/accordion/default/preview.1785472426900-c597a8dc-43a8-4b6c-a3c0-b3b6170cd61d.png"
+        },
+        {
+          "id": 7537,
+          "name": "Accordion",
+          "author": "brijr",
+          "url": "https://21st.dev/@brijr/components/accordion-1",
+          "description": "Here is Accordion component",
+          "previewUrl": "https://cdn.21st.dev/user_brijr/accordion-1/default/preview.1787237826428.png"
+        },
+        {
+          "id": 34660,
+          "name": "Accessible Accordion",
+          "author": "a11ypros",
+          "url": "https://21st.dev/@a11ypros/components/a11y-accordion",
+          "description": "A keyboard-accessible accordion built on native HTML5 details/summary elements, with single- or multi-expand coordination, focus-visible outlines and reduced-motion support — ported to React from A11YPros' a11y-ui web component (credit: Ryan Mack / a11ypros.com).",
+          "previewUrl": "https://cdn.21st.dev/user_registry_a11ypros_1790790185577/a11y-accordion/single-item/preview.1790889718629.webp"
+        },
+        {
+          "id": 734,
+          "name": "Accordion - Cheveron",
+          "author": "designali-in",
+          "url": "https://21st.dev/@designali-in/components/accordion-01",
+          "description": "Accordion",
+          "previewUrl": "https://cdn.21st.dev/user_2rO0IUQINTfBex4xN8Ghho5dpr4/accordion-01/accordion-01/preview.png?v=1"
+        },
+        {
+          "id": 506,
+          "name": "Accordion",
+          "author": "originui",
+          "url": "https://21st.dev/@originui/components/accordion",
+          "description": "Enchanced shadcn/ui accordion",
+          "previewUrl": "https://cdn.21st.dev/user_originui/accordion/multi-level/preview.png?v=1"
+        }
+      ]
+    },
+    {
+      "query": "tooltip button",
+      "results": [
+        {
+          "id": 223,
+          "name": "Button",
+          "author": "originui",
+          "url": "https://21st.dev/@originui/components/button",
+          "description": "Enhanced shadcn/ui button",
+          "previewUrl": "https://cdn.21st.dev/user_originui/button/button-with-tooltip/preview.1786741021119.png"
+        },
+        {
+          "id": 7917,
+          "name": "Tooltip Button",
+          "author": "ruixen.ui",
+          "url": "https://21st.dev/@ruixen.ui/components/tooltip-button",
+          "description": "The Tooltip Button is a shadcn/ui component that combines a standard button with a hover-triggered tooltip to provide additional context or guidance for users. It is perfect for icon-only buttons or actions that may not be immediately clear, as the tooltip explains the button’s purpose without cluttering the interface. The component supports optional icons, flexible text labels, and configurable sizes (sm, md, lg), making it highly adaptable for dashboards, toolbars, or any interactive UI. By using shadcn/ui primitives, it ensures accessibility, smooth animations, and a consistent, modern design.",
+          "previewUrl": "https://cdn.21st.dev/user_2y5Wd5l713ZIFYjX19aZXSyXd6b/tooltip-button/default/preview.1788374141745.png"
+        },
+        {
+          "id": 3450,
+          "name": "Button",
+          "author": "sean0205",
+          "url": "https://21st.dev/@sean0205/components/button-1",
+          "description": "Renders a clickable button or an element styled as a button with advance options",
+          "previewUrl": "https://cdn.21st.dev/sean0205/button-1/ghost/preview.1751367336020.png"
+        },
+        {
+          "id": 64,
+          "name": "Particle Button",
+          "author": "kokonutd",
+          "url": "https://21st.dev/@kokonutd/components/particle-button",
+          "description": "A little particle animation on submit",
+          "previewUrl": "https://cdn.21st.dev/user_2rQ1QHrJyxpmWMHhqhANzWMc64n/particle-button/default/preview.1788470170183.png"
+        },
+        {
+          "id": 13566,
+          "name": "Highlight Button",
+          "author": "radiumcoders",
+          "url": "https://21st.dev/@radiumcoders/components/highlight-button",
+          "description": "A button with a mouse-following highlight that darkens the surface as the cursor moves, fades in a soft border on hover, and bursts a radial ripple from the exact click point. Theme-aware, with overridable highlight color, size, and border color.",
+          "previewUrl": "https://cdn.21st.dev/user_36kD1scOExJb89UoQCZAl3Z0xi7/highlight-button/default/preview.1787323582871.png"
+        }
+      ]
+    },
+    {
+      "query": "pagination result count",
+      "results": [
+        {
+          "id": 25140,
+          "name": "Pagination with Page Info and Page Size",
+          "author": "bundui",
+          "url": "https://21st.dev/@bundui/components/pagination9",
+          "description": "A pagination control that shows the current page range, numbered page links with ellipsis, and a results-per-page select.",
+          "previewUrl": "https://cdn.21st.dev/user_bundui/pagination9/default/preview.1787684400178.webp"
+        },
+        {
+          "id": 7705,
+          "name": "Pagination Ant",
+          "author": "antdesign",
+          "url": "https://21st.dev/@antdesign/components/pagination-ant",
+          "description": "Here is Pagination component",
+          "previewUrl": "https://cdn.21st.dev/larsen66/pagination-ant/total-number/preview.1758093863798.png"
+        },
+        {
+          "id": 452,
+          "name": "Pagination with text buttons",
+          "author": "originui",
+          "url": "https://21st.dev/@originui/components/text-pagination",
+          "description": "Pagination with text buttons",
+          "previewUrl": "https://cdn.21st.dev/user_originui/text-pagination/default/preview.1737992436440.png"
+        },
+        {
+          "id": 25131,
+          "name": "Pagination with Ellipsis",
+          "author": "bundui",
+          "url": "https://21st.dev/@bundui/components/pagination8",
+          "description": "A joined pagination control with previous/next arrows, page number buttons, and truncating ellipsis for large page counts.",
+          "previewUrl": "https://cdn.21st.dev/bundui/pagination8/default/preview.1787176763122-8af6a973-95cb-4c7a-8924-0e7fe34436d5.png"
+        },
+        {
+          "id": 453,
+          "name": "Numbered Pagination",
+          "author": "originui",
+          "url": "https://21st.dev/@originui/components/numbered-pagination",
+          "description": " ",
+          "previewUrl": "https://cdn.21st.dev/user_originui/numbered-pagination/default/preview.1737992372368.png"
+        }
+      ]
+    },
+    {
+      "query": "progress bar labelled",
+      "results": [
+        {
+          "id": 19567,
+          "name": "Progress Bar",
+          "author": "hero_ui",
+          "url": "https://21st.dev/@hero_ui/components/heroui-progress-bar",
+          "description": "A HeroUI progress bar for showing completion of a task — loading, uploads, multi-step flows. Built on react-aria with an accessible label and formatted output. Supports accent/success/warning/danger colors, sm/md/lg sizes, an indeterminate animated state, and an optional label.",
+          "previewUrl": "https://cdn.21st.dev/user_hero_ui/heroui-progress-bar/without-label/preview.1787332876165.png"
+        },
+        {
+          "id": 23549,
+          "name": "Progress Bar",
+          "author": "ddoemonn",
+          "url": "https://21st.dev/@ddoemonn/components/progress-bar",
+          "description": "An accessible linear progress bar with animated fill, indeterminate shimmer, and pending/complete state labels.",
+          "previewUrl": "https://cdn.21st.dev/user_2y2pjLtk7oS33zts6BqhEIOHrAj/progress-bar/default/preview.1787347821163.png"
+        },
+        {
+          "id": 26545,
+          "name": "Partition Bar",
+          "author": "8starlabs",
+          "url": "https://21st.dev/@8starlabs/components/partition-bar",
+          "description": "A horizontal bar chart that splits into proportional colored segments to visualize parts of a whole, with labeled titles and values under each segment.",
+          "previewUrl": "https://cdn.21st.dev/8starlabs/partition-bar/default/preview.1788813428561-46d40967-3f71-4602-98af-e141719a9f6c.png"
+        },
+        {
+          "id": 19174,
+          "name": "Progress With Value",
+          "author": "arihantcodes_1f7b8c4d",
+          "url": "https://21st.dev/@arihantcodes_1f7b8c4d/components/progress-with-value",
+          "description": "A progress bar that displays its percentage value inline, with configurable label positions inside or outside the track.",
+          "previewUrl": "https://cdn.21st.dev/arihantcodes_1f7b8c4d/progress-with-value/default/preview.1784684089296-0747433d-fca9-428a-a8a0-ef895319fa67.png"
+        },
+        {
+          "id": 29460,
+          "name": "Progress Bar With Slider",
+          "author": "sean0205",
+          "url": "https://21st.dev/@sean0205/components/c-progress-6",
+          "description": "A progress bar synced to a draggable slider, so a user can see and adjust a percentage value with live visual feedback.",
+          "previewUrl": "https://cdn.21st.dev/sean0205/c-progress-6/default/preview.1790080343236-1b20bf6a-5b35-4f81-9794-7fae359e7b80.png"
+        }
+      ]
+    },
+    {
+      "query": "input otp",
+      "results": [
+        {
+          "id": 9031,
+          "name": "Input OTPs",
+          "author": "clevision",
+          "url": "https://21st.dev/@clevision/components/input-otps",
+          "description": "Here is Input OTP component",
+          "previewUrl": "https://cdn.21st.dev/larsen66/input-otps/input-otp-alphanumeric/preview.1760517334927.png"
+        },
+        {
+          "id": 8735,
+          "name": "Otp Input",
+          "author": "educalvolpz",
+          "url": "https://21st.dev/@educalvolpz/components/otp-input",
+          "description": "Here is Otp Input component",
+          "previewUrl": "https://cdn.21st.dev/user_2s2o9RwN7OoP4Na42lJREy96Xua/otp-input/default/preview.1787907377660.png"
+        },
+        {
+          "id": 23543,
+          "name": "OTP Input",
+          "author": "ddoemonn",
+          "url": "https://21st.dev/@ddoemonn/components/otp-input",
+          "description": "A one-time-code input with per-character cells, animated character crossfade, paste and keyboard navigation, and error/success validation states.",
+          "previewUrl": "https://cdn.21st.dev/ddoemonn/otp-input/default/preview.1785473777969-dc36ac48-44b8-4fd6-bc72-4f24cb9d80cd.png"
+        },
+        {
+          "id": 34735,
+          "name": "Input OTP",
+          "author": "halaska-studio",
+          "url": "https://21st.dev/@halaska-studio/components/input-otp",
+          "description": "A row of auto-advancing digit boxes for entering a one-time verification code sent by SMS, email, or an authenticator app.",
+          "previewUrl": "https://cdn.21st.dev/user_registry_halaska-studio_1790790197996/input-otp/prefilled-code/preview.1790887615182.webp"
+        },
+        {
+          "id": 174,
+          "name": "Input",
+          "author": "originui",
+          "url": "https://21st.dev/@originui/components/input",
+          "description": "Upgaraded shadcn/ui Input",
+          "previewUrl": "https://cdn.21st.dev/user_originui/input/default/preview.1737998307549.png"
+        }
+      ]
+    },
+    {
+      "query": "filter chips removable",
+      "results": [
+        {
+          "id": 1963,
+          "name": "Selector Chips",
+          "author": "preetsuthar17",
+          "url": "https://21st.dev/@preetsuthar17/components/selector-chips",
+          "description": "Selector Chips are used to display a list of items that can be selected.",
+          "previewUrl": "https://cdn.21st.dev/user_2rWolCuRnJW3DRiuQ5JHrl5kj8a/selector-chips/default/preview.1788887916562.webp"
+        },
+        {
+          "id": 35042,
+          "name": "Chip Group",
+          "author": "kuratlielia",
+          "url": "https://21st.dev/@kuratlielia/components/chip-group",
+          "description": "A row of selectable filter chips for narrowing a list by facets like topics, statuses, or tags, with an animated check and a \"+N more\" overflow for long sets.",
+          "previewUrl": "https://cdn.21st.dev/user_registry_kuratlielia_1790903117010/chip-group/default/preview.1790978073493.webp"
+        },
+        {
+          "id": 29354,
+          "name": "Memory Chips",
+          "author": "arihantcodes_1f7b8c4d",
+          "url": "https://21st.dev/@arihantcodes_1f7b8c4d/components/memory-chips",
+          "description": "A panel or row of removable chips showing facts an AI assistant remembers, with add/remove interactions.",
+          "previewUrl": "https://cdn.21st.dev/arihantcodes_1f7b8c4d/memory-chips/default/preview.1790067847909-215b6068-31d8-4c3f-8bfd-243e16c915a8.png"
+        },
+        {
+          "id": 13842,
+          "name": "Chip",
+          "author": "hero_ui",
+          "url": "https://21st.dev/@hero_ui/components/heroui-chip",
+          "description": "Small informational badges for displaying labels, statuses, and categories.",
+          "previewUrl": "https://cdn.21st.dev/reapollo/heroui-chip/variants/preview.1780264594989.png"
+        },
+        {
+          "id": 22213,
+          "name": "Role Filter Chips",
+          "author": "cnippet-dev",
+          "url": "https://21st.dev/@cnippet-dev/components/v-toggle-10",
+          "description": "Role filter chips built from toggle buttons, each with a count badge and a live running total of matching results.",
+          "previewUrl": "https://cdn.21st.dev/cnippet.dev/v-toggle-10/default/preview.1785464988753-9b6ec5e3-892f-4c68-86b6-2889d926f506.png"
+        }
+      ]
+    },
+    {
+      "query": "faq accordion numbered steps guide",
+      "results": [
+        {
+          "id": 29467,
+          "name": "Onboarding Accordion",
+          "author": "ephraimduncan",
+          "url": "https://21st.dev/@ephraimduncan/components/onboarding-04",
+          "description": "A step-by-step onboarding checklist rendered as an accordion, where each step unlocks and auto-expands the next once its action button is completed.",
+          "previewUrl": "https://cdn.21st.dev/user_2vZexZytBe3Vo4fbfmzWgvCugbB/onboarding-04/default/preview.1790089183728.webp"
+        },
+        {
+          "id": 31351,
+          "name": "Accordion",
+          "author": "wensity",
+          "url": "https://21st.dev/@wensity/components/accordion",
+          "description": "An animated accordion for FAQs, settings groups and nested content, with single or multiple open items and several visual variants. Accessible, built on Base UI.",
+          "previewUrl": "https://cdn.21st.dev/wensity/accordion/default/preview.1790294931419-64d4a560-d678-4c30-a757-0a1ef991aeff.png"
+        },
+        {
+          "id": 29230,
+          "name": "Ghost Accordion",
+          "author": "arihantcodes_1f7b8c4d",
+          "url": "https://21st.dev/@arihantcodes_1f7b8c4d/components/accordion-ghost",
+          "description": "A borderless, minimal accordion with a plus/cross toggle indicator and numbered items, for FAQs or step-by-step guides.",
+          "previewUrl": "https://cdn.21st.dev/user_2xmIUPynCyYHPXZPBwS1EDV1Aq8/accordion-ghost/default/preview.1790098201798.png"
+        },
+        {
+          "id": 38218,
+          "name": "FAQ Accordion Section",
+          "author": "kedhareswer",
+          "url": "https://21st.dev/@kedhareswer/components/slit-type-faq",
+          "description": "FAQ accordion section set in one ink on one paper: a display headline cut by a stencil slit that lifts clear on hover, live search across questions and answers with matches highlighted, and rows that flood with ink edge to edge as they open. A real accessible accordion with keyboard navigation, deep links per question and Copy link. Single or multiple open, four presets, light and dark.",
+          "previewUrl": "https://cdn.21st.dev/user_30fkm37UoBFJx1GiK2Q4Sy8lSrO/slit-type-faq/default/preview.1792010596991.webp"
+        },
+        {
+          "id": 29774,
+          "name": "FAQ Accordion",
+          "author": "scrollxui",
+          "url": "https://21st.dev/@scrollxui/components/frequently-asked-questions-with-accordion",
+          "description": "An animated FAQ section that reveals answers in an accordion with word-by-word blur-in headline animation and staggered item entrance.",
+          "previewUrl": "https://cdn.21st.dev/scrollxui/frequently-asked-questions-with-accordion/default/preview.1790118526161-db8fc8a3-c308-4183-9941-42b97cfc1ed7.png"
+        }
+      ]
+    },
+    {
+      "query": "inline alert success warning",
+      "results": [
+        {
+          "id": 332,
+          "name": "Alert",
+          "author": "serafimcloud",
+          "url": "https://21st.dev/@serafimcloud/components/alert",
+          "description": "Alert in shadcn/ui format",
+          "previewUrl": "https://cdn.21st.dev/user_2nElBLvklOKlAURm6W1PTu6yYFh/alert/warning-alert/preview.png?v=1"
+        },
+        {
+          "id": 3587,
+          "name": "Alert",
+          "author": "sean0205",
+          "url": "https://21st.dev/@sean0205/components/alert-1",
+          "description": "Displays a callout for user attention, such as a success message, warning, or error.",
+          "previewUrl": "https://cdn.21st.dev/sean0205/alert-1/extended/preview.1751434599073.png"
+        },
+        {
+          "id": 705,
+          "name": "Alert Dialog",
+          "author": "shadcn",
+          "url": "https://21st.dev/@shadcn/components/alert-dialog",
+          "description": "A modal dialog that interrupts the user with important content and expects a response.",
+          "previewUrl": "https://cdn.21st.dev/user_shadcn/alert-dialog/success/preview.1786661424565.webp"
+        },
+        {
+          "id": 11330,
+          "name": "Alert",
+          "author": "coss.com",
+          "url": "https://21st.dev/@coss.com/components/alert",
+          "description": "A styled alert component with variant support (default, info, success, warning, error) and optional action buttons.",
+          "previewUrl": "https://cdn.21st.dev/coss.com/alert/warning/preview.1774275779058.png"
+        },
+        {
+          "id": 23619,
+          "name": "Warning Alert",
+          "author": "cnippet-dev",
+          "url": "https://21st.dev/@cnippet-dev/components/v-alert-6",
+          "description": "A warning alert callout with a triangle icon, title and description for surfacing cautionary messages.",
+          "previewUrl": "https://cdn.21st.dev/cnippet.dev/v-alert-6/default/preview.1785491150683-565f4c5b-6151-4261-b852-314b5dfabf5c.png"
+        }
+      ]
+    }
+  ],
+  "sourceReviews": [
+    {
+      "id": 521,
+      "name": "Status Badge",
+      "componentId": 1201,
+      "sourceRetrieved": true,
+      "sourceCharacters": 1740,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Dönen ana bileşen kaynağı okundu; demo bağlantısı/bağımlılık gereksinimi incelendi.",
+      "decision": "İkon + metin + ikincil bağlam fikri uygun; @remixicon/react ve tremor sınıfları doğrudan alınmayacak.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    },
+    {
+      "id": 36536,
+      "name": "Copy With Confirmation",
+      "componentId": 20457,
+      "sourceRetrieved": true,
+      "sourceCharacters": 9592,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Dönen ana bileşen kaynağı okundu; demo bağlantısı/bağımlılık gereksinimi incelendi.",
+      "decision": "Clipboard Promise sonucuna bağlı onay, manuel kopyalama fallback'i ve reduced-motion var. Geniş genel stil/hook paketi yerine mevcut CopyClassCode geliştirilebilir.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    },
+    {
+      "id": 1435,
+      "name": "Empty State",
+      "componentId": 256,
+      "sourceRetrieved": true,
+      "sourceCharacters": 2836,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Dönen ana bileşen kaynağı okundu; demo bağlantısı/bağımlılık gereksinimi incelendi.",
+      "decision": "İkon, kısa açıklama ve eylem düzeni uygun. 3 ikonlu hareket, dashed dev panel ve sabit geniş boşluklar çalışma alanına taşınmayacak.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    },
+    {
+      "id": 23536,
+      "name": "Loading Button",
+      "componentId": 11398,
+      "sourceRetrieved": true,
+      "sourceCharacters": 7657,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Dönen ana bileşen kaynağı okundu; demo bağlantısı/bağımlılık gereksinimi incelendi.",
+      "decision": "Gerçek async action Promise sonucunu izliyor; eşzamanlı çağrı kilidi, sabit etiket geometrisi ve live status incelendi. motion/react yerine mevcut Button ve CSS.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    },
+    {
+      "id": 34517,
+      "name": "Table of Contents",
+      "componentId": 19236,
+      "sourceRetrieved": true,
+      "sourceCharacters": 8804,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Dönen ana bileşen kaynağı okundu; demo bağlantısı/bağımlılık gereksinimi incelendi.",
+      "decision": "IntersectionObserver, rootMargin, aria-current ve ResizeObserver yaklaşımı uygun. Base UI bağımlılığını almadan mevcut FormOutline'a aktif bölüm eklenebilir.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    },
+    {
+      "id": 23557,
+      "name": "Skeleton Swap",
+      "componentId": 11419,
+      "sourceRetrieved": true,
+      "sourceCharacters": 4870,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Dönen ana bileşen kaynağı okundu; demo bağlantısı/bağımlılık gereksinimi incelendi.",
+      "decision": "Sabit reserve yüksekliği + overflow-y-auto ve opacity/pointer-events ile gizleme içerik/odak açısından uyarlama gerektiriyor. motion/react ve minVisible gecikmesi alınmayacak.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    },
+    {
+      "id": 34660,
+      "name": "Accessible Accordion",
+      "componentId": 19337,
+      "sourceRetrieved": true,
+      "sourceCharacters": 4729,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Dönen ana bileşen kaynağı okundu; demo bağlantısı/bağımlılık gereksinimi incelendi.",
+      "decision": "Native details/summary ve dekoratif chevron yapısı uygun. Projede details zaten var; yeni accordion paketi gerekmez. Katalogdaki WCAG iddiası bağımsız doğrulama değildir.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    },
+    {
+      "id": 25140,
+      "name": "Pagination with Page Info and Page Size",
+      "componentId": 12364,
+      "sourceRetrieved": true,
+      "sourceCharacters": 4242,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Dönen ana bileşen kaynağı okundu; demo bağlantısı/bağımlılık gereksinimi incelendi.",
+      "decision": "Sayfa bilgisi görünümü uygun. Demo sayfa boyutu seçicisi veri sorgusuna bağlanmıyor ve hash linkleri yerel örnek. Mevcut 25 kayıt/URL sözleşmesi korunmalı.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    },
+    {
+      "id": 19174,
+      "name": "Progress With Value",
+      "componentId": 9759,
+      "sourceRetrieved": true,
+      "sourceCharacters": 2376,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Dönen ana bileşen kaynağı okundu; demo bağlantısı/bağımlılık gereksinimi incelendi.",
+      "decision": "Kaynak value'yu destrüktüre ediyor ancak Radix Root'a aktarmıyor; dolgu value||0 kullanıyor. null/0 ayrımı ve ARIA değeri düzeltilmeden doğrudan kullanılamaz.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    },
+    {
+      "id": 28483,
+      "name": "Audit Log With Icon Tiles",
+      "componentId": 14865,
+      "sourceRetrieved": true,
+      "sourceCharacters": 4184,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Dönen ana bileşen kaynağı okundu; demo bağlantısı/bağımlılık gereksinimi incelendi.",
+      "decision": "İkon, olay adı, ayrıntı, etiket ve zaman yerleşimi uygun; event listesi statik demo. Gerçek audit/version verisine adaptasyon gerekir.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    },
+    {
+      "id": 23681,
+      "name": "Breadcrumb",
+      "componentId": 11518,
+      "sourceRetrieved": true,
+      "sourceCharacters": 2628,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Dönen ana bileşen kaynağı okundu; demo bağlantısı/bağımlılık gereksinimi incelendi.",
+      "decision": "nav/ol ve aria-current yaklaşımı uygun; Base UI eklemek gereksiz. Mevcut PageHeading.back ile hafif üst-bağlam kullanılabilir.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    },
+    {
+      "id": 19201,
+      "name": "File Dropzone",
+      "componentId": 9786,
+      "sourceRetrieved": true,
+      "sourceCharacters": 7034,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Kaynak odaklı satır incelemesi; tüm bağımlılık ağacı denetlenmedi.",
+      "decision": "Dosya satırı, görsel preview, hata bölgesi incelendi; use-file-upload yardımcı bağımlılığı var. Mevcut PackageFilePicker zaten çoğunu karşılıyor; yalnız raster kapak önizlemesi aday.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    },
+    {
+      "id": 23543,
+      "name": "OTP Input",
+      "componentId": 11405,
+      "sourceRetrieved": true,
+      "sourceCharacters": 14509,
+      "hasRegistryDependencies": true,
+      "reviewScope": "Kaynak odaklı satır incelemesi; tüm bağımlılık ağacı denetlenmedi.",
+      "decision": "Çoklu hücre, özel paste/odak yönetimi ve motion/react var. Küçük rötuş kapsamına göre ağır; mevcut tek one-time-code alanını koruma kararı.",
+      "license": "Bu araştırmada yeni lisans doğrulaması yapılmadı; kaynak projeye kopyalanmadı."
+    }
+  ],
+  "liveObserved": [
+    "/ogretmenler-icin",
+    "/parolami-unuttum",
+    "/giris",
+    "/kayit?tur=ogrenci",
+    "/kesfet?saved=1",
+    "/kesfet",
+    "/icerik/demo-kesir-mutfagi?from=%2Fkesfet",
+    "/ogrenci/parola"
+  ],
+  "screenshotsReviewed": [
+    ".impeccable/review/21st-workspace/after/contents-390.png",
+    ".impeccable/review/21st-workspace/after/assignment-1440.png",
+    ".impeccable/review/assignment-delivery/exports-1440.png",
+    ".impeccable/review/21st-workspace/after/metadata-390.png",
+    ".impeccable/review/21st-workspace/after/assessment-390.png",
+    ".impeccable/review/unified/student-1440.png",
+    ".impeccable/review/unified/admin-kayitlar-390.png",
+    ".impeccable/review/21st-workspace/after/queue-1440.png"
+  ],
+  "limitations": [
+    "Korumalı rollerde bu tur yeni oturum açılmadı ve işlem gönderilmedi.",
+    "Eski ekran görüntüleri görsel yardımcı kanıt; mevcut davranış için güncel kaynak esas alındı.",
+    "Canlı önizleme inceleme sırasında güncellendi; /nasil-kullanilir dosyası son envantere eklendi ve /ogretmenler-icin yönlendirmeye dönüştü. Yeni rehber için canlı gezinme zaman aşımına uğradı.",
+    "Önceki test başarıları bu araştırmada yeniden çalıştırılmış sayılmadı.",
+    "Önerilerin kullanıcı performansına etkisi henüz ölçülmedi."
+  ],
+  "webSources": [
+    "https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html",
+    "https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum",
+    "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html",
+    "https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/",
+    "https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/"
+  ],
+  "routeInventory": {
+    "count": 25,
+    "screens": 20,
+    "redirects": 5,
+    "entries": [
+      {
+        "route": "/editor/[id]",
+        "kind": "screen",
+        "source": "src/app/editor/[id]/page.tsx",
+        "sha256": "beb6d5a8193fa35429895b3a09e835b3317a03eab674565c6b0db525ba82522d"
+      },
+      {
+        "route": "/editor",
+        "kind": "screen",
+        "source": "src/app/editor/page.tsx",
+        "sha256": "05cd622f7f6091f92442095b36b6870b310df1f4d7f612230cc999a1720d1d08"
+      },
+      {
+        "route": "/giris",
+        "kind": "screen",
+        "source": "src/app/giris/page.tsx",
+        "sha256": "7c1eb0790469208263a20a581165ab22c22dfa4bb9cb50774156931294878cbf"
+      },
+      {
+        "route": "/hesap",
+        "kind": "screen",
+        "source": "src/app/hesap/page.tsx",
+        "sha256": "9065f4d924d9b7fbba508edae725a6f4dda76333a0949bc47f578bc3c334aea3"
+      },
+      {
+        "route": "/icerik/[slug]",
+        "kind": "screen",
+        "source": "src/app/icerik/[slug]/page.tsx",
+        "sha256": "5505692623f7ee20d02e28ec0071ff10ceb378396d1a784e9c5631b19cfc5823"
+      },
+      {
+        "route": "/kayit",
+        "kind": "screen",
+        "source": "src/app/kayit/page.tsx",
+        "sha256": "ce996deca315c0a37d28a8b4ce0bb8937934f230d9483eed00232cc0ba92604f"
+      },
+      {
+        "route": "/kesfet",
+        "kind": "screen",
+        "source": "src/app/kesfet/page.tsx",
+        "sha256": "4787de7fbc275330cd3641fd25b7d6a01924f1b9da62c2985cb0d33328669249"
+      },
+      {
+        "route": "/nasil-kullanilir",
+        "kind": "screen",
+        "source": "src/app/nasil-kullanilir/page.tsx",
+        "sha256": "5ba1bb928cb96d879318465f8b585564391436b01ee8e34842dd3d3123e326c9"
+      },
+      {
+        "route": "/ogrenci/giris",
+        "kind": "redirect",
+        "source": "src/app/ogrenci/giris/page.tsx",
+        "sha256": "a9eb40264490690447c3ca67d06d6beea2f653127b40f1f771054c6ea230792f"
+      },
+      {
+        "route": "/ogrenci/kayit",
+        "kind": "redirect",
+        "source": "src/app/ogrenci/kayit/page.tsx",
+        "sha256": "30bda6d987a988ed486a1903138c9c489ab017126c2f7fbd88ffe48d6b88207d"
+      },
+      {
+        "route": "/ogrenci/oyna/[id]",
+        "kind": "screen",
+        "source": "src/app/ogrenci/oyna/[id]/page.tsx",
+        "sha256": "aa9cb5c0a295696380a0337edf2009e98fc84dbaabeb4d3ccee74427ba52659e"
+      },
+      {
+        "route": "/ogrenci",
+        "kind": "screen",
+        "source": "src/app/ogrenci/page.tsx",
+        "sha256": "a735c2f6149b3e4a1fa256fcc94a3fbdc9d464a771c1e5132694d81391df2d57"
+      },
+      {
+        "route": "/ogrenci/parola",
+        "kind": "screen",
+        "source": "src/app/ogrenci/parola/page.tsx",
+        "sha256": "350c6f5be4d08cfd12574928d43ad1030cd1eca54925c75f684d98f341963c37"
+      },
+      {
+        "route": "/ogretmen/icerik/[id]",
+        "kind": "screen",
+        "source": "src/app/ogretmen/icerik/[id]/page.tsx",
+        "sha256": "d8f57531e6f36be43cf4af4b949c60a7fafdb410896aa21427351391b47604b3"
+      },
+      {
+        "route": "/ogretmen/odevler/[id]",
+        "kind": "screen",
+        "source": "src/app/ogretmen/odevler/[id]/page.tsx",
+        "sha256": "ffb054858ef6a31cf90faa809c6dc252f33ee6aa556524e31edb4cb4a0d46157"
+      },
+      {
+        "route": "/ogretmen/odevler",
+        "kind": "screen",
+        "source": "src/app/ogretmen/odevler/page.tsx",
+        "sha256": "541c883c0ad00843ab614a5c2e5ae7300890298f9ed5a3d79bc80a7b26a2f241"
+      },
+      {
+        "route": "/ogretmen",
+        "kind": "screen",
+        "source": "src/app/ogretmen/page.tsx",
+        "sha256": "4120411673db51cf55f1b49039b6cd524faa999c91647d9145716176ecc136c1"
+      },
+      {
+        "route": "/ogretmen/siniflar",
+        "kind": "screen",
+        "source": "src/app/ogretmen/siniflar/page.tsx",
+        "sha256": "e532410c204fb9adcd974c1211bb2fa9cf08e7c1f9df43d472c7769548b9c69e"
+      },
+      {
+        "route": "/ogretmen/yeni",
+        "kind": "screen",
+        "source": "src/app/ogretmen/yeni/page.tsx",
+        "sha256": "e27962745e20891d3aaa9f98a7d8a0dfeaa91a362d7fe46c7cf444cdb3e3afa3"
+      },
+      {
+        "route": "/ogretmenler-icin",
+        "kind": "redirect",
+        "source": "src/app/ogretmenler-icin/page.tsx",
+        "sha256": "81582b35bc65387583e3c99cc82c9fb6ba1b77513054ebec5c21c8445717448d"
+      },
+      {
+        "route": "/oturum",
+        "kind": "redirect",
+        "source": "src/app/oturum/page.tsx",
+        "sha256": "a82b224704deb5bf6ac6e65487d67f1cf9ba75058d7dbd6a360d04aa4fcfee27"
+      },
+      {
+        "route": "/oyna/[slug]",
+        "kind": "redirect",
+        "source": "src/app/oyna/[slug]/page.tsx",
+        "sha256": "1dcb1df4072092a2f791302a6428298d0f93de81f0d3b18da2d0497c588b359b"
+      },
+      {
+        "route": "/parola-yenile",
+        "kind": "screen",
+        "source": "src/app/parola-yenile/page.tsx",
+        "sha256": "ec387a44585878da0bdf5c5da682a065a64dcc1e426a2a81692fcfc72b1133ec"
+      },
+      {
+        "route": "/parolami-unuttum",
+        "kind": "screen",
+        "source": "src/app/parolami-unuttum/page.tsx",
+        "sha256": "e9034fcaad8ac2b1fa67f47ff5cc54b13a4c6a7022f32ed3e3af701448cec569"
+      },
+      {
+        "route": "/yonetim",
+        "kind": "screen",
+        "source": "src/app/yonetim/page.tsx",
+        "sha256": "8a05c28745d47ecced3f18c308084d30da1277548ef851720bff7c929803441d"
+      }
+    ]
+  },
+  "reportValidation": {
+    "allLocalLinksExist": true,
+    "jsonParsed": true,
+    "applicationTestsRerun": false,
+    "applicationCodeChanged": false
+  }
+}

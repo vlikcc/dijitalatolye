@@ -1,0 +1,728 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-26T23:34:18.022317Z",
+  "title": "Design System: Dijital Oyun Atölyesi — Keşif Atlası",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Atlas navy",
+        "tonalRamp": [
+          "oklch(0.150 0.0161 259.08)",
+          "oklch(0.264 0.0323 259.08)",
+          "oklch(0.379 0.0440 259.08)",
+          "oklch(0.493 0.0494 259.08)",
+          "oklch(0.607 0.0478 259.08)",
+          "oklch(0.721 0.0396 259.08)",
+          "oklch(0.836 0.0256 259.08)",
+          "oklch(0.950 0.0082 259.08)"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Deep navy hover",
+        "tonalRamp": [
+          "oklch(0.150 0.0150 257.85)",
+          "oklch(0.264 0.0300 257.85)",
+          "oklch(0.379 0.0409 257.85)",
+          "oklch(0.493 0.0460 257.85)",
+          "oklch(0.607 0.0445 257.85)",
+          "oklch(0.721 0.0368 257.85)",
+          "oklch(0.836 0.0239 257.85)",
+          "oklch(0.950 0.0076 257.85)"
+        ]
+      },
+      "primary-foreground": {
+        "role": "primary",
+        "displayName": "Action white",
+        "tonalRamp": [
+          "oklch(0.150 0.0000 0.00)",
+          "oklch(0.264 0.0000 0.00)",
+          "oklch(0.379 0.0000 0.00)",
+          "oklch(0.493 0.0000 0.00)",
+          "oklch(0.607 0.0000 0.00)",
+          "oklch(0.721 0.0000 0.00)",
+          "oklch(0.836 0.0000 0.00)",
+          "oklch(0.950 0.0000 0.00)"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Neutral paper",
+        "tonalRamp": [
+          "oklch(0.150 0.0009 264.54)",
+          "oklch(0.264 0.0019 264.54)",
+          "oklch(0.379 0.0025 264.54)",
+          "oklch(0.493 0.0029 264.54)",
+          "oklch(0.607 0.0028 264.54)",
+          "oklch(0.721 0.0023 264.54)",
+          "oklch(0.836 0.0015 264.54)",
+          "oklch(0.950 0.0005 264.54)"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Navy ink",
+        "tonalRamp": [
+          "oklch(0.150 0.0161 259.08)",
+          "oklch(0.264 0.0323 259.08)",
+          "oklch(0.379 0.0440 259.08)",
+          "oklch(0.493 0.0494 259.08)",
+          "oklch(0.607 0.0478 259.08)",
+          "oklch(0.721 0.0396 259.08)",
+          "oklch(0.836 0.0256 259.08)",
+          "oklch(0.950 0.0082 259.08)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted blue-grey",
+        "tonalRamp": [
+          "oklch(0.150 0.0087 258.37)",
+          "oklch(0.264 0.0174 258.37)",
+          "oklch(0.379 0.0236 258.37)",
+          "oklch(0.493 0.0265 258.37)",
+          "oklch(0.607 0.0257 258.37)",
+          "oklch(0.721 0.0213 258.37)",
+          "oklch(0.836 0.0138 258.37)",
+          "oklch(0.950 0.0044 258.37)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "White surface",
+        "tonalRamp": [
+          "oklch(0.150 0.0000 0.00)",
+          "oklch(0.264 0.0000 0.00)",
+          "oklch(0.379 0.0000 0.00)",
+          "oklch(0.493 0.0000 0.00)",
+          "oklch(0.607 0.0000 0.00)",
+          "oklch(0.721 0.0000 0.00)",
+          "oklch(0.836 0.0000 0.00)",
+          "oklch(0.950 0.0000 0.00)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Quiet divider",
+        "tonalRamp": [
+          "oklch(0.150 0.0032 252.82)",
+          "oklch(0.264 0.0064 252.82)",
+          "oklch(0.379 0.0087 252.82)",
+          "oklch(0.493 0.0097 252.82)",
+          "oklch(0.607 0.0094 252.82)",
+          "oklch(0.721 0.0078 252.82)",
+          "oklch(0.836 0.0051 252.82)",
+          "oklch(0.950 0.0016 252.82)"
+        ]
+      },
+      "input-border": {
+        "role": "neutral",
+        "displayName": "Control stroke",
+        "tonalRamp": [
+          "oklch(0.150 0.0086 259.81)",
+          "oklch(0.264 0.0172 259.81)",
+          "oklch(0.379 0.0234 259.81)",
+          "oklch(0.493 0.0263 259.81)",
+          "oklch(0.607 0.0255 259.81)",
+          "oklch(0.721 0.0211 259.81)",
+          "oklch(0.836 0.0136 259.81)",
+          "oklch(0.950 0.0043 259.81)"
+        ]
+      },
+      "outline-border": {
+        "role": "neutral",
+        "displayName": "Outline stroke",
+        "tonalRamp": [
+          "oklch(0.150 0.0032 252.82)",
+          "oklch(0.264 0.0064 252.82)",
+          "oklch(0.379 0.0087 252.82)",
+          "oklch(0.493 0.0097 252.82)",
+          "oklch(0.607 0.0094 252.82)",
+          "oklch(0.721 0.0078 252.82)",
+          "oklch(0.836 0.0051 252.82)",
+          "oklch(0.950 0.0016 252.82)"
+        ]
+      },
+      "interactive-hover": {
+        "role": "neutral",
+        "displayName": "Pale blue-grey selection",
+        "tonalRamp": [
+          "oklch(0.150 0.0035 256.70)",
+          "oklch(0.264 0.0071 256.70)",
+          "oklch(0.379 0.0096 256.70)",
+          "oklch(0.493 0.0108 256.70)",
+          "oklch(0.607 0.0105 256.70)",
+          "oklch(0.721 0.0087 256.70)",
+          "oklch(0.836 0.0056 256.70)",
+          "oklch(0.950 0.0018 256.70)"
+        ]
+      },
+      "focus-ring": {
+        "role": "neutral",
+        "displayName": "Keyboard blue",
+        "tonalRamp": [
+          "oklch(0.150 0.0273 254.69)",
+          "oklch(0.264 0.0547 254.69)",
+          "oklch(0.379 0.0746 254.69)",
+          "oklch(0.493 0.0837 254.69)",
+          "oklch(0.607 0.0811 254.69)",
+          "oklch(0.721 0.0671 254.69)",
+          "oklch(0.836 0.0435 254.69)",
+          "oklch(0.950 0.0139 254.69)"
+        ]
+      },
+      "scrollbar-thumb": {
+        "role": "neutral",
+        "displayName": "Scrollbar grey",
+        "tonalRamp": [
+          "oklch(0.150 0.0086 259.81)",
+          "oklch(0.264 0.0172 259.81)",
+          "oklch(0.379 0.0234 259.81)",
+          "oklch(0.493 0.0263 259.81)",
+          "oklch(0.607 0.0255 259.81)",
+          "oklch(0.721 0.0211 259.81)",
+          "oklch(0.836 0.0136 259.81)",
+          "oklch(0.950 0.0043 259.81)"
+        ]
+      },
+      "danger": {
+        "role": "neutral",
+        "displayName": "Danger",
+        "tonalRamp": [
+          "oklch(0.150 0.0454 20.96)",
+          "oklch(0.264 0.0909 20.96)",
+          "oklch(0.379 0.1239 20.96)",
+          "oklch(0.493 0.1391 20.96)",
+          "oklch(0.607 0.1348 20.96)",
+          "oklch(0.721 0.1115 20.96)",
+          "oklch(0.836 0.0722 20.96)",
+          "oklch(0.950 0.0230 20.96)"
+        ]
+      },
+      "math": {
+        "role": "secondary",
+        "displayName": "Mathematics violet",
+        "tonalRamp": [
+          "oklch(0.150 0.0664 291.35)",
+          "oklch(0.264 0.1330 291.35)",
+          "oklch(0.379 0.1812 291.35)",
+          "oklch(0.493 0.2035 291.35)",
+          "oklch(0.607 0.1971 291.35)",
+          "oklch(0.721 0.1631 291.35)",
+          "oklch(0.836 0.1056 291.35)",
+          "oklch(0.950 0.0337 291.35)"
+        ]
+      },
+      "math-surface": {
+        "role": "secondary",
+        "displayName": "Math surface",
+        "tonalRamp": [
+          "oklch(0.150 0.0094 301.00)",
+          "oklch(0.264 0.0189 301.00)",
+          "oklch(0.379 0.0257 301.00)",
+          "oklch(0.493 0.0288 301.00)",
+          "oklch(0.607 0.0280 301.00)",
+          "oklch(0.721 0.0231 301.00)",
+          "oklch(0.836 0.0150 301.00)",
+          "oklch(0.950 0.0048 301.00)"
+        ]
+      },
+      "turkish": {
+        "role": "secondary",
+        "displayName": "Turkish coral",
+        "tonalRamp": [
+          "oklch(0.150 0.0416 18.27)",
+          "oklch(0.264 0.0832 18.27)",
+          "oklch(0.379 0.1134 18.27)",
+          "oklch(0.493 0.1273 18.27)",
+          "oklch(0.607 0.1234 18.27)",
+          "oklch(0.721 0.1021 18.27)",
+          "oklch(0.836 0.0661 18.27)",
+          "oklch(0.950 0.0211 18.27)"
+        ]
+      },
+      "turkish-surface": {
+        "role": "secondary",
+        "displayName": "Turkish surface",
+        "tonalRamp": [
+          "oklch(0.150 0.0068 24.79)",
+          "oklch(0.264 0.0136 24.79)",
+          "oklch(0.379 0.0186 24.79)",
+          "oklch(0.493 0.0208 24.79)",
+          "oklch(0.607 0.0202 24.79)",
+          "oklch(0.721 0.0167 24.79)",
+          "oklch(0.836 0.0108 24.79)",
+          "oklch(0.950 0.0034 24.79)"
+        ]
+      },
+      "science": {
+        "role": "secondary",
+        "displayName": "Science teal",
+        "tonalRamp": [
+          "oklch(0.150 0.0275 191.59)",
+          "oklch(0.264 0.0550 191.59)",
+          "oklch(0.379 0.0749 191.59)",
+          "oklch(0.493 0.0841 191.59)",
+          "oklch(0.607 0.0815 191.59)",
+          "oklch(0.721 0.0674 191.59)",
+          "oklch(0.836 0.0437 191.59)",
+          "oklch(0.950 0.0139 191.59)"
+        ]
+      },
+      "science-surface": {
+        "role": "secondary",
+        "displayName": "Science surface",
+        "tonalRamp": [
+          "oklch(0.150 0.0068 178.36)",
+          "oklch(0.264 0.0137 178.36)",
+          "oklch(0.379 0.0187 178.36)",
+          "oklch(0.493 0.0210 178.36)",
+          "oklch(0.607 0.0203 178.36)",
+          "oklch(0.721 0.0168 178.36)",
+          "oklch(0.836 0.0109 178.36)",
+          "oklch(0.950 0.0035 178.36)"
+        ]
+      },
+      "life": {
+        "role": "secondary",
+        "displayName": "Life Studies amber",
+        "tonalRamp": [
+          "oklch(0.150 0.0315 73.23)",
+          "oklch(0.264 0.0631 73.23)",
+          "oklch(0.379 0.0860 73.23)",
+          "oklch(0.493 0.0966 73.23)",
+          "oklch(0.607 0.0936 73.23)",
+          "oklch(0.721 0.0774 73.23)",
+          "oklch(0.836 0.0501 73.23)",
+          "oklch(0.950 0.0160 73.23)"
+        ]
+      },
+      "life-surface": {
+        "role": "secondary",
+        "displayName": "Life surface",
+        "tonalRamp": [
+          "oklch(0.150 0.0111 84.59)",
+          "oklch(0.264 0.0222 84.59)",
+          "oklch(0.379 0.0302 84.59)",
+          "oklch(0.493 0.0339 84.59)",
+          "oklch(0.607 0.0328 84.59)",
+          "oklch(0.721 0.0272 84.59)",
+          "oklch(0.836 0.0176 84.59)",
+          "oklch(0.950 0.0056 84.59)"
+        ]
+      },
+      "other": {
+        "role": "secondary",
+        "displayName": "Other subject grey",
+        "tonalRamp": [
+          "oklch(0.150 0.0110 274.64)",
+          "oklch(0.264 0.0219 274.64)",
+          "oklch(0.379 0.0299 274.64)",
+          "oklch(0.493 0.0335 274.64)",
+          "oklch(0.607 0.0325 274.64)",
+          "oklch(0.721 0.0269 274.64)",
+          "oklch(0.836 0.0174 274.64)",
+          "oklch(0.950 0.0056 274.64)"
+        ]
+      },
+      "other-surface": {
+        "role": "secondary",
+        "displayName": "Other surface",
+        "tonalRamp": [
+          "oklch(0.150 0.0026 293.91)",
+          "oklch(0.264 0.0052 293.91)",
+          "oklch(0.379 0.0071 293.91)",
+          "oklch(0.493 0.0080 293.91)",
+          "oklch(0.607 0.0078 293.91)",
+          "oklch(0.721 0.0064 293.91)",
+          "oklch(0.836 0.0042 293.91)",
+          "oklch(0.950 0.0013 293.91)"
+        ]
+      },
+      "error-surface": {
+        "role": "neutral",
+        "displayName": "Error surface",
+        "tonalRamp": [
+          "oklch(0.150 0.0059 34.30)",
+          "oklch(0.264 0.0119 34.30)",
+          "oklch(0.379 0.0162 34.30)",
+          "oklch(0.493 0.0182 34.30)",
+          "oklch(0.607 0.0176 34.30)",
+          "oklch(0.721 0.0146 34.30)",
+          "oklch(0.836 0.0095 34.30)",
+          "oklch(0.950 0.0030 34.30)"
+        ]
+      },
+      "error-text": {
+        "role": "neutral",
+        "displayName": "Error text",
+        "tonalRamp": [
+          "oklch(0.150 0.0378 28.45)",
+          "oklch(0.264 0.0756 28.45)",
+          "oklch(0.379 0.1031 28.45)",
+          "oklch(0.493 0.1157 28.45)",
+          "oklch(0.607 0.1121 28.45)",
+          "oklch(0.721 0.0928 28.45)",
+          "oklch(0.836 0.0601 28.45)",
+          "oklch(0.950 0.0192 28.45)"
+        ]
+      },
+      "warning-surface": {
+        "role": "neutral",
+        "displayName": "Warning surface",
+        "tonalRamp": [
+          "oklch(0.150 0.0141 91.27)",
+          "oklch(0.264 0.0283 91.27)",
+          "oklch(0.379 0.0385 91.27)",
+          "oklch(0.493 0.0432 91.27)",
+          "oklch(0.607 0.0419 91.27)",
+          "oklch(0.721 0.0346 91.27)",
+          "oklch(0.836 0.0224 91.27)",
+          "oklch(0.950 0.0072 91.27)"
+        ]
+      },
+      "warning-text": {
+        "role": "neutral",
+        "displayName": "Warning text",
+        "tonalRamp": [
+          "oklch(0.150 0.0255 77.90)",
+          "oklch(0.264 0.0511 77.90)",
+          "oklch(0.379 0.0696 77.90)",
+          "oklch(0.493 0.0782 77.90)",
+          "oklch(0.607 0.0758 77.90)",
+          "oklch(0.721 0.0627 77.90)",
+          "oklch(0.836 0.0406 77.90)",
+          "oklch(0.950 0.0129 77.90)"
+        ]
+      },
+      "badge-warning-surface": {
+        "role": "neutral",
+        "displayName": "Badge warning surface",
+        "tonalRamp": [
+          "oklch(0.150 0.0151 89.57)",
+          "oklch(0.264 0.0303 89.57)",
+          "oklch(0.379 0.0412 89.57)",
+          "oklch(0.493 0.0463 89.57)",
+          "oklch(0.607 0.0449 89.57)",
+          "oklch(0.721 0.0371 89.57)",
+          "oklch(0.836 0.0240 89.57)",
+          "oklch(0.950 0.0077 89.57)"
+        ]
+      },
+      "badge-warning-text": {
+        "role": "neutral",
+        "displayName": "Badge warning text",
+        "tonalRamp": [
+          "oklch(0.150 0.0254 83.28)",
+          "oklch(0.264 0.0508 83.28)",
+          "oklch(0.379 0.0692 83.28)",
+          "oklch(0.493 0.0777 83.28)",
+          "oklch(0.607 0.0753 83.28)",
+          "oklch(0.721 0.0623 83.28)",
+          "oklch(0.836 0.0404 83.28)",
+          "oklch(0.950 0.0129 83.28)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Shared host display role."
+      },
+      "display-mobile": {
+        "displayName": "Display Mobile",
+        "purpose": "Shared host display mobile role."
+      },
+      "brand-descriptor": {
+        "displayName": "Brand Descriptor",
+        "purpose": "Shared host brand descriptor role."
+      },
+      "brand-name": {
+        "displayName": "Brand Name",
+        "purpose": "Shared host brand name role."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Shared host headline role."
+      },
+      "collection": {
+        "displayName": "Collection",
+        "purpose": "Shared host collection role."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Shared host title role."
+      },
+      "card-title": {
+        "displayName": "Card Title",
+        "purpose": "Shared host card title role."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Shared host body role."
+      },
+      "card-body": {
+        "displayName": "Card Body",
+        "purpose": "Shared host card body role."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Shared host label role."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Shared host button role."
+      },
+      "field": {
+        "displayName": "Field",
+        "purpose": "Shared host field role."
+      },
+      "chip": {
+        "displayName": "Chip",
+        "purpose": "Shared host chip role."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Shared host meta role."
+      },
+      "game-prompt": {
+        "displayName": "Game Prompt",
+        "purpose": "Unchanged bundled game prompt."
+      },
+      "button-small": {
+        "displayName": "Button Small",
+        "purpose": "Shared host button small role."
+      }
+    },
+    "shadows": [
+      {
+        "name": "contained-elevation",
+        "value": "0 12px 28px rgb(36 52 77 / 9%)",
+        "purpose": "Shared menus, suggestions, player start panel and transient feedback."
+      },
+      {
+        "name": "bundled-answer-selection",
+        "value": "inset 0 0 0 1px #7046d3",
+        "purpose": "Selected answers inside bundled game documents only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "button-state",
+        "value": "160ms ease",
+        "purpose": "Host button colour transitions."
+      },
+      {
+        "name": "navigation-state",
+        "value": "180ms ease",
+        "purpose": "Navigation colour transitions."
+      },
+      {
+        "name": "control-ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Existing popover and puzzle transitions."
+      },
+      {
+        "name": "suggestion-open",
+        "value": "150ms",
+        "purpose": "Search suggestion entrance."
+      },
+      {
+        "name": "select-open",
+        "value": "160ms",
+        "purpose": "Select entrance."
+      },
+      {
+        "name": "menu-open",
+        "value": "180ms",
+        "purpose": "Mobile menu entrance."
+      },
+      {
+        "name": "puzzle-signature",
+        "value": "900ms linear",
+        "purpose": "Once per document; original raster returns at completion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-card-density",
+        "value": "1100px"
+      },
+      {
+        "name": "mobile-menu-workspace",
+        "value": "1099px"
+      },
+      {
+        "name": "stacked-discovery",
+        "value": "1023px"
+      },
+      {
+        "name": "two-card-columns",
+        "value": "900px"
+      },
+      {
+        "name": "subject-selects",
+        "value": "767px"
+      },
+      {
+        "name": "phone",
+        "value": "600px"
+      },
+      {
+        "name": "narrow-wordmark",
+        "value": "360px"
+      }
+    ],
+    "layout": {
+      "containerMaxWidth": "1400px",
+      "workspaceColumns": "190px minmax(0, 1fr)",
+      "workspaceGap": "44px",
+      "formMaxWidth": "720px",
+      "metadataFormMaxWidth": "800px",
+      "authMaxWidth": "480px",
+      "playerMaxWidth": "1120px"
+    },
+    "interaction": {
+      "sharedControlMinHeight": "46px",
+      "compactFamilyMinTarget": "44px",
+      "focusOutline": "3px solid var(--focus-ring)",
+      "focusOutlineOffset": "4px",
+      "scope": "Compact-family minimum covers small buttons, menu/nav, card save and password visibility; it is not a universal target audit.",
+      "reducedMotion": "Host animations and transitions disabled; original puzzle raster remains visible."
+    },
+    "sourceFiles": [
+      "src/app/globals.css",
+      "src/components/page-heading.tsx",
+      "src/components/shell.tsx",
+      "src/components/register-form.tsx",
+      "src/components/workspace-sections.tsx",
+      "src/components/puzzle-mark.tsx",
+      "src/games/demo-document.ts"
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Shared primary action; 46px minimum height with visible focus.",
+      "html": "<button class=\"ds-button-primary\" type=\"button\">Oyun paylaş</button>",
+      "css": ".ds-button-primary{font-family:var(--font-sans,\"Source Sans 3\",sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:11px 20px;border:1px solid transparent;border-radius:9px;font-size:16px;line-height:1.55;font-weight:600;text-decoration:none;cursor:pointer;transition:background .16s ease,color .16s ease;background:var(--primary,#24344d);color:var(--primary-foreground,#fff);}.ds-button-primary:hover{background:var(--primary-hover,#17263c);}.ds-button-primary:focus-visible{outline:3px solid var(--focus-ring,#3b5f8c);outline-offset:4px;}.ds-button-primary:disabled{opacity:.55;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition:none;}}"
+    },
+    {
+      "name": "Outline button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Shared outline action; 46px minimum height with visible focus.",
+      "html": "<button class=\"ds-button-outline\" type=\"button\">Vazgeç</button>",
+      "css": ".ds-button-outline{font-family:var(--font-sans,\"Source Sans 3\",sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:11px 20px;border:1px solid transparent;border-radius:9px;font-size:16px;line-height:1.55;font-weight:600;text-decoration:none;cursor:pointer;transition:background .16s ease,color .16s ease;background:var(--surface,#fff);border-color:var(--outline-border,#dde2e8);color:var(--foreground,#24344d);}.ds-button-outline:hover{background:var(--interactive-hover,#e8edf4);}.ds-button-outline:focus-visible{outline:3px solid var(--focus-ring,#3b5f8c);outline-offset:4px;}.ds-button-outline:disabled{opacity:.55;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-outline{transition:none;}}"
+    },
+    {
+      "name": "Ghost button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Shared ghost action; 46px minimum height with visible focus.",
+      "html": "<button class=\"ds-button-ghost\" type=\"button\">Ayrıntıları göster</button>",
+      "css": ".ds-button-ghost{font-family:var(--font-sans,\"Source Sans 3\",sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:11px 20px;border:1px solid transparent;border-radius:9px;font-size:16px;line-height:1.55;font-weight:600;text-decoration:none;cursor:pointer;transition:background .16s ease,color .16s ease;background:transparent;color:var(--foreground,#24344d);padding-inline:8px;}.ds-button-ghost:hover{background:var(--interactive-hover,#e8edf4);}.ds-button-ghost:focus-visible{outline:3px solid var(--focus-ring,#3b5f8c);outline-offset:4px;}.ds-button-ghost:disabled{opacity:.55;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-ghost{transition:none;}}"
+    },
+    {
+      "name": "Destructive button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Shared destructive action; 46px minimum height with visible focus.",
+      "html": "<button class=\"ds-button-destructive\" type=\"button\">Yayından kaldır</button>",
+      "css": ".ds-button-destructive{font-family:var(--font-sans,\"Source Sans 3\",sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:11px 20px;border:1px solid transparent;border-radius:9px;font-size:16px;line-height:1.55;font-weight:600;text-decoration:none;cursor:pointer;transition:background .16s ease,color .16s ease;background:var(--danger,#a53b40);color:var(--primary-foreground,#fff);}.ds-button-destructive:hover{background:var(--danger,#a53b40);}.ds-button-destructive:focus-visible{outline:3px solid var(--focus-ring,#3b5f8c);outline-offset:4px;}.ds-button-destructive:disabled{opacity:.55;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-destructive{transition:none;}}"
+    },
+    {
+      "name": "Text field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Visible label and white editable control with the common focus outline.",
+      "html": "<label class=\"ds-field\">Oyun başlığı<input class=\"ds-field-input\" placeholder=\"Başlığı yazın\"></label>",
+      "css": ".ds-field{font-family:var(--font-sans,\"Source Sans 3\",sans-serif);display:grid;gap:7px;color:var(--foreground,#24344d);font-size:15px;font-weight:600;}.ds-field-input{font-family:var(--font-sans,\"Source Sans 3\",sans-serif);width:100%;min-width:0;min-height:46px;padding:11px 12px;border:1px solid var(--input-border,#8a94a4);border-radius:7px;background:var(--surface,#fff);color:var(--foreground,#24344d);font-size:16px;font-weight:400;line-height:1.55;caret-color:var(--primary,#24344d);}.ds-field-input::placeholder{color:var(--muted,#606a79);}.ds-field-input:hover{border-color:var(--input-border,#8a94a4);}.ds-field-input:focus-visible{outline:3px solid var(--focus-ring,#3b5f8c);outline-offset:4px;}"
+    },
+    {
+      "name": "Shared navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Discovery links use the same selected fill and 44px minimum targets as workspace navigation.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Oyunlar\"><a class=\"ds-nav-link\" href=\"#oyunlar\" aria-current=\"page\">Oyunlar</a><a class=\"ds-nav-link\" href=\"#kaydedilenler\">Kaydettiklerim</a></nav>",
+      "css": ".ds-nav{font-family:var(--font-sans,\"Source Sans 3\",sans-serif);display:flex;flex-wrap:wrap;gap:4px;font-size:15px;font-weight:600;}.ds-nav-link{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:9px 14px;border-radius:8px;color:var(--foreground,#24344d);text-decoration:none;transition:background-color 180ms ease,color 180ms ease;}.ds-nav-link:hover,.ds-nav-link[aria-current=\"page\"]{color:var(--primary,#24344d);background:var(--interactive-hover,#e8edf4);}.ds-nav-link:focus-visible{outline:3px solid var(--focus-ring,#3b5f8c);outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-nav-link{transition:none;}}"
+    },
+    {
+      "name": "Subject tag",
+      "kind": "chip",
+      "refersTo": "subject-tag",
+      "description": "Mathematics metadata keeps the established subject colour; it is not a global action colour.",
+      "html": "<a class=\"ds-subject-tag\" href=\"#matematik\">Matematik</a>",
+      "css": ".ds-subject-tag{font-family:var(--font-sans,\"Source Sans 3\",sans-serif);display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:5px;background:var(--subject-bg,#eee7fc);color:var(--subject,#7046d3);font-size:14px;line-height:1.55;font-weight:600;text-decoration:none;}.ds-subject-tag:hover{text-decoration:underline;}.ds-subject-tag:focus-visible{outline:3px solid var(--focus-ring,#3b5f8c);outline-offset:4px;}"
+    },
+    {
+      "name": "Game card content",
+      "kind": "card",
+      "refersTo": "game-card",
+      "description": "The flat white content frame; production cards add their real game artwork above this region.",
+      "html": "<article class=\"ds-game-card\"><div class=\"ds-card-meta\"><span class=\"ds-card-subject\">Matematik</span><span>3. sınıf</span></div><h3 class=\"ds-card-title\"><a class=\"ds-card-link\" href=\"#oyun\">Örnek oyun</a></h3><p class=\"ds-card-copy\">Kısa bir etkinlikle öğrendiklerini dene.</p><span class=\"ds-card-demo\">Demo</span></article>",
+      "css": ".ds-game-card{font-family:var(--font-sans,\"Source Sans 3\",sans-serif);background:var(--surface,#fff);color:var(--foreground,#24344d);border:1px solid var(--border,#dde2e8);border-radius:14px;padding:16px 17px 13px;max-width:300px;}.ds-card-meta{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted,#606a79);margin-bottom:8px;}.ds-card-subject{color:var(--subject,#7046d3);font-weight:600;}.ds-card-title{font-family:var(--font-display,\"Manrope Variable\",sans-serif);font-size:18px;font-weight:750;line-height:1.35;letter-spacing:-.025em;margin:0;}.ds-card-link{color:inherit;text-decoration:none;}.ds-game-card:hover .ds-card-link{color:var(--subject,#7046d3);}.ds-card-link:hover{text-decoration:underline;}.ds-card-link:focus-visible{outline:3px solid var(--focus-ring,#3b5f8c);outline-offset:4px;}.ds-card-copy{font-size:14px;line-height:1.55;color:var(--muted,#606a79);margin:7px 0 14px;}.ds-card-demo{display:inline-block;font-size:11px;color:var(--muted,#606a79);border:1px solid var(--border,#dde2e8);border-radius:4px;padding:1px 6px;}"
+    },
+    {
+      "name": "Account type tabs",
+      "kind": "custom",
+      "refersTo": "account-tabs",
+      "description": "Static style preview of teacher/student tabs; production RegisterForm supplies roving focus and mounted panels.",
+      "html": "<div class=\"ds-account-tabs\" role=\"tablist\" aria-label=\"Hesap türü\"><button class=\"ds-account-tab\" role=\"tab\" aria-selected=\"true\">Öğretmen</button><button class=\"ds-account-tab\" role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">Öğrenci</button></div>",
+      "css": ".ds-account-tabs{display:flex;padding:4px;background:var(--interactive-hover,#e8edf4);border-radius:10px;max-width:480px;}.ds-account-tab{font-family:var(--font-sans,\"Source Sans 3\",sans-serif);flex:1;border:0;min-height:44px;border-radius:7px;background:transparent;color:var(--muted,#606a79);font-size:17px;line-height:1.55;font-weight:600;cursor:pointer;}.ds-account-tab[aria-selected=\"true\"]{background:var(--surface,#fff);color:var(--primary,#24344d);}.ds-account-tab:hover{color:var(--primary,#24344d);}.ds-account-tab:focus-visible{outline:3px solid var(--focus-ring,#3b5f8c);outline-offset:4px;}"
+    },
+    {
+      "name": "Page heading",
+      "kind": "custom",
+      "refersTo": "page-heading",
+      "description": "Compact task heading and supporting text shared by game and workspace compositions.",
+      "html": "<header class=\"ds-page-heading\"><h1 class=\"ds-heading-title\">İçeriklerim</h1><p class=\"ds-heading-copy\">Oyunlarını ve inceleme durumlarını gör.</p></header>",
+      "css": ".ds-page-heading{color:var(--foreground,#24344d);margin:32px 0 28px;}.ds-heading-title{font-family:var(--font-display,\"Manrope Variable\",sans-serif);font-size:32px;font-weight:750;line-height:1.25;letter-spacing:-.03em;margin:0;overflow-wrap:anywhere;}.ds-heading-copy{font-family:var(--font-sans,\"Source Sans 3\",sans-serif);font-size:16px;line-height:1.55;color:var(--muted,#606a79);margin:8px 0 0;max-width:72ch;}@media(max-width:600px){.ds-heading-title{font-size:28px;}.ds-page-heading{margin:24px 0;}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Keşif Atlası",
+    "overview": "Keşif Atlası is a bright, orderly workshop for finding, playing and managing short learning games. Neutral paper and navy ink now form one host interface across public discovery, game detail, accounts and every role workspace. White controls, real game scenes and written subject labels keep the next task visible.\n\nManrope gives headings and the live wordmark a clear, confident shape; Source Sans 3 keeps Turkish controls and explanations readable. The original four-piece circular puzzle mark remains the signature. Paper texture belongs to discovery, game detail and account introductions; operational workspaces stay flat. The host is light-only, including its short footer. Individual game documents retain their own content colours and layout.",
+    "keyCharacteristics": [
+      "One neutral ground, navy text and actions, white controls, and unchanged subject colour pairs across the host application.",
+      "Locally served Manrope headings and brand lettering, with Source Sans 3 interface text and Turkish characters.",
+      "Compact page headings, restrained game tools, flat task lists and selected workspace sections.",
+      "Real game art, explicit Demo labels and the original puzzle signature with reduced-motion support.",
+      "Visible keyboard focus, labelled navigation, preserved form drafts and responsive 4/2/1 catalogue columns."
+    ],
+    "rules": [
+      {
+        "name": "The Subject Thread Rule",
+        "body": "Keep each subject’s colour and written label together across its tab, game card and detail metadata. Colour reinforces the label; it does not replace it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Shared Ink Rule",
+        "body": "Use the same navy action and focus system in discovery, accounts and workspaces. Violet remains a Mathematics and bundled-game colour, not a second host theme.",
+        "section": "colors"
+      },
+      {
+        "name": "The Contained Lift Rule",
+        "body": "Keep catalogue cards and workspaces flat at rest. Use the existing soft elevation for overlapping menus, the player start panel and transient feedback.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use the shared neutral ground and navy controls for all host routes, while preserving subject and game colours.",
+      "Do keep the original puzzle mark, once-per-document animation, real game captures and local CC0 paper asset with its provenance.",
+      "Do use compact headings, written statuses, native form semantics, visible focus and the same role navigation in the sidebar and mobile menu.",
+      "Do preserve mounted account/review panels, single-player continuity and the user’s draft while changing sections.",
+      "Do distinguish browser-local bookmarks from account-bound game progress and provide a selectable link when copying fails."
+    ],
+    "donts": [
+      "Don’t restore the superseded lavender/violet host palette, warm discovery palette, decorative puzzle gutters or Source Serif 4 headings.",
+      "Don’t replace game scenes with invented covers or present bundled demos as published teacher uploads.",
+      "Don’t introduce oversized workspace banners, nested decorative cards, a detail sidebar or a repeated play action.",
+      "Don’t use Unicode glyphs or emoji as interface icons; keep the existing inline SVG vocabulary.",
+      "Don’t treat preview tonal ramps as shipping tokens, impose host styling on uploaded games, or claim broad accessibility certification from the bounded checks."
+    ]
+  }
+}

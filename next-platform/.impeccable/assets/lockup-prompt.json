@@ -1,0 +1,6 @@
+{
+  "tool": "image_gen",
+  "prompt": "Create the horizontal logo lockup for the attached approved puzzle logo. Use this exact four-piece circle symbol unchanged at left. To its right, a carefully kerned contemporary geometric sans wordmark in deep navy #18213D, exact Turkish text on two lines: first line \"Dijital Oyun\", second line \"Atölyesi\". Use Manrope-like bold geometric lettering, generous optical spacing, professional editorial polish. The two text lines together should be about 75% the height of the symbol; the first line larger than the second. Horizontal wide 3:1 composition, very tight transparent padding around the full lockup. One single logo only, no samples, no extra subtitle, no slogans. Completely transparent background. Preserve purple cyan amber teal symbol colors. Do not add gradients, shadows, textures or ornamental elements.",
+  "source": "Approved generated puzzle-mark.png",
+  "output": "public/brand/logo-horizontal.png"
+}

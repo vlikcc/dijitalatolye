@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0.0",
+  "collection": "sources",
+  "generatedAt": "2026-10-26T00:00:00Z",
+  "items": [
+    {
+      "id": "source-2b78d932184d649e",
+      "title": "TTKB Öğretim Programları Kataloğu",
+      "url": "https://tymm.meb.gov.tr/test-only-source-2b78d932184d649e.pdf",
+      "publisher": "Millî Eğitim Bakanlığı Talim ve Terbiye Kurulu Başkanlığı",
+      "documentType": "curriculum_pdf",
+      "publicationDate": null,
+      "retrievedAt": "2026-10-26T18:10:49.067371+00:00",
+      "sha256": "f738fba2e0544b2d54b927296395f85a52b04855d68a0812ab5f2a8940afff2e",
+      "accessStatus": "downloaded",
+      "pageCount": 1000,
+      "localPath": "source-cache/source-2b78d932184d649e.html"
+    },
+    {
+      "title": "Talim ve Terbiye Kurulu Kararı: 2025-09-10 / 87 — [TYMM] BİLİŞİM TEKNOLOJİLERİ VE YAZILIM DERSİ (5-6) (2025)",
+      "url": "https://tymm.meb.gov.tr/test-only-source-794ad1f3a2703e36.pdf",
+      "publisher": "Millî Eğitim Bakanlığı Talim ve Terbiye Kurulu Başkanlığı",
+      "publicationDate": null,
+      "retrievedAt": "2026-10-26T18:12:22.170945+00:00",
+      "sha256": "f738fba2e0544b2d54b927296395f85a52b04855d68a0812ab5f2a8940afff2e",
+      "accessStatus": "downloaded",
+      "id": "source-794ad1f3a2703e36",
+      "documentType": "curriculum_pdf",
+      "pageCount": 1000,
+      "localPath": "source-cache/source-794ad1f3a2703e36.pdf"
+    },
+    {
+      "id": "source-01f71001e97d1c16",
+      "title": "[TYMM] BİLİŞİM TEKNOLOJİLERİ VE YAZILIM DERSİ (5-6) (2025)",
+      "url": "https://tymm.meb.gov.tr/test-only-source-01f71001e97d1c16.pdf",
+      "publisher": "Millî Eğitim Bakanlığı Talim ve Terbiye Kurulu Başkanlığı",
+      "documentType": "curriculum_pdf",
+      "publicationDate": null,
+      "retrievedAt": "2026-10-26T18:11:44.878854+00:00",
+      "sha256": "f738fba2e0544b2d54b927296395f85a52b04855d68a0812ab5f2a8940afff2e",
+      "accessStatus": "downloaded",
+      "pageCount": 1000,
+      "error": null,
+      "localPath": "source-cache/source-01f71001e97d1c16.html"
+    },
+    {
+      "id": "source-ab68b04857b89189",
+      "title": "[TYMM] BİLİŞİM TEKNOLOJİLERİ VE YAZILIM DERSİ (5-6) (2025)",
+      "url": "https://tymm.meb.gov.tr/test-only-source-ab68b04857b89189.pdf",
+      "publisher": "Millî Eğitim Bakanlığı",
+      "documentType": "curriculum_pdf",
+      "publicationDate": null,
+      "retrievedAt": "2026-10-26T18:11:59.220064+00:00",
+      "sha256": "f738fba2e0544b2d54b927296395f85a52b04855d68a0812ab5f2a8940afff2e",
+      "accessStatus": "downloaded",
+      "pageCount": 1000,
+      "byteSize": 2728893,
+      "finalUrl": "https://mufredat.meb.gov.tr/Dosyalar/202591115327350-bili%C5%9Fim%20d%C3%B6p.pdf",
+      "error": null,
+      "localPath": "source-cache/source-ab68b04857b89189.pdf"
+    }
+  ]
+}

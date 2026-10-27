@@ -1,0 +1,305 @@
+{
+  "schemaVersion": "1.0.0",
+  "collection": "outcomes",
+  "generatedAt": "2026-10-26T00:00:00Z",
+  "items": [
+    {
+      "id": "outcome-0cf000e37da20b5152e93848",
+      "programId": "program-mufredat-2024",
+      "grades": [
+        5
+      ],
+      "unitId": "unit-66338b459d013410d06fcdb7",
+      "kind": "learning_outcome",
+      "officialCode": "BTY.5.1.1.",
+      "text": "Günlük yaşamda kullanılan bilişim teknolojilerini sınıflandırabilme",
+      "order": 1,
+      "processComponents": [
+        {
+          "label": "a)",
+          "text": "Bilişim teknolojilerine ilişkin temel kavramları belirler.",
+          "order": 1,
+          "sourceRefs": [
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 16,
+              "printedPage": "16",
+              "section": "5. SINIF / 1. TEMA / BTY.5.1.1. / a)",
+              "anchor": null
+            }
+          ]
+        },
+        {
+          "label": "b)",
+          "text": "Geçmişten günümüze bilişim teknolojilerindeki benzerlikleri ve farklılıkları ilişkilendirir.",
+          "order": 2,
+          "sourceRefs": [
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 16,
+              "printedPage": "16",
+              "section": "5. SINIF / 1. TEMA / BTY.5.1.1. / b)",
+              "anchor": null
+            }
+          ]
+        },
+        {
+          "label": "c)",
+          "text": "Bilişim teknolojilerini kullanım alanlarına göre gruplandırır.",
+          "order": 3,
+          "sourceRefs": [
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 16,
+              "printedPage": "16",
+              "section": "5. SINIF / 1. TEMA / BTY.5.1.1. / c)",
+              "anchor": null
+            }
+          ]
+        }
+      ],
+      "notes": [
+        {
+          "text": "Öğrencilere \"bilişim teknolojileri\" hakkında ne düşündükleri sorularak beyin fırtınası yapılır. Tahtaya, öğrencilerin bilişim teknolojileri ile ilgili düşünceleri yazılır. Bu aşamada, öğrenciler günlük hayatlarında karşılaştıkları bilişim teknolojilerini belirleyerek örnekler verir. Ardından öğretmen, bilişim teknolojilerine ilişkin temel kavramları (iletişim, bilgi, bilişim, teknoloji, BİT) tanıtır. Grup çalışması becerilerini ortaya koymaları açısından öğrenciler otomatik grup oluşturan web 2.0 aracıyla veya e-içerikler üzerinden rastgele küçük gruplara ayrılarak her bir gruba öğretmen tarafından hazırlanan kelime kavanozundan bir temel kavram seçtirilir (D3.4). Gruplar, belirlenen süre içinde kendi kavramları hakkında hazırlık yapabilir. Öğrencilerin araştırmalarına destek olmak için öğretmen herhangi bir tarayıcı programı kullanarak rehberlik edebilir. Gruplar araştırma sonuçlarını sınıfla paylaşarak temel kavramları belirler (SDB2.2). Belirlediği kavramları kullanım alanlarına göre gruplandırır. Diğer öğrencilerin sunum sırasında sorular sormaları teşvik edilir (KB2.8, E3.8). “Bilişim teknolojilerinin genel olarak sağladığı avantajlar neler olabilir?” sorusu beyin fırtınası tekniği ile tartışılır (E3.5, SDB2.1). Öğrenciler birbirlerinin fikirlerini dinler. Bilişim teknolojilerinin “hayatımızı kolaylaştırmak, hayatımızı hızlandırmak, maliyetleri azaltmak, verimliliği artırmak...” gibi avantajları üzerinde uzlaşarak ortak bir görüşe ulaşmaya çalışırlar (SDB2.2). Öğrencilerden geçmişte ve günümüzde kullanılan bilişim teknolojilerine örnek vermeleri istenir. Öğretmen geçmişteki bazı teknolojilere (daktilo, teyp, ilk bilgisayarlar vb.) ve günümüzdeki teknolojilere (dizüstü bilgisayarlar, akıllı telefonlar, bulut bilişim vb.) ilişkin görseller gösterir. Bu aşamada, öğrenciler görselleri inceleyerek benzerlik ve farklılıklarına göre eski ve yeni bilişim teknolojilerini ilişkilendirir. Grup çalışması becerilerinin geliştirilmesi amacıyla öğrenciler, renkli kartlar aracılığıyla rastgele oluşturulan küçük gruplara ayrılır ve her gruba geçmişten günümüze belirli bir teknolojiyi (bilgisayar, telefon vb.) inceleme görevi verilir (D3.4). Gruplar, verilen teknoloji hakkında araştırma yaparak geçmişte ve günümüzdeki biçimlerini karşılaştırmak için benzerlik ve farklılıkları birbiriyle ilişkilendirir. Bu süreçte, gruplar hazırladıkları bilgileri afiş olarak sunabilir. Sunum sırasında, bilişim teknolojileri arasındaki ilişkileri vurgulayarak düşüncelerini başkalarıyla tartışabilir ve başkalarını etkin şekilde dinleyebilir (SDB2.1, SDB2.2). Sunum sırasında, diğer öğrenciler sunum yapan grubun belirttiği benzerlik ve farklılıkları açık fikirlilikle değerlendirebilir (E3.5). Bu süreçte, farklı deneyimlere ve fikirlere saygılı bir şekilde yaklaşarak merakla sorular sorabilir (E3.8). Yeşil ekran teknolojisi ile oluşturulmuş bir film sahnesini izleyip bu sahne üzerine düşünen öğrencilerden yeşil ekran teknolojisi hakkında merak ettiklerini paylaşmaları istenir (SDB1.1). Bu süreçte, farklı bakış açılarını keşfetmek ve yeni bilgilere açık fikirlilikle yaklaşmak için gözlem yapabilir ve sorular sorabilir (E1.1, E3.5). Öğrencilerin düşünceleri alındıktan sonra, sahnenin çekim süreci gösterilir ve ardından farklı yeşil ekran film sahneleri sunulur. Öğrencilere sinema ve televizyon alanında kullanılan diğer bilişim teknolojilerinin neler olabileceği sorulur. Gelen cevaplar tahtaya yazılarak öğrencilerin katkılarıyla liste oluşturulur. Bu teknolojiler kullanım alanlarına göre kategorize edilir. Öğrenciler, bilişim teknolojilerinin farklı alanlardaki kullanımına dair sorular sorarak konuya ilişkin zihinsel örüntülerini ifade eder (E3.8). Alınan cevaplar tahtaya liste hâlinde yazılarak kullanım alanlarına göre gruplandırılır. Bu süreçte, öğrenciler iş birliği içinde çalışarak fikirlerini paylaşabilir (SDB2.2). Eksik kalan alanlar öğretmen tarafından tamamlanır. Ayrıca öğrencilerin bilişim teknolojilerinin toplumsal hayata etkilerini tartışmaları ve bu teknolojilerin hangi alanlarda daha fazla fayda sağladığını değerlendirmeleri istenir (SDB3.3). Öğrenciler bilişim teknolojilerinin topluma sağladığı katkıları değerlendirirken sorumluluk bilinciyle hareket eder, bu süreci sahip oldukları örneklerle zenginleştirir ve iç motivasyon geliştirerek katkılarını paylaşır (D16.3, SDB1.2). Öğrencilerin grup çalışması becerilerini geliştirmek için sayı verme yöntemiyle küçük gruplar oluşturulur ve her grup, seçtiği alandaki bilişim teknolojilerini tanıtan kısa bir sunum hazırlar (D3.4, SDB1.2, SDB2.2). Bu süreçte, öğrencilerin öğrenmelerini desteklemek ve eğitsel etkileşimi artırmak amacıyla devlet kurum ve kuruluşları tarafından geliştirilen dijital ders içeriklerine dayalı Web 2.0 oyunlaştırma araçlarından veya e-içeriklerden de yararlanılabilir. Öğrencilerin grup çalışması sırasında hazırladıkları içerikler ve sunum becerileri, dereceli puanlama anahtarı veya gözlem formu ile değerlendirilebilir. Dereceli puanlama anahtarı öğrencilerin içerik, düzen ve sunum becerilerini yapılandırılmış kriterlere göre analiz etmek için kullanılabilir. Gözlem formu; grup içi etkileşim ve bireysel katkıları süreç odaklı bir şekilde izlemek ve değerlendirmek için uygulanabilir.",
+          "sourceRefs": [
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 18,
+              "printedPage": "18",
+              "section": "5. SINIF / 1. TEMA / Öğrenme-Öğretme Uygulamaları / BTY.5.1.1.",
+              "anchor": null
+            },
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 19,
+              "printedPage": "19",
+              "section": "5. SINIF / 1. TEMA / Öğrenme-Öğretme Uygulamaları / BTY.5.1.1.",
+              "anchor": null
+            }
+          ]
+        }
+      ],
+      "sourceRefs": [
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 16,
+          "printedPage": "16",
+          "section": "5. SINIF / 1. TEMA / Öğrenme Çıktıları ve Süreç Bileşenleri",
+          "anchor": null
+        },
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 16,
+          "printedPage": "16",
+          "section": "5. SINIF / 1. TEMA / BTY.5.1.1. / a)",
+          "anchor": null
+        },
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 16,
+          "printedPage": "16",
+          "section": "5. SINIF / 1. TEMA / BTY.5.1.1. / b)",
+          "anchor": null
+        },
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 16,
+          "printedPage": "16",
+          "section": "5. SINIF / 1. TEMA / BTY.5.1.1. / c)",
+          "anchor": null
+        },
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 18,
+          "printedPage": "18",
+          "section": "5. SINIF / 1. TEMA / Öğrenme-Öğretme Uygulamaları / BTY.5.1.1.",
+          "anchor": null
+        },
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 19,
+          "printedPage": "19",
+          "section": "5. SINIF / 1. TEMA / Öğrenme-Öğretme Uygulamaları / BTY.5.1.1.",
+          "anchor": null
+        }
+      ],
+      "verificationStatus": "needs_review",
+      "normalizedCode": "BTY.5.1.1",
+      "normalizedText": "günlük yaşamda kullanılan bilişim teknolojilerini sınıflandırabilme",
+      "reviewFlags": [],
+      "textSourceRefs": [
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 16,
+          "printedPage": "16",
+          "section": "5. SINIF / 1. TEMA / Öğrenme Çıktıları ve Süreç Bileşenleri",
+          "anchor": null
+        }
+      ],
+      "gradeSourceRefs": [
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 15,
+          "printedPage": "15",
+          "section": "5. SINIF",
+          "anchor": null
+        }
+      ],
+      "sourceCodeVariants": [
+        "BTY.5.1.1."
+      ],
+      "extractionMethod": "PyMuPDF spatial text; programme-specific section parser; visual review recorded separately"
+    },
+    {
+      "id": "outcome-3a7d91f162f577c22c7a8e98",
+      "programId": "program-mufredat-2024",
+      "grades": [
+        5
+      ],
+      "unitId": "unit-66338b459d013410d06fcdb7",
+      "kind": "learning_outcome",
+      "officialCode": "BTY.5.1.2.",
+      "text": "Bilişim teknolojilerinin birey ve toplum üzerindeki etkilerini özetleyebilme",
+      "order": 2,
+      "processComponents": [
+        {
+          "label": "a)",
+          "text": "Farklı bilişim teknolojilerinin olumlu ve olumsuz yönleri ile ilgili çözümleme yapar.",
+          "order": 1,
+          "sourceRefs": [
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 16,
+              "printedPage": "16",
+              "section": "5. SINIF / 1. TEMA / BTY.5.1.2. / a)",
+              "anchor": null
+            }
+          ]
+        },
+        {
+          "label": "b)",
+          "text": "Farklı bilişim teknolojilerinin kullanımına göre fiziksel güvenlik önlemleri ile ilgili sınıflandırma yapar.",
+          "order": 2,
+          "sourceRefs": [
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 16,
+              "printedPage": "16",
+              "section": "5. SINIF / 1. TEMA / BTY.5.1.2. / b)",
+              "anchor": null
+            }
+          ]
+        },
+        {
+          "label": "c)",
+          "text": "Bilişim teknolojilerini kullanmanın beden ve ruh sağlığı üzerindeki etkilerini kendi cümleleriyle ifade eder.",
+          "order": 3,
+          "sourceRefs": [
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 16,
+              "printedPage": "16",
+              "section": "5. SINIF / 1. TEMA / BTY.5.1.2. / c)",
+              "anchor": null
+            }
+          ]
+        }
+      ],
+      "notes": [
+        {
+          "text": "Öğrenciler tartışma tekniğini kullanarak farklı bilişim teknolojilerinin (telefon, tablet, sosyal medya platformları, bulut teknolojileri vb.) olumlu ve olumsuz yönlerine ilişkin çözümleme yapar. Bu süreçte öğrenciler, elde ettikleri bilgileri eleştirel bakış açısıyla değerlendirerek kendi düşüncelerini geliştirme yolunda sorumluluk alır (D3.3, OB1). Öğrencilerden bu teknolojilerin olumlu (hızlı iletişim, bilgiye erişim vb.) ve olumsuz yönlerini (gizlilik sorunları, dijital bağımlılık, oyun bağımlılığı, aşırı ekran süresi vb.) belirleyerek bireysel liste oluşturmaları istenir. Bu yönleri kullanım alanları veya etkileriyle ilişkilendirerek karşılaştırma yapmaları sağlanır. Öğrenciler tartışma sırasında kendi görüşlerini açıkça ifade eder ve başkalarının fikirlerine de saygı göstermeyi öğrenirler (D6.2). Bu süreçte, teknoloji ve davranış bağımlılığının insan sağlığı üzerindeki olumsuz etkilerini fark eder ve teknoloji kullanımının dijital bağımlılığa dönüşmemesi için kontrollü davranmanın önemini anlarlar (D13.3). Ardından öğretmen, öğrencilerin sunduğu tüm olumlu ve olumsuz sonuçları listeler. Bu süreçte, öğrencilerin birbirleriyle açık fikirli bir şekilde iletişim kurmaları ve farklı bakış açılarını değerlendirmeleri teşvik edilir (SDB2.1, SDB2.3, E.3.5). Bu değerlendirme sürecinde öğrenciler farklı bakış açılarını dikkate alarak fikirlerini dengeli bir şekilde ifade etme pratiği kazanırlar (D10.3). Aynı zamanda öğrenciler, günlük yaşamlarında sağlıklı sınırlar belirleyerek (örneğin teknolojiyi günde kaç saat ve hangi amaçlarla – eğitim, eğlence, sosyal medya vb. – kullandıklarını not ederek) teknoloji kullanımını kontrollü bir şekilde yönetme bilinci geliştirir (SDB1.2). Bu sayede teknoloji ve davranış bağımlılığının olumsuz etkilerini fark ederek sağlıklı alışkanlıklar geliştirir ve dijital bağımlılıkla mücadele etmenin yollarını öğrenirler (D13.3). Öğrencilerden bilişim teknolojilerinin beden ve ruh sağlığı üzerindeki etkileri üzerine düşünmeleri istenir. Öğrenciler, bireysel olarak bu etkileri belirler ve bir liste hazırlarlar. Öğrenciler belirledikleri etkileri neden-sonuç ilişkisi kurarak analiz eder ve çıkarımlar yapar (KB2.8, SDB3.3). Bu süreçte, farklı bakış açılarına açık fikirlilikle yaklaşarak etkiler arasında ilişkiler kurar (E3.5). Ayrıca öğrencilerin yaş düzeyine uygun ekran kullanım süreleri üzerinde durularak sağlıklı bir teknoloji kullanım alışkanlığı geliştirmeleri teşvik edilir. Öğrencilerden günlük yaşamlarında teknolojiyi nasıl kullandıklarını belirlemeleri istenir. Teknolojinin etkilerini düşünerek deneyimlerini analiz etmeleri sağlanır. Küçük grup tartışmaları veya bireysel günlük tutma etkinlikleri ile hangi teknolojileri hangi amaçlarla kullandıklarını, bunların sağlık ve yaşamları üzerindeki etkilerini değerlendirirler. Öğrencilere bilişim teknolojilerinin sağlığa etkisi ile ilgili videolar izletilir ya da sağlık ve güvenlik kurallarına uygun bilgisayar kullanma görselinin yer aldığı bir afiş ile bu etkiler kapsamlı bir şekilde ele alınır. Öğretmen ergonomi kavramını tanımlar. Bilişim teknolojilerinin kullanımında ergonomiye uygun davranışların beden sağlığı üzerindeki önemi açıklanır. Ardından, farklı bilişim teknolojisi araçlarının kullanımına göre alınabilecek fiziksel güvenlik önlemleri sınıflandırılır. Sağlık ve güvenliğe uygun olmayan kullanım hatalarının yer aldığı fotoğraf ve videolar öğrencilere gösterilir. Öğrenciler bu hatalı kullanım örneklerini empati kurup analiz ederek doğru kullanım yöntemlerini belirler. Bu davranışların hem uzun hem kısa vadede beden ve ruh sağlığına nasıl zarar verebileceğini kendi cümleleriyle ifade ederler. Bu zararların günlük yaşamda nelere yol açabileceğini (örneğin bel ağrısı nedeniyle spor yapamama, göz yorgunluğu nedeniyle derse odaklanamama gibi) tartışırlar. Ardından öğrenciler, doğru kullanım yöntemlerini belirleyerek farklı bilişim teknolojisi örneklerini kullanım alanlarına göre kategorilere ayırır (E2.1, OB4). Böylelikle öğrenciler, hem fiziksel güvenlik hem de ergonomi açısından doğru kullanım alışkanlıkları geliştirmenin önemini kavrarlar (D13.4). Bu süreçte öğrencilerin dijital sağlık ve esenlik konularında bilinç kazanmaları desteklenir. Özellikle fiziksel sağlık açısından ekran süresi yönetimi, doğru oturuş pozisyonları, dijital göz yorgunluğu, göz sağlığı için dijital alışkanlıklar; bilişsel/davranışsal sağlık açısından aşırı teknoloji kullanımının uyku düzenine etkisi, bildirim (uyarı) yorgunluğu, dikkat dağınıklığı, dijital detoks farkındalığı; sosyal-duygusal sağlık açısından siber zorbalığın ruh sağlığına etkileri ve siber zorbalıkla baş etme yolları, çevrim içi nezaket, empati gibi alt boyutlar ele alınarak öğrencilerin dijital ortamla dengeli ve sağlıklı ilişki kurmaları desteklenir. Öz değerlendirme formu ile öğrenciler, bilişim teknolojilerinin sağlığa etkilerini anlamlandırma düzeylerini analiz ederek kendi güçlü ve gelişime açık yönlerine ilişkin değerlendirme yapabilirler.",
+          "sourceRefs": [
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 19,
+              "printedPage": "19",
+              "section": "5. SINIF / 1. TEMA / Öğrenme-Öğretme Uygulamaları / BTY.5.1.2.",
+              "anchor": null
+            },
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 20,
+              "printedPage": "20",
+              "section": "5. SINIF / 1. TEMA / Öğrenme-Öğretme Uygulamaları / BTY.5.1.2.",
+              "anchor": null
+            }
+          ]
+        }
+      ],
+      "sourceRefs": [
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 16,
+          "printedPage": "16",
+          "section": "5. SINIF / 1. TEMA / Öğrenme Çıktıları ve Süreç Bileşenleri",
+          "anchor": null
+        },
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 16,
+          "printedPage": "16",
+          "section": "5. SINIF / 1. TEMA / BTY.5.1.2. / a)",
+          "anchor": null
+        },
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 16,
+          "printedPage": "16",
+          "section": "5. SINIF / 1. TEMA / BTY.5.1.2. / b)",
+          "anchor": null
+        },
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 16,
+          "printedPage": "16",
+          "section": "5. SINIF / 1. TEMA / BTY.5.1.2. / c)",
+          "anchor": null
+        },
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 19,
+          "printedPage": "19",
+          "section": "5. SINIF / 1. TEMA / Öğrenme-Öğretme Uygulamaları / BTY.5.1.2.",
+          "anchor": null
+        },
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 20,
+          "printedPage": "20",
+          "section": "5. SINIF / 1. TEMA / Öğrenme-Öğretme Uygulamaları / BTY.5.1.2.",
+          "anchor": null
+        }
+      ],
+      "verificationStatus": "needs_review",
+      "normalizedCode": "BTY.5.1.2",
+      "normalizedText": "bilişim teknolojilerinin birey ve toplum üzerindeki etkilerini özetleyebilme",
+      "reviewFlags": [],
+      "textSourceRefs": [
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 16,
+          "printedPage": "16",
+          "section": "5. SINIF / 1. TEMA / Öğrenme Çıktıları ve Süreç Bileşenleri",
+          "anchor": null
+        }
+      ],
+      "gradeSourceRefs": [
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 15,
+          "printedPage": "15",
+          "section": "5. SINIF",
+          "anchor": null
+        }
+      ],
+      "sourceCodeVariants": [
+        "BTY.5.1.2."
+      ],
+      "extractionMethod": "PyMuPDF spatial text; programme-specific section parser; visual review recorded separately"
+    }
+  ],
+  "programId": "program-mufredat-2024",
+  "scopeGrades": [
+    5
+  ]
+}

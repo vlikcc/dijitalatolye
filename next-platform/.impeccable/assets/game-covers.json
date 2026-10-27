@@ -1,0 +1,27 @@
+{
+  "origin": "Browser captures of each bundled game's actual scene, rendered with demoDocument(game, true). No external artwork or invented game imagery.",
+  "command": "pnpm demos:build",
+  "sources": [
+    "src/games/demos.ts",
+    "src/games/scenes.ts",
+    "src/games/demo-document.ts"
+  ],
+  "outputs": [
+    "public/game-covers/demo-kesir-mutfagi.webp",
+    "public/game-covers/demo-sozcuk-esleri.webp",
+    "public/game-covers/demo-gezegen-sirasi.webp",
+    "public/game-covers/demo-yonunu-bul.webp",
+    "public/game-covers/demo-carpim-rotasi.webp",
+    "public/game-covers/demo-cumle-ustasi.webp",
+    "public/game-covers/demo-devreyi-tamamla.webp",
+    "public/game-covers/demo-geri-donusum.webp",
+    "public/game-covers/demo-geometri-dedektifi.webp",
+    "public/game-covers/demo-paragraf-dedektifi.webp",
+    "public/game-covers/demo-besin-zinciri.webp",
+    "public/game-covers/demo-mevsim-takvimi.webp",
+    "public/game-covers/demo-ondalik-pazari.webp",
+    "public/game-covers/demo-noktalama-atolyesi.webp",
+    "public/game-covers/demo-maddenin-halleri.webp",
+    "public/game-covers/demo-guvenli-yol.webp"
+  ]
+}

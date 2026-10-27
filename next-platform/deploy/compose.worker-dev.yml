@@ -1,0 +1,28 @@
+name: dijital-next-dev
+services:
+  worker:
+    build:
+      context: ..
+      target: worker
+    image: dijital-next-worker:dev
+    env_file: ../.env
+    environment:
+      DATABASE_URL: postgresql://app:local-only@postgres:5432/dijital
+      DATA_DIR: /data
+      CLAMAV_HOST: clamav
+      CLAMAV_PORT: "3310"
+      YARA_BIN: yara
+    volumes: ["../.data:/data", "../src:/app/src:ro"]
+    depends_on: [postgres, clamav]
+  games:
+    image: nginx:1.28.3-alpine
+    ports: ["127.0.0.1:58080:8080"]
+    env_file: ../.env
+    environment:
+      GAME_BASE_DOMAIN_REGEX: 'games\.localhost'
+      WEB_UPSTREAM: host.docker.internal:3000
+      NGINX_ENVSUBST_FILTER: "^(APP_URL|GAME_BASE_DOMAIN_REGEX|INTERNAL_SECRET|WEB_UPSTREAM)$$"
+    volumes:
+      - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ../.data/ready:/games/ready:ro
+      - ../.data/published:/games/published:ro

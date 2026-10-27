@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "project": {
+    "name": "Dijital Oyun Atölyesi",
+    "productType": "Turkish educational game library and role workspaces",
+    "stack": [
+      "nextjs",
+      "react",
+      "shadcn",
+      "tailwind-v4"
+    ]
+  },
+  "sources": {
+    "tokens": [
+      "src/app/globals.css"
+    ],
+    "components": [
+      "src/components/ui"
+    ],
+    "assets": [
+      "public/brand",
+      "assets"
+    ],
+    "instructions": [
+      "DESIGN.md",
+      "PRODUCT.md",
+      "AGENTS.md"
+    ]
+  },
+  "design": {
+    "colorMode": "light",
+    "colors": {
+      "--background": {
+        "value": "#f6f7f9",
+        "source": "src/app/globals.css"
+      },
+      "--foreground": {
+        "value": "#24344d",
+        "source": "src/app/globals.css"
+      },
+      "--muted": {
+        "value": "#606a79",
+        "source": "src/app/globals.css"
+      },
+      "--primary": {
+        "value": "#24344d",
+        "source": "src/app/globals.css"
+      },
+      "--primary-hover": {
+        "value": "#17263c",
+        "source": "src/app/globals.css"
+      },
+      "--primary-foreground": {
+        "value": "#fff",
+        "source": "src/app/globals.css"
+      },
+      "--border": {
+        "value": "#dde2e8",
+        "source": "src/app/globals.css"
+      },
+      "--input-border": {
+        "value": "#8a94a4",
+        "source": "src/app/globals.css"
+      },
+      "--accent": {
+        "value": "#f2a044",
+        "source": "src/app/globals.css"
+      },
+      "--outline-border": {
+        "value": "#dde2e8",
+        "source": "src/app/globals.css"
+      },
+      "--focus-ring": {
+        "value": "#3b5f8c",
+        "source": "src/app/globals.css"
+      },
+      "--color-background": {
+        "value": "var(--background)",
+        "source": "src/app/globals.css"
+      },
+      "--color-foreground": {
+        "value": "var(--foreground)",
+        "source": "src/app/globals.css"
+      },
+      "--color-primary": {
+        "value": "var(--primary)",
+        "source": "src/app/globals.css"
+      },
+      "--color-border": {
+        "value": "var(--border)",
+        "source": "src/app/globals.css"
+      }
+    },
+    "typography": {
+      "--font-sans": {
+        "value": "\"Source Sans 3\", sans-serif",
+        "source": "src/app/globals.css"
+      },
+      "--font-display": {
+        "value": "\"Manrope Variable\", sans-serif",
+        "source": "src/app/globals.css"
+      },
+      "--font-serif": {
+        "value": "var(--font-display)",
+        "source": "src/app/globals.css"
+      }
+    },
+    "spacing": {},
+    "radius": {
+      "--radius": {
+        "value": "14px",
+        "source": "src/app/globals.css"
+      }
+    },
+    "shadows": {
+      "--elevation": {
+        "value": "0 12px 28px rgb(36 52 77 / 9%)",
+        "source": "src/app/globals.css"
+      }
+    },
+    "motion": {},
+    "density": "compact"
+  },
+  "components": {
+    "installed": [
+      "button"
+    ],
+    "preferredPrimitives": [
+      "radix-ui"
+    ],
+    "patterns": []
+  },
+  "constraints": {
+    "must": [
+      "Preserve Keşif Atlası navy, neutral paper, Manrope headings and Source Sans 3 controls.",
+      "Keep workspace surfaces flat and task focused.",
+      "Preserve ownership, feature flags, nullable scores and publication state semantics."
+    ],
+    "avoid": [
+      "New UI, chart, table, calendar or icon dependencies for this pilot.",
+      "Decorative paper textures in operational workspaces.",
+      "Hosted AI generation: this account has retrieval access only."
+    ]
+  },
+  "decisions": [
+    "2026-10-27: User approved five workspace packages in docs/21ST-WORKSPACE-IMPLEMENTATION-PLAN.md.",
+    "Use semantic report tables, mobile native disclosures and local ID-based selectors; 21st sources are pattern references, not copied code.",
+    "[Withdrawn by user 2026-10-27] 2026-10-27: User selected Canlı vitrin for the homepage: strong split heading, subject-controlled real game preview, subtle manual transitions, and existing search. Filtered views and /kesfet retain the compact catalogue. References: 21st Hero Carousel (crafterui/24752) and Editorial Collage Hero (felipemenezes098/19074); implemented locally without additional dependencies or hosted generation.",
+    "[Withdrawn by user 2026-10-27] 2026-10-27: User approved trying a four-piece puzzle subject selector and one-question demo inside the homepage showcase. Use native keyboard-accessible controls with original SVG puzzle geometry. Questions derive from the selected bundled demo, remain unscored, and open the full game after a correct answer. Published games without a sample keep the existing preview.",
+    "2026-10-27: User requested a more premium login. /giris uses a white compact form and navy manual game-cover showcase with the existing amber accent, fonts, radius and elevation; below 1024px only the form appears. Registration and auth logic retain existing behaviour. 21st Split Sign In Form (diarmuradi/39096) informed composition only; no copied source, new runtime dependency or hosted generation. See docs/LOGIN-SHOWCASE-DELIVERY.md.",
+    "2026-10-27: User rejected the homepage showcase and puzzle/sample experiment, and selected light motion. Restore the compact catalogue. On / only, reveal an amber underline once and add subject-coloured hover/focus halos, a 3px card lift and a small arrow movement. Respect reduced motion and touch; preserve the original brand mark. 21st Text Highlight (uiable/27942) and Hover Effect (serafimcloud/1071) are source-reviewed pattern references, locally adapted in CSS without motion dependencies or hosted generation.",
+    "2026-10-27: User requested the new login appearance on account creation too. /kayit now shares the white form and navy manual game showcase, with denser spacing for teacher/student forms. Keep registration fields, feature flags, tabs, drafts and validation unchanged.",
+    "2026-10-27: User removed the small decorative game thumbnails beside the homepage search. Catalogue introductions now contain only the heading and description at every size; the heading underline and game-card interactions remain.",
+    "2026-10-27: User selected Sağda tek grup for the header. Keep the logo left and group discovery, contribution and account navigation at the content container’s right edge. Anonymous contribution opens /ogretmenler-icin; creators get direct Oyun paylaş. Role-aware account disclosures reuse the central workspace policy; bookmarks remain public and browser-local. Sharing intent changes the common login copy without changing authentication. Use the existing UI primitives, with no new dependencies or hosted generation.",
+    "2026-10-27: User approved three catalogue refinements: a shared subject-coloured sliding navigation underline, brief successful bookmark feedback, and individually removable query/grade/subject chips. Retain native navigation links, saved collection context and search drafts; restore keyboard focus after chip removal. Adapted from 21st Animated Tabs (educalvolpz/24930), Bookmark Icon Button (ozantekin/1696) and Filter Badge (serafimcloud/519) without new packages. Respect reduced motion; do not animate on restored saved state or storage errors.",
+    "2026-10-27: When a subject is selected, underline only its name in the catalogue heading using the same subject token as the selected navigation tab. Reuse the homepage marker style and reduced-motion behaviour; keep “oyunları” unmarked.",
+    "2026-10-27: User approved all catalogue micro-touches from the detailed 21st research. Add Turkish-aware search marks, subject copy, context-preserving empty recovery, last-removal undo, real transition feedback, resilient covers, keyboard/hover save hints, / search focus, measured long-list return links and static catalogue loading placeholders. Preserve compact Keşif Atlası composition, native links, existing colours, reduced motion and browser-local saves. Adapt patterns locally without new dependencies or hosted AI; see docs/CATALOG-MICRO-TOUCHES-DELIVERY.md.",
+    "2026-10-27: User approved non-home refinements in docs/21ST-NONHOME-RESEARCH-2026-10-27.md. Keep the compact navy/neutral identity. Use a shorter pre-play mobile view, compact recovery surfaces, icon-and-text statuses, true request/clipboard feedback, top list ranges, active form sections, cover previews and version history. Preserve the active iframe, role/ownership rules, null scores, live-publication/new-draft distinction and homepage. Adapt the reviewed 21st patterns locally without new dependencies or hosted generation."
+  ],
+  "evidence": [
+    {
+      "fact": "components.installed",
+      "source": "src/components/ui"
+    },
+    {
+      "fact": "design.colorMode:light",
+      "source": "src/app/globals.css"
+    },
+    {
+      "fact": "design.tokens",
+      "source": "src/app/globals.css"
+    },
+    {
+      "fact": "project.instructions",
+      "source": "AGENTS.md"
+    },
+    {
+      "fact": "project.instructions",
+      "source": "DESIGN.md"
+    },
+    {
+      "fact": "project.instructions",
+      "source": "PRODUCT.md"
+    },
+    {
+      "fact": "project.stack:nextjs",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:react",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:shadcn",
+      "source": "components.json"
+    },
+    {
+      "fact": "project.stack:tailwind-v4",
+      "source": "package.json"
+    }
+  ],
+  "generatedAt": "2026-10-27T01:46:01.659Z"
+}

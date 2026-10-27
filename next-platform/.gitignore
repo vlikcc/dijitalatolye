@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.next*/
+.env*
+!.env.example
+.data/
+playwright-report/
+test-results/
+.impeccable/review/
+*.tsbuildinfo
+
+.next-learning*/

@@ -1,0 +1,608 @@
+{
+  "date": "2026-10-27",
+  "searches": [
+    {
+      "query": "search input matched text highlight results keyboard shortcut",
+      "results": [
+        {
+          "id": 38563,
+          "name": "Highlight Match",
+          "author": "klyv-ui",
+          "description": "A text component that wraps the parts matching a search query in a <mark> tag, ignoring case and accent differences, for use in search results, comboboxes and filterable lists.",
+          "url": "https://21st.dev/@klyv-ui/components/highlight-match",
+          "previewUrl": "https://cdn.21st.dev/user_registry_klyv-ui_1791308669867/highlight-match/default/preview.1792089000345.webp"
+        },
+        {
+          "id": 24899,
+          "name": "Search Input with Keyboard Shortcut",
+          "author": "shadcnspace",
+          "description": "A search input that displays a ⌘K / Ctrl+K keyboard shortcut badge in the input's end addon, with a Mac/Windows platform toggle.",
+          "url": "https://21st.dev/@shadcnspace/components/kbd-04",
+          "previewUrl": "https://cdn.21st.dev/user_38qAOtph5HovpSn2yjNYXjbTOm2/kbd-04/default/preview.1787744434148.png"
+        },
+        {
+          "id": 31184,
+          "name": "Morphing Search",
+          "author": "starc007",
+          "description": "A search input that morphs into a glass results panel with filtering, keyboard arrow navigation, and a keyboard shortcut to open it, usable as a full field or a compact icon trigger.",
+          "url": "https://21st.dev/@starc007/components/morphing-search",
+          "previewUrl": "https://cdn.21st.dev/user_3GMbzDOOqkmdobxoz8ep4iCuufg/morphing-search/default/preview.1790284926501.webp"
+        },
+        {
+          "id": 28888,
+          "name": "Command Search",
+          "author": "arihantcodes_1f7b8c4d",
+          "description": "A command palette input that types out sample queries and live-filters grouped results, with arrow-key navigation and an animated selection highlight.",
+          "url": "https://21st.dev/@arihantcodes_1f7b8c4d/components/command-search",
+          "previewUrl": "https://cdn.21st.dev/arihantcodes_1f7b8c4d/command-search/default/preview.1790017591136-eec4dafb-3e8f-4e54-9a64-6eefeb199138.png"
+        }
+      ]
+    },
+    {
+      "query": "loading button pending search spinner subtle",
+      "results": [
+        {
+          "id": 146,
+          "name": "Button",
+          "author": "originui",
+          "description": "Enhanced shadcn/ui button",
+          "url": "https://21st.dev/@originui/components/button",
+          "previewUrl": "https://cdn.21st.dev/user_originui/button/loading-button-1/preview.1786740824981.png"
+        },
+        {
+          "id": 29824,
+          "name": "Spinner Input Group",
+          "author": "sean0205",
+          "description": "A search input with a loading spinner shown inline inside the input group while results are being fetched.",
+          "url": "https://21st.dev/@sean0205/components/c-spinner-4",
+          "previewUrl": "https://cdn.21st.dev/sean0205/c-spinner-4/default/preview.1790124964041-20d81f7d-92b0-4f66-9069-ac199e42c518.png"
+        },
+        {
+          "id": 28660,
+          "name": "Loading Button",
+          "author": "coss.com",
+          "description": "A disabled button that shows a spinner icon and \"Loading...\" text to indicate an async action is in progress.",
+          "url": "https://21st.dev/@coss.com/components/loading-button-spinner",
+          "previewUrl": "https://cdn.21st.dev/user_cosscom/loading-button-spinner/default/preview.1789997719116.webp"
+        },
+        {
+          "id": 19975,
+          "name": "Button Spinner",
+          "author": "uiable",
+          "description": "A button in loading state with an animated circular spinner, for indicating progress during form submission or async actions.",
+          "url": "https://21st.dev/@uiable/components/uiable-spinner-button",
+          "previewUrl": "https://cdn.21st.dev/user_registry_uiable_1783486969177/uiable-spinner-button/default/preview.1784801593130.png"
+        }
+      ]
+    },
+    {
+      "query": "empty search results clear filters",
+      "results": [
+        {
+          "id": 29989,
+          "name": "Search Empty State",
+          "author": "arihantcodes_1f7b8c4d",
+          "description": "An animated no-search-results panel that echoes the typed query, offers alternate search suggestions, and reveals matching results when a suggestion is picked.",
+          "url": "https://21st.dev/@arihantcodes_1f7b8c4d/components/search-empty",
+          "previewUrl": "https://cdn.21st.dev/arihantcodes_1f7b8c4d/search-empty/default/preview.1790148257351-2facd849-340f-40b2-bbe7-1a5822d0ac4c.png"
+        },
+        {
+          "id": 4035,
+          "name": "Combobox",
+          "author": "shugar",
+          "description": "Filters large lists to selectable options based on the matching query.",
+          "url": "https://21st.dev/@shugar/components/combobox",
+          "previewUrl": "https://cdn.21st.dev/shugar/combobox/custom-empty-message/preview.1752568679204.png"
+        },
+        {
+          "id": 19750,
+          "name": "Empty",
+          "author": "cnippet-dev",
+          "description": "A composable empty-state block for when there's no data to show — no results, no events, an empty folder, cleared filters. Ships Empty plus EmptyHeader, EmptyMedia (with a stacked 'icon' variant), EmptyTitle, EmptyDescription and EmptyContent, so you can drop in an icon or illustration, a title, supporting copy and call-to-action buttons. Dependency-free (just cva + cn).",
+          "url": "https://21st.dev/@cnippet-dev/components/cnippet-empty",
+          "previewUrl": "https://cdn.21st.dev/larsen66/cnippet-empty/filters/preview.1784047727980.png"
+        },
+        {
+          "id": 29920,
+          "name": "Company Search Input Group",
+          "author": "sean0205",
+          "description": "A search input with an inline clear button and a region-selecting dropdown menu, for filtering a company/organization list by keyword and region.",
+          "url": "https://21st.dev/@sean0205/components/company-search-input-group",
+          "previewUrl": "https://cdn.21st.dev/sean0205/company-search-input-group/default/preview.1790139376808-efc1cbeb-9c4f-473d-8317-b8566d2e84a1.png"
+        }
+      ]
+    },
+    {
+      "query": "card skeleton loading placeholder minimal",
+      "results": [
+        {
+          "id": 19988,
+          "name": "Card Skeleton",
+          "author": "uiable",
+          "description": "A loading placeholder card with skeleton lines and a media block for content that is still fetching.",
+          "url": "https://21st.dev/@uiable/components/uiable-skeleton-card",
+          "previewUrl": "https://cdn.21st.dev/user_registry_uiable_1783486969177/uiable-skeleton-card/default/preview.1788194190818.png"
+        },
+        {
+          "id": 1588,
+          "name": "Skeleton",
+          "author": "shadcn",
+          "description": "Use to show a placeholder while content is loading.",
+          "url": "https://21st.dev/@shadcn/components/skeleton",
+          "previewUrl": "https://cdn.21st.dev/user_shadcn/skeleton/with-card/preview.png?v=1"
+        },
+        {
+          "id": 29863,
+          "name": "Shapes Skeleton",
+          "author": "ai2",
+          "description": "A set of decorative loading placeholders (circle, square, rounded square, pill, and bar) that pulse calmly while content loads, with sizes from sm to xl and reduced-motion support.",
+          "url": "https://21st.dev/@ai2/components/skeleton-shapes",
+          "previewUrl": "https://cdn.21st.dev/ai2/skeleton-shapes/default/preview.1790130146935-0f9eb2ba-dfe4-43c0-a233-d32d0c8386b0.png"
+        },
+        {
+          "id": 23557,
+          "name": "Skeleton Swap",
+          "author": "ddoemonn",
+          "description": "A loading placeholder that crossfades skeleton bars into real content with zero layout shift, holding a reserved box until data is ready.",
+          "url": "https://21st.dev/@ddoemonn/components/skeleton-swap",
+          "previewUrl": "https://cdn.21st.dev/user_2y2pjLtk7oS33zts6BqhEIOHrAj/skeleton-swap/default/preview.1786651222523.png"
+        }
+      ]
+    },
+    {
+      "query": "toast undo action bookmark notification",
+      "results": [
+        {
+          "id": 3977,
+          "name": "Toast",
+          "author": "shugar",
+          "description": "A succinct message that is displayed temporarily.",
+          "url": "https://21st.dev/@shugar/components/toast",
+          "previewUrl": "https://cdn.21st.dev/shugar/toast/undo/preview.1752230648566.png"
+        },
+        {
+          "id": 29941,
+          "name": "Undo Pill",
+          "author": "arihantcodes_1f7b8c4d",
+          "description": "An inline undo pill that shows a draining countdown ring after a delete action, pausing on hover/focus and firing undo or expire callbacks.",
+          "url": "https://21st.dev/@arihantcodes_1f7b8c4d/components/undo-pill",
+          "previewUrl": "https://cdn.21st.dev/arihantcodes_1f7b8c4d/undo-pill/default/preview.1790143764798-ea31f4cf-490f-4157-a694-33c5e6334179.png"
+        },
+        {
+          "id": 37539,
+          "name": "Undo Countdown Button",
+          "author": "dhxwhy",
+          "description": "Undo countdown button for React and Tailwind CSS (shadcn/ui) that turns into an \"Undo · 5s\" control with a shrinking countdown bar after a click and only commits the action when the window closes. It is built to make destructive or irreversible actions safe without a confirmation dialog, so people act first and can still change their mind. An undo button is a button that delays its side effect for a short window during which the user can cancel; this one runs the countdown with the Web Animations API, rewinds the bar when you click again or press Escape, shows a Restored flash, then a Done check with an accent color before returning to idle. Supports undoWindow and resetAfter timing, onStart, onCommit and onUndo callbacks, controlled state, default, destructive and outline variants, three sizes, keyboard activation, aria-live announcements, and reduced motion. Use it for delete, send, archive, publish, and payment actions in SaaS apps, email clients, and admin dashboards. The included demo scripts three sample actions; the component makes no requests. Requires React and lucide-react, with no animation library.",
+          "url": "https://21st.dev/@dhxwhy/components/undo-countdown-button",
+          "previewUrl": "https://cdn.21st.dev/user_35e5ygDqQuDYzujLgyG9331zPPO/undo-countdown-button/default/preview.1791809231388.webp"
+        },
+        {
+          "id": 35702,
+          "name": "Undo Feedback",
+          "author": "sltowl",
+          "description": "A dismissible \"item removed\" snackbar card with an Undo button that shows pending, restored and error states while an async restore action runs, ported from SL UI Library's vanilla-JS Matte Feedback kit (MIT, credit to original author SLtowl).",
+          "url": "https://21st.dev/@sltowl/components/matte-undo-feedback",
+          "previewUrl": "https://cdn.21st.dev/user_registry_sltowl_1790936520448/matte-undo-feedback/default/preview.1791204062490.webp"
+        }
+      ]
+    },
+    {
+      "query": "scroll back to top button minimal",
+      "results": [
+        {
+          "id": 1745,
+          "name": "Scroll Button",
+          "author": "ibelick",
+          "description": "A floating button component that appears when users scroll up in a container, allowing them to quickly return to the bottom of the content with a single click.",
+          "url": "https://21st.dev/@ibelick/components/scroll-button",
+          "previewUrl": "https://cdn.21st.dev/user_2rkgEMvkQ7I2oxalLXELCy8NObN/scroll-button/default/preview.png?v=1"
+        },
+        {
+          "id": 248,
+          "name": "Button",
+          "author": "originui",
+          "description": "Enhanced shadcn/ui button",
+          "url": "https://21st.dev/@originui/components/button",
+          "previewUrl": "https://cdn.21st.dev/user_originui/button/go-back-button/preview.1786741834388.png"
+        },
+        {
+          "id": 1697,
+          "name": "Back Button",
+          "author": "ozantekin",
+          "description": "A stylish animated button component that reveals an arrow icon on hover, perfect for navigation and going back to previous pages.",
+          "url": "https://21st.dev/@ozantekin/components/back-button",
+          "previewUrl": "https://cdn.21st.dev/user_2uBFUQQFefvDfuYzup60HJNvIkO/back-button/default/preview.1741970456308.png"
+        },
+        {
+          "id": 23298,
+          "name": "Great UI Minimal Buttons",
+          "author": "saurabh-2607",
+          "description": "A tactile, retro-modern button component featuring beveled top-border highlights, inner gradients, and inset shadow detailing.",
+          "url": "https://21st.dev/@saurabh-2607/components/great-ui-minimal-buttons-larsen66",
+          "previewUrl": "https://cdn.21st.dev/larsen66/great-ui-minimal-buttons/default/preview.1785391190028-9e0e391a-1235-49ee-96d3-fb7b771f142b.png"
+        }
+      ]
+    },
+    {
+      "query": "sticky filter toolbar scroll",
+      "results": [
+        {
+          "id": 35030,
+          "name": "Filter Toolbar",
+          "author": "kuratlielia",
+          "description": "An animated active-filter chip bar with remove/clear-all controls and an add-filter menu for stepping through fields and values, used to manage applied filters on a data table or collection view.",
+          "url": "https://21st.dev/@kuratlielia/components/filter-toolbar",
+          "previewUrl": "https://cdn.21st.dev/user_registry_kuratlielia_1790903117010/filter-toolbar/default/preview.1790980224079.webp"
+        },
+        {
+          "id": 26824,
+          "name": "Filter Token Bar",
+          "author": "laziekiki",
+          "description": "Linear-style composable filter tokens (field · operator · value) with roving-tabindex keyboard navigation, async option loading, multi/single select, hand-drawn assignee avatars, and light/dark support.",
+          "url": "https://21st.dev/@laziekiki/components/filter-token-bar",
+          "previewUrl": "https://cdn.21st.dev/user_3J39TADh2eUXcUqIKX6ozU6RE62/filter-token-bar/default/preview.1788943838301.webp"
+        },
+        {
+          "id": 27042,
+          "name": "Tile Scrollbar",
+          "author": "kedhareswer",
+          "description": "Custom 3D tile scrollbar and scroll progress indicator: the page is cut into equal slices on a tilted tray, passed tiles press flat and darken, and the current one stands proud and fills. Click a tile to jump or drag to scrub. Zero dependencies, no Tailwind, every rule scoped inline.",
+          "url": "https://21st.dev/@kedhareswer/components/tile-scrollbar",
+          "previewUrl": "https://cdn.21st.dev/user_30fkm37UoBFJx1GiK2Q4Sy8lSrO/tile-scrollbar/default/preview.1789375200697.png"
+        },
+        {
+          "id": 18775,
+          "name": "Canvas Zoom Toolbar",
+          "author": "cnippet-dev",
+          "description": "A compact canvas toolbar with light/dark theme toggle, zoom in/out controls with a live percentage readout, and a reset action, each with tooltips.",
+          "url": "https://21st.dev/@cnippet-dev/components/v-toolbar-8",
+          "previewUrl": "https://cdn.21st.dev/cnippet.dev/v-toolbar-8/default/preview.1784757264576-ae462dbe-1df9-4295-93c8-92ba6356bd41.png"
+        }
+      ]
+    },
+    {
+      "query": "image loading fade placeholder error fallback",
+      "results": [
+        {
+          "id": 23581,
+          "name": "Image Generation",
+          "author": "kvnkld",
+          "description": "An animated \"generating image\" placeholder that shows a shimmering label, a morphing glow inside a canvas, a prompt caption and a resolution badge while an AI image is being created.",
+          "url": "https://21st.dev/@kvnkld/components/image-generation",
+          "previewUrl": "https://cdn.21st.dev/user_registry_kvnkld_1785470431824/image-generation/default/preview.1787589199391.png"
+        },
+        {
+          "id": 7042,
+          "name": "Lazy Image",
+          "author": "efferd",
+          "description": "A lightweight lazy-loading image with a skeleton shimmer and smooth fade-in.\nSupports placeholders, in-view loading, and responsive aspect ratios out of the box.",
+          "url": "https://21st.dev/@efferd/components/lazy-image",
+          "previewUrl": "https://cdn.21st.dev/sshahaider/lazy-image/default/preview.1757258727373.png"
+        },
+        {
+          "id": 20030,
+          "name": "LQIP Image",
+          "author": "pulkitxm",
+          "description": "Image component with a Low Quality Image Placeholder (LQIP) that shows a blurred placeholder and fades into the full image once it loads.",
+          "url": "https://21st.dev/@pulkitxm/components/lqip-image",
+          "previewUrl": "https://cdn.21st.dev/pulkitxm/lqip-image/default/preview.1784664029910-c494bae9-10a8-44a3-a9b3-9db6d3b29874.png"
+        },
+        {
+          "id": 13803,
+          "name": "Avatar",
+          "author": "hero_ui",
+          "description": "Display user profile images with customizable fallback content.",
+          "url": "https://21st.dev/@hero_ui/components/heroui-avatar",
+          "previewUrl": "https://cdn.21st.dev/user_hero_ui/heroui-avatar/fallback/preview.1785852335833.png"
+        }
+      ]
+    },
+    {
+      "query": "back to top scroll progress button",
+      "results": [
+        {
+          "id": 28517,
+          "name": "Circular Scroll Progress",
+          "author": "reuno-ui",
+          "description": "A draggable floating button that shows page scroll progress as a circular progress ring with an animated percentage counter.",
+          "url": "https://21st.dev/@reuno-ui/components/skiper89",
+          "previewUrl": "https://cdn.21st.dev/reuno-ui/skiper89/default/preview.1789983544698-4a75e0c6-4b84-4dfb-8e86-9e6fec17ea9a.png"
+        },
+        {
+          "id": 1032,
+          "name": "Scroll Progress Bar",
+          "author": "bundui",
+          "description": "The Scroll Progress Bar component enhances user experience by providing a visually dynamic indicator as the user scrolls through the page. It visually informs users how much of the page has been scrolled, making it especially useful for longer content. Unlike static progress bars, this animated indicator offers a more modern and interactive experience. The scroll bar can be configured as a circular or linear bar and can be positioned in specific corners of the page, such as the bottom-right or top-left. Built using Framer Motion and Tailwind CSS, the Scroll Progress Bar ensures smooth transitions and an aesthetically pleasing design.",
+          "url": "https://21st.dev/@bundui/components/scroll-progress-bar",
+          "previewUrl": "https://cdn.21st.dev/user_bundui/scroll-progress-bar/1032/preview.png"
+        },
+        {
+          "id": 18715,
+          "name": "Scroll Progress",
+          "author": "cnippet-dev",
+          "description": "A spring-animated progress bar that tracks scroll position — works for the full page or a scrollable container element.",
+          "url": "https://21st.dev/@cnippet-dev/components/scroll-progress",
+          "previewUrl": "https://cdn.21st.dev/larsen66/scroll-progress/default/preview.1783607682461.png"
+        }
+      ]
+    },
+    {
+      "query": "tooltip icon button keyboard focus",
+      "results": [
+        {
+          "id": 240,
+          "name": "Button",
+          "author": "originui",
+          "description": "Enhanced shadcn/ui button",
+          "url": "https://21st.dev/@originui/components/button",
+          "previewUrl": "https://cdn.21st.dev/user_originui/button/button-with-highlighted-right-icon/preview.1786741468079.png"
+        },
+        {
+          "id": 34684,
+          "name": "Accessible Tooltip",
+          "author": "a11ypros",
+          "description": "A WCAG-compliant tooltip that shows contextual help text on hover or keyboard focus, with ARIA aria-describedby wiring, Escape-to-dismiss, hoverable persistence, and automatic edge-clamping. Ported from A11YPros' accessible a11y-tooltip web component (MIT licensed).",
+          "url": "https://21st.dev/@a11ypros/components/a11y-tooltip",
+          "previewUrl": "https://cdn.21st.dev/user_registry_a11ypros_1790790185577/a11y-tooltip/default/preview.1790889295364.webp"
+        },
+        {
+          "id": 35286,
+          "name": "Expand Button",
+          "author": "balick",
+          "description": "An icon button whose text label slides out and fades in on hover or keyboard focus, keeping the UI compact at rest.",
+          "url": "https://21st.dev/@balick/components/expand-button",
+          "previewUrl": "https://cdn.21st.dev/user_2zGyWJR6RbkMQVk7U0RzSiJhmyv/expand-button/default/preview.1791201446273.webp"
+        }
+      ]
+    },
+    {
+      "query": "button press feedback arrow subtle",
+      "results": [
+        {
+          "id": 143,
+          "name": "Button",
+          "author": "originui",
+          "description": "Enhanced shadcn/ui button",
+          "url": "https://21st.dev/@originui/components/button",
+          "previewUrl": "https://cdn.21st.dev/user_originui/button/button-with-arrow-down/preview.1786740769517.png"
+        },
+        {
+          "id": 29292,
+          "name": "Expanding Arrow Button",
+          "author": "starc007",
+          "description": "An accent call-to-action button whose lime tile expands into a trail of dotted arrows on hover or keyboard focus.",
+          "url": "https://21st.dev/@starc007/components/expanding-arrow-button",
+          "previewUrl": "https://cdn.21st.dev/starc007/expanding-arrow-button/default/preview.1790061845811-23b1926f-d08e-4235-bd7d-7c692f090389.png"
+        },
+        {
+          "id": 6591,
+          "name": "Sneaky Button",
+          "author": "nextjsshop",
+          "description": "A playful button with a sliding arrow animation that sneaks in from the side. Perfect for adding fun interactions to navigation, menus, or call-to-actions while keeping a clean and modern design.",
+          "url": "https://21st.dev/@nextjsshop/components/sneaky-button",
+          "previewUrl": "https://cdn.21st.dev/nextjsshop/sneaky-button/default/preview.1756717693248.png"
+        }
+      ]
+    },
+    {
+      "query": "empty saved collection bookmark",
+      "results": [
+        {
+          "id": 29990,
+          "name": "Saved Empty State",
+          "author": "arihantcodes_1f7b8c4d",
+          "description": "An empty saved-items panel that teaches the bookmark gesture by letting a reader save three real sample rows.",
+          "url": "https://21st.dev/@arihantcodes_1f7b8c4d/components/saved-empty",
+          "previewUrl": "https://cdn.21st.dev/arihantcodes_1f7b8c4d/saved-empty/default/preview.1790148271870-94e0ecc3-dcdd-49d5-a414-b2195f2bf146.png"
+        },
+        {
+          "id": 22218,
+          "name": "Bookmark Toggle List",
+          "author": "cnippet-dev",
+          "description": "A list of article rows where each row has a bookmark toggle button, with a live count of how many items are saved.",
+          "url": "https://21st.dev/@cnippet-dev/components/v-toggle-11",
+          "previewUrl": "https://cdn.21st.dev/cnippet.dev/v-toggle-11/default/preview.1785464949841-d69820e2-b53a-4391-bed7-a3a73338a10d.png"
+        },
+        {
+          "id": 1696,
+          "name": "Bookmark Icon Button",
+          "author": "ozantekin",
+          "description": "A toggle-able bookmark button with animated icon and counter effects, perfect for favoriting or bookmarking content.",
+          "url": "https://21st.dev/@ozantekin/components/bookmark-icon-button",
+          "previewUrl": "https://cdn.21st.dev/user_2uBFUQQFefvDfuYzup60HJNvIkO/bookmark-icon-button/default/preview.1741970396721.png"
+        }
+      ]
+    }
+  ],
+  "sourceAudits": [
+    {
+      "id": 38563,
+      "name": "Highlight Match",
+      "sourceLength": 4462,
+      "imports": [
+        "import type { ReactNode } from \"react\";",
+        "import { cn } from \"@/lib/utils\";"
+      ],
+      "registryFiles": [],
+      "registryNpmDependencies": {}
+    },
+    {
+      "id": 29824,
+      "name": "Spinner Input Group",
+      "sourceLength": 1199,
+      "imports": [
+        "import * as React from \"react\";",
+        "import { Input } from \"@/components/ui/input\";",
+        "import { cn } from \"@/lib/utils\";"
+      ],
+      "registryFiles": [
+        "/components/ui/input.tsx"
+      ],
+      "registryNpmDependencies": {}
+    },
+    {
+      "id": 19750,
+      "name": "Empty",
+      "sourceLength": 3546,
+      "imports": [
+        "import { cva, type VariantProps } from \"class-variance-authority\";",
+        "import type React from \"react\";",
+        "import { cn } from \"@/lib/utils\";"
+      ],
+      "registryFiles": [],
+      "registryNpmDependencies": {}
+    },
+    {
+      "id": 29989,
+      "name": "Search Empty State",
+      "sourceLength": 7998,
+      "imports": [
+        "import * as React from \"react\";",
+        "import { AnimatePresence, motion, useReducedMotion } from \"motion/react\";",
+        "import { cn } from \"@/lib/utils\";",
+        "import {\n  EmptyAction,\n  EmptyHint,\n  EmptyPanel,\n  EmptyState,\n  IconArrowRight,\n  IconDocument,\n  IconSearch,\n  SPRING_FLUID,\n  SPRING_SNAPPY,\n  usePropState,\n} from \"@/components/ui/search-empty-utils/empty-state-kit\";"
+      ],
+      "registryFiles": [
+        "/components/ui/button.tsx"
+      ],
+      "registryNpmDependencies": {
+        "@radix-ui/react-slot": "latest",
+        "class-variance-authority": "latest"
+      }
+    },
+    {
+      "id": 19988,
+      "name": "Card Skeleton",
+      "sourceLength": 648,
+      "imports": [
+        "import { Card, CardContent, CardHeader } from \"@/components/ui/card\";",
+        "import { Skeleton } from \"@/components/ui/skeleton\";"
+      ],
+      "registryFiles": [
+        "/components/ui/skeleton.tsx",
+        "/components/ui/card.tsx"
+      ],
+      "registryNpmDependencies": {}
+    },
+    {
+      "id": 29941,
+      "name": "Undo Pill",
+      "sourceLength": 11405,
+      "imports": [
+        "import React, { useCallback, useEffect, useRef, useState } from \"react\";",
+        "import {\n  AnimatePresence,\n  motion,\n  useMotionValue,\n  useReducedMotion,\n  type Variants,\n} from \"framer-motion\";",
+        "import { cn } from \"@/lib/utils\";"
+      ],
+      "registryFiles": [],
+      "registryNpmDependencies": {}
+    },
+    {
+      "id": 7042,
+      "name": "Lazy Image",
+      "sourceLength": 2264,
+      "imports": [
+        "import React from 'react';",
+        "import { cn } from '@/lib/utils';",
+        "import { useInView } from 'framer-motion';",
+        "import { AspectRatio } from '@/components/ui/aspect-ratio';"
+      ],
+      "registryFiles": [
+        "/components/ui/button.tsx",
+        "/components/ui/aspect-ratio.tsx"
+      ],
+      "registryNpmDependencies": {
+        "@radix-ui/react-slot": "latest",
+        "class-variance-authority": "latest",
+        "@radix-ui/react-aspect-ratio": "latest"
+      }
+    },
+    {
+      "id": 24899,
+      "name": "Search Input with Keyboard Shortcut",
+      "sourceLength": 1331,
+      "imports": [
+        "import { useState } from \"react\";",
+        "import { SearchIcon } from \"lucide-react\";",
+        "import {\n  InputGroup,\n  InputGroupAddon,\n  InputGroupInput,\n} from \"@/components/ui/input-group\";",
+        "import { Kbd, KbdGroup } from \"@/components/ui/kbd\";",
+        "import { Switch } from \"@/components/ui/switch\";"
+      ],
+      "registryFiles": [
+        "/components/ui/button.tsx",
+        "/components/ui/checkbox.tsx",
+        "/components/ui/dropdown-menu.tsx",
+        "/components/ui/input.tsx",
+        "/components/ui/label.tsx",
+        "/components/ui/switch.tsx",
+        "/components/ui/textarea.tsx",
+        "/components/ui/tooltip.tsx",
+        "/components/ui/popover.tsx",
+        "/components/ui/separator.tsx",
+        "/components/ui/button-group.tsx",
+        "/components/ui/input-group.tsx",
+        "/components/ui/kbd.tsx"
+      ],
+      "registryNpmDependencies": {
+        "@radix-ui/react-slot": "latest",
+        "class-variance-authority": "latest",
+        "lucide-react": "latest",
+        "@radix-ui/react-checkbox": "latest",
+        "@radix-ui/react-dropdown-menu": "latest",
+        "@radix-ui/react-label": "latest",
+        "@radix-ui/react-switch": "latest",
+        "@radix-ui/react-tooltip": "latest",
+        "@radix-ui/react-popover": "latest",
+        "@radix-ui/react-separator": "latest"
+      }
+    },
+    {
+      "id": 35702,
+      "name": "Undo Feedback",
+      "sourceLength": 5051,
+      "imports": [
+        "import * as React from \"react\";"
+      ],
+      "registryFiles": [],
+      "registryNpmDependencies": {}
+    },
+    {
+      "id": 37539,
+      "name": "Undo Countdown Button",
+      "sourceLength": 6832,
+      "imports": [
+        "import * as React from \"react\";",
+        "import { Check, RotateCcw } from \"lucide-react\";"
+      ],
+      "registryFiles": [],
+      "registryNpmDependencies": {}
+    },
+    {
+      "id": 34684,
+      "name": "Accessible Tooltip",
+      "sourceLength": 12972,
+      "imports": [
+        "import React from \"react\";"
+      ],
+      "registryFiles": [],
+      "registryNpmDependencies": {}
+    },
+    {
+      "id": 29990,
+      "name": "Saved Empty State",
+      "sourceLength": 7306,
+      "imports": [
+        "import * as React from \"react\";",
+        "import { AnimatePresence, motion, useReducedMotion } from \"motion/react\";",
+        "import { cn } from \"@/lib/utils\";",
+        "import {\n  EmptyAction,\n  EmptyPanel,\n  EmptyState,\n  IconArrowRight,\n  IconBookmark,\n  IconDocument,\n  SPRING_ENTRANCE,\n  SPRING_SNAPPY,\n  VIEWPORT,\n  EASE_OUT,\n} from \"@/components/ui/saved-empty-utils/empty-state-kit\";"
+      ],
+      "registryFiles": [
+        "/components/ui/button.tsx"
+      ],
+      "registryNpmDependencies": {
+        "@radix-ui/react-slot": "latest",
+        "class-variance-authority": "latest"
+      }
+    }
+  ]
+}

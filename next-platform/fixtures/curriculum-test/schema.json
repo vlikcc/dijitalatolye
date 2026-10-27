@@ -1,0 +1,1414 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dijitalatolye.local/schemas/meb-curriculum/1.0.0/schema.json",
+  "title": "DijitalAtölye official MEB curriculum extraction collections",
+  "description": "System IDs are internal, not official MEB codes. null means unknown/not reviewed and is explained in issues.json. Empty arrays mean inspected and absent. Array-of-grade groups are not duplicated into individual outcomes.",
+  "$defs": {
+    "sourceRef": {
+      "type": "object",
+      "properties": {
+        "sourceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pdfPage": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "printedPage": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "section": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "anchor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "bbox": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        }
+      },
+      "required": [
+        "sourceId",
+        "pdfPage",
+        "printedPage",
+        "section",
+        "anchor"
+      ],
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "publisher": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "documentType": {
+          "enum": [
+            "curriculum_pdf",
+            "directory_html",
+            "program_detail_html",
+            "board_decision_pdf",
+            "implementation_pdf",
+            "official_web_page",
+            "other"
+          ]
+        },
+        "publicationDate": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retrievedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "accessStatus": {
+          "enum": [
+            "downloaded",
+            "read_via_web",
+            "inaccessible",
+            "not_attempted"
+          ]
+        },
+        "pageCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "localPath": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "byteSize": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "finalUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "url",
+        "publisher",
+        "documentType",
+        "publicationDate",
+        "retrievedAt",
+        "sha256",
+        "accessStatus"
+      ],
+      "additionalProperties": false
+    },
+    "program": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "officialName": {
+          "type": "string"
+        },
+        "subjectName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "curriculumFamily": {
+          "enum": [
+            "tymm",
+            "previous"
+          ]
+        },
+        "versionLabel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "approvalDate": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "approvalNumber": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "schoolTypes": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "grades": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "sourceIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "catalogueId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "catalogueSection": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gradeScopeText": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gradeScopeSourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "schoolTypeSourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "courseType": {
+          "enum": [
+            "compulsory",
+            "elective",
+            "mixed",
+            null
+          ]
+        },
+        "excludedReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extractionStatus": {
+          "enum": [
+            "complete",
+            "partial",
+            "inaccessible",
+            "not_applicable",
+            "pending"
+          ]
+        },
+        "approvalSourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "officialName",
+        "subjectName",
+        "curriculumFamily",
+        "versionLabel",
+        "approvalDate",
+        "approvalNumber",
+        "schoolTypes",
+        "grades",
+        "sourceIds"
+      ],
+      "additionalProperties": false
+    },
+    "note": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "kind": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "label": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "text",
+        "sourceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "unit": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "programId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "grades": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "parentId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "theme",
+            "unit",
+            "learning_area",
+            "sub_learning_area",
+            "module",
+            "level",
+            "other"
+          ]
+        },
+        "officialCode": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "order": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "officialKeywords": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "sourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "keywordSourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "sourceLabel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/note"
+          }
+        },
+        "reviewFlags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "programId",
+        "grades",
+        "parentId",
+        "kind",
+        "officialCode",
+        "title",
+        "order",
+        "officialKeywords",
+        "sourceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "processComponent": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      },
+      "required": [
+        "label",
+        "text",
+        "order",
+        "sourceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "unitVariant": {
+      "type": "object",
+      "properties": {
+        "unitId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "processComponents": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/processComponent"
+          }
+        },
+        "notes": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/note"
+          }
+        },
+        "sourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      },
+      "required": [
+        "unitId",
+        "text",
+        "processComponents",
+        "notes",
+        "sourceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "outcome": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "programId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "grades": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "unitId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "learning_outcome",
+            "attainment"
+          ]
+        },
+        "officialCode": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "order": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "processComponents": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/processComponent"
+          }
+        },
+        "notes": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/note"
+          }
+        },
+        "sourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "verificationStatus": {
+          "enum": [
+            "verified",
+            "needs_review"
+          ]
+        },
+        "normalizedCode": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "normalizedText": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewFlags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "textSourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "gradeSourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "sourceCodeVariants": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "extractionMethod": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "relatedUnitIds": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "unitMappingSourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "textVariants": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/note"
+          }
+        },
+        "unitVariants": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/unitVariant"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "programId",
+        "grades",
+        "unitId",
+        "kind",
+        "officialCode",
+        "text",
+        "order",
+        "processComponents",
+        "notes",
+        "sourceRefs",
+        "verificationStatus"
+      ],
+      "additionalProperties": false
+    },
+    "applicability": {
+      "type": "object",
+      "properties": {
+        "programId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "academicYear": {
+          "const": "2026–2027"
+        },
+        "grades": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "schoolTypes": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "status": {
+          "enum": [
+            "in_force",
+            "published_not_yet_in_force",
+            "unknown"
+          ]
+        },
+        "scheduleStatus": {
+          "enum": [
+            "in_force",
+            "published_not_yet_in_force",
+            "unknown"
+          ]
+        },
+        "scopeResolved": {
+          "type": "boolean"
+        },
+        "scopeResolutionIssues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "reason": {
+          "type": "string"
+        },
+        "basis": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "isInference": {
+          "type": "boolean"
+        },
+        "conditions": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "populationScope": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lifecycleStatus": {
+          "enum": [
+            "superseded",
+            "current",
+            "historical",
+            null
+          ]
+        },
+        "supersededByProgramId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "programId",
+        "academicYear",
+        "grades",
+        "schoolTypes",
+        "status",
+        "sourceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "programId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subjectName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "variant": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "grades": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "schoolTypes": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "scopeType": {
+          "enum": [
+            "grade",
+            "grade_group",
+            "document_unresolved",
+            "excluded"
+          ]
+        },
+        "status": {
+          "enum": [
+            "complete",
+            "partial",
+            "inaccessible",
+            "not_applicable"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "outcomeCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "verifiedOutcomeCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "processComponentCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "expectedOutcomeCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "sourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "outputFiles": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "contextualProcessComponentCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "processCountExplanation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "programId",
+        "subjectName",
+        "variant",
+        "grades",
+        "schoolTypes",
+        "scopeType",
+        "status",
+        "reason",
+        "outcomeCount",
+        "processComponentCount",
+        "sourceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "issue": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "error"
+          ]
+        },
+        "code": {
+          "type": "string"
+        },
+        "entityType": {
+          "type": "string"
+        },
+        "entityIds": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "fields": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "reason": {
+          "type": "string"
+        },
+        "sourceRefs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "nextAction": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "severity",
+        "code",
+        "entityType",
+        "entityIds",
+        "fields",
+        "reason",
+        "sourceRefs",
+        "nextAction"
+      ],
+      "additionalProperties": false
+    },
+    "sourcesDocument": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "collection": {
+          "const": "sources"
+        },
+        "generatedAt": {
+          "type": "string"
+        },
+        "programId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scopeGrades": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "collection",
+        "generatedAt",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "programsDocument": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "collection": {
+          "const": "programs"
+        },
+        "generatedAt": {
+          "type": "string"
+        },
+        "programId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scopeGrades": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/program"
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "collection",
+        "generatedAt",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "unitsDocument": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "collection": {
+          "const": "units"
+        },
+        "generatedAt": {
+          "type": "string"
+        },
+        "programId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scopeGrades": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/unit"
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "collection",
+        "generatedAt",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "outcomesDocument": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "collection": {
+          "const": "outcomes"
+        },
+        "generatedAt": {
+          "type": "string"
+        },
+        "programId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scopeGrades": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcome"
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "collection",
+        "generatedAt",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "applicabilityDocument": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "collection": {
+          "const": "applicability"
+        },
+        "generatedAt": {
+          "type": "string"
+        },
+        "programId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scopeGrades": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/applicability"
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "collection",
+        "generatedAt",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "coverageDocument": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "collection": {
+          "const": "coverage"
+        },
+        "generatedAt": {
+          "type": "string"
+        },
+        "programId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scopeGrades": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/coverage"
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "collection",
+        "generatedAt",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "issuesDocument": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "collection": {
+          "const": "issues"
+        },
+        "generatedAt": {
+          "type": "string"
+        },
+        "programId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scopeGrades": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/issue"
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "collection",
+        "generatedAt",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/sourcesDocument"
+    },
+    {
+      "$ref": "#/$defs/programsDocument"
+    },
+    {
+      "$ref": "#/$defs/unitsDocument"
+    },
+    {
+      "$ref": "#/$defs/outcomesDocument"
+    },
+    {
+      "$ref": "#/$defs/applicabilityDocument"
+    },
+    {
+      "$ref": "#/$defs/coverageDocument"
+    },
+    {
+      "$ref": "#/$defs/issuesDocument"
+    }
+  ]
+}

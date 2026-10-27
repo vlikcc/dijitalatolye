@@ -1,0 +1,26 @@
+name: dijital-next-dev
+services:
+  postgres:
+    image: postgres:17.9-bookworm
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: local-only
+      POSTGRES_DB: dijital
+    ports: ["127.0.0.1:55432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d dijital"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  clamav:
+    image: clamav/clamav:1.4.3
+    platform: linux/amd64
+    ports: ["127.0.0.1:53310:3310"]
+    volumes: [clamdb:/var/lib/clamav]
+  mailpit:
+    image: axllent/mailpit:v1.29.2
+    ports: ["127.0.0.1:51025:1025", "127.0.0.1:58025:8025"]
+volumes:
+  pgdata:
+  clamdb:

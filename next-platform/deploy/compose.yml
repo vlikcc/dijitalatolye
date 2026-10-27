@@ -1,0 +1,118 @@
+name: dijital-next
+x-env: &env
+  NODE_ENV: production
+  APP_URL: ${APP_URL:?APP_URL required}
+  DATABASE_URL: postgresql://app:${POSTGRES_PASSWORD:?password required}@postgres:5432/dijital
+  BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?secret required}
+  PREVIEW_SECRET: ${PREVIEW_SECRET:?secret required}
+  INTERNAL_SECRET: ${INTERNAL_SECRET:?secret required}
+  GAME_BASE_DOMAIN: ${GAME_BASE_DOMAIN:?game domain required}
+  GAME_PROTOCOL: https
+  DATA_DIR: /data
+  CLAMAV_HOST: clamav
+  CLAMAV_PORT: "3310"
+  YARA_RULES: /app/deploy/security.yar
+  SMTP_HOST: ${SMTP_HOST:?SMTP host required}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_SECURE: ${SMTP_SECURE:-false}
+  SMTP_USER: ${SMTP_USER:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  STUDENT_LEARNING_ENABLED: ${STUDENT_LEARNING_ENABLED:-false}
+  DEMO_CATALOG_ENABLED: ${DEMO_CATALOG_ENABLED:-false}
+  MAIL_FROM: ${MAIL_FROM:?sender required}
+services:
+  postgres:
+    image: postgres:17.9-bookworm
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?password required}
+      POSTGRES_DB: dijital
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d dijital"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  migrate:
+    image: ${WORKER_IMAGE:?commit-tagged worker image required}
+    environment: *env
+    command: ["pnpm", "db:migrate"]
+    volumes: [thumbnails:/data/thumbnails, cover_inputs:/data/cover-inputs]
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+  web:
+    image: ${WEB_IMAGE:?commit-tagged web image required}
+    environment: *env
+    expose: ["3000"]
+    volumes: [quarantine:/data/quarantine, thumbnails:/data/thumbnails, cover_inputs:/data/cover-inputs, curriculum_sources:/data/curriculum-sources]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          'fetch("http://127.0.0.1:3000/api/health").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))',
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+  worker:
+    image: ${WORKER_IMAGE:?worker image required}
+    environment: *env
+    volumes:
+      [
+        quarantine:/data/quarantine,
+        ready:/data/ready,
+        published:/data/published,
+        work:/data/work,
+        thumbnails:/data/thumbnails,
+        cover_inputs:/data/cover-inputs,
+      ]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      clamav: { condition: service_started }
+    healthcheck:
+      test: ['CMD','node','-e',"const fs=require('fs');process.exit(Date.now()-Number(fs.readFileSync('/tmp/dijital-worker-heartbeat','utf8'))<45000?0:1)"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    stop_grace_period: 45s
+    restart: unless-stopped
+    mem_limit: 1g
+    cpus: 1.0
+  clamav:
+    image: clamav/clamav:1.4.3
+    platform: linux/amd64
+    volumes: [clamdb:/var/lib/clamav]
+    restart: unless-stopped
+    mem_limit: 2g
+  games:
+    image: nginx:1.28.3-alpine
+    environment:
+      APP_URL: ${APP_URL}
+      GAME_BASE_DOMAIN_REGEX: ${GAME_BASE_DOMAIN_REGEX:?escaped game domain required}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      WEB_UPSTREAM: web:3000
+      NGINX_ENVSUBST_FILTER: "^(APP_URL|GAME_BASE_DOMAIN_REGEX|INTERNAL_SECRET|WEB_UPSTREAM)$$"
+    volumes:
+      - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ready:/games/ready:ro
+      - published:/games/published:ro
+    expose: ["8080"]
+    depends_on: [web]
+    restart: unless-stopped
+volumes:
+  pgdata:
+  quarantine:
+  thumbnails:
+  cover_inputs:
+  ready:
+  published:
+  work:
+  clamdb:
+  curriculum_sources:

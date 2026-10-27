@@ -1,0 +1,146 @@
+{
+  "schemaVersion": "1.0.0",
+  "collection": "units",
+  "generatedAt": "2026-10-26T00:00:00Z",
+  "items": [
+    {
+      "id": "unit-66338b459d013410d06fcdb7",
+      "programId": "program-mufredat-2024",
+      "grades": [
+        5
+      ],
+      "parentId": null,
+      "kind": "theme",
+      "officialCode": null,
+      "title": "BİLİŞİM TEKNOLOJİLERİNİN HAYATIMIZDAKİ YERİ",
+      "order": 1,
+      "officialKeywords": [
+        "bilgi",
+        "bilgi ve iletişim teknolojileri",
+        "bilgisayar sistemleri",
+        "bilişim teknolojileri",
+        "bulut bilişim",
+        "çıkış birimi",
+        "depolama birimi",
+        "dijital ayak izi",
+        "dijital bağımlılık",
+        "dijital etik",
+        "dijital kimlik",
+        "dijital vatandaşlık",
+        "doğal zekâ",
+        "donanım",
+        "dosya",
+        "dosya yönetimi",
+        "dosya uzantısı",
+        "ergonomi",
+        "ekran süresi",
+        "giriş birimi",
+        "iletişim",
+        "işletim sistemi",
+        "klasör",
+        "klasör yapısı",
+        "sosyal medya",
+        "teknoloji bağımlılığı",
+        "veri sıkıştırma",
+        "yapay zekâ",
+        "yapay zekâ tarihi",
+        "yazılım"
+      ],
+      "sourceRefs": [
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 15,
+          "printedPage": "15",
+          "section": "5. SINIF / 1. TEMA",
+          "anchor": null
+        }
+      ],
+      "sourceLabel": "1. TEMA",
+      "keywordSourceRefs": [
+        {
+          "sourceId": "source-ab68b04857b89189",
+          "pdfPage": 17,
+          "printedPage": "17",
+          "section": "5. SINIF / 1. TEMA / Anahtar Kavramlar",
+          "anchor": null
+        }
+      ],
+      "notes": [
+        {
+          "kind": "theme_context",
+          "text": "“Bilişim Teknolojilerinin Hayatımızdaki Yeri” teması kapsamında öğrencilerin günlük yaşamda kullanılan bilişim teknolojilerini sınıflandırılabilmesi, bilişim teknolojilerinin etkilerini özetleyebilmesi, dijital vatandaşlık uygulamalarını sınıflandırabilmesi, yapay zekâya ilişkin temel kavramları ve özellikleri sorgulayabilmesi, bilgisayar sistemlerini çözümleyebilmesi, dosya ve klasör yönetimi ile ilgili temel işlemlerle çalışabilmesi amaçlanmaktadır. Bunun yanı sıra bilişim teknolojilerinin temellerini oluşturan kavramlar ve uygulamalar arasında ilişkiler kurularak bir bütün oluşturulması amaçlanmaktadır. DERS SAATİ 14 ALAN BECERİLERİ BTYAB1. Bilişim Teknolojileri Kullanma KAVRAMSAL BECERİLER KB2.3. Özetleme, KB2.4. Çözümleme, KB2.8. Sorgulama EĞİLİMLER E1.1. Merak, E1.2. Bağımsızlık, E2.1. Empati, E2.2. Sorumluluk, E2.5. Oyunseverlik, E3.5. Açık Fikirlilik, E3.7. Sistematiklik, E3.8. Soru Sorma, E3.10. Eleştirel Bakma PROGRAMLAR ARASI BİLEŞENLER Sosyal-Duygusal Öğrenme Becerileri SDB1.1. Kendini Tanıma (Öz Farkındalık), SDB1.2. Kendini Düzenleme (Öz Düzenleme), SDB2.1. İletişim, SDB2.2. İş Birliği, SDB2.3. Sosyal Farkındalık, SDB3.1. Uyum, SDB3.3. Sorumlu Karar Verme Değerler D3. Çalışkanlık, D4. Dostluk, D6. Dürüstlük, D8. Mahremiyet , D10. Mütevazılık, D12. Sabır, D13. Sağlıklı Yaşam, D14. Saygı, D15. Sevgi, D16. Sorumluluk, D17. Tasarruf Okuryazarlık Becerileri OB1. Bilgi Okuryazarlığı, OB2. Dijital Okuryazarlık, OB4. Görsel Okuryazarlık DİSİPLİNLER ARASI - İLİŞKİLER BECERİLER ARASI İLİŞKİLER KB2.7. Karşılaştırma, KB2.8. Sorgulama ÖĞRENME ÇIKTILARI VE",
+          "sourceRefs": [
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 15,
+              "printedPage": "15",
+              "section": "5. SINIF / 1. TEMA / theme_context",
+              "anchor": null
+            },
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 16,
+              "printedPage": "16",
+              "section": "5. SINIF / 1. TEMA / theme_context",
+              "anchor": null
+            }
+          ]
+        },
+        {
+          "kind": "content_framework",
+          "text": "İÇERİK ÇERÇEVESİ Bilişim Teknolojilerinin Sınıflandırılması Bilişim Teknolojilerinin Etkileri ve Dijital Sağlık Dijital Vatandaşlık Uygulamaları Yapay Zekâda Temel Kavram ve Özellikler Bilgisayar Sistemlerinin Kullanımı Dosya ve Klasör Yönetimi",
+          "sourceRefs": [
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 17,
+              "printedPage": "17",
+              "section": "5. SINIF / 1. TEMA / content_framework",
+              "anchor": null
+            }
+          ]
+        },
+        {
+          "kind": "shared_teaching_guidance",
+          "text": "ÖĞRENME KANITLARI Bu temadaki öğrenme çıktıları; dereceli puanlama anahtarı, gözlem formu, Frayer mo(Ölçme ve deli, Web 2.0 araçları/e-içerikler ve performans görevi ile değerlendirilebilir. Değerlendirme) Performans görevi olarak öğrenciler bilişim teknolojilerinin günlük yaşama etkileri, dijital vatandaşlık, yapay zekâ, bilgisayar sistemleri ve dosya yönetimi konularında sunum, poster veya etkileşimli etkinlik hazırlayabilir. Performans görevleri; içerik doğruluğu, kavramsal anlama, sunum becerileri ve araç kullanımı ölçütlerine göre değerlendirilebilir. ÖĞRENME-ÖĞRETME YAŞANTILARI Temel Kabuller Öğrencilerin temel dijital araçlarla (bilgisayar, tablet vb.) daha önce karşılaştığı ve bu araçların temel kullanımına yönelik deneyimlerinin olduğu kabul edilmektedir. Ön Değerlendirme Beyin fırtınası tekniğiyle öğrencilerin bilişim teknolojilerine ilişkin mevcut bilgi düzeyleri Süreci ve ön öğrenmeleri belirlenerek konuya yönelik bilgileri değerlendirilebilir. Köprü Kurma Günlük yaşamda kullanılan ve iletişimi, etkileşimi kolaylaştıran bilişim teknolojilerinin bulunduğu açıklanarak ders içeriği ile ilişki kurulabilir. Vatandaşlık kavramının tanımı ve temel özellikleri ile dijital vatandaşlık uygulamaları (sağlık, eğitim vb.) arasında anlamlı ilişkiler kurulabilir. Öğrencilerin günlük hayatta karşılaştıkları yapay zekâ uygulamaları (örneğin sesli asistanlar, çevrim içi film veya müzik öneri sistemleri, yüz tanıma uygulamaları) ile derste işlenecek kavramlar arasında köprü kurulabilir. Öğretmen, yapay zekânın yalnızca günlük hayatta değil, ülkemiz için önemli alanlar olan tarım ve turizmde de kullanıldığını vurgular. Örneğin yapay zekâ ile hava tahminlerine dayalı ekim planlaması yapılabileceğini, turistlerin ilgilerine göre dijital rehberlik hizmeti verilebileceğini açıklar. Günlük yaşamdaki fiziksel kontrollerle veri girişi yapılabilen araçlarla (para çekme makinesi, pos cihazı vb.) bilgisayar donanımının kullanımı arasında ilişki kurulabilir. Fiziksel ortamdaki dosya düzenleme ve klasörleme (raf düzenleme vb.) işlemleri ile dijital ortamda dosya ve klasör işlemleri arasında ilişki kurulabilir. Öğrenme-Öğretme Uygulamaları",
+          "sourceRefs": [
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 17,
+              "printedPage": "17",
+              "section": "5. SINIF / 1. TEMA / shared_teaching_guidance",
+              "anchor": null
+            },
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 18,
+              "printedPage": "18",
+              "section": "5. SINIF / 1. TEMA / shared_teaching_guidance",
+              "anchor": null
+            }
+          ]
+        },
+        {
+          "kind": "differentiation",
+          "text": "FARKLILAŞTIRMA Zenginleştirme Öğrencilerden, “bilgi” kavramını merkeze alarak günlük yaşamda karşılaştıkları teknolojik bilgileri (internet aramaları, uygulama önerileri, öğretmen anlatımı vb.) karşılaştırmaları istenebilir. Böylece öğrenciler, teknolojik bilgileri temel bilgi kavramıyla ilişkilendirerek bu bilgileri içselleştirebilir. Öğrencilerin aile büyükleriyle röportaj yaparak geçmişte kullanılan bilişim teknolojilerini araştırmaları ve bu bilgileri sınıfta arkadaşlarıyla paylaşmaları istenir. Öğrenciler, geçmişten günümüze bilişim teknolojilerini araştırarak bir zaman çizelgesi oluşturabilir. Bu çalışmada öğrencilerden teknolojinin gelişimi, benzerlikleri ve farklılıkları hakkında bilgi toplamaları istenebilir. Bilişim teknolojilerinin günlük yaşamda nasıl kullanıldığına dair belgesel veya video gösterimi yapılabilir. Öğrencilerin izlediklerini tartışmaları için bir alan oluşturulabilir. Öğrenciler, belirli bir bilişim teknolojisi (bulut bilişim, yapay zekâ vb.) ile ilgili bir sanal gezi yapabilirler. Gezi sonrası öğrendiklerini bir sunum şeklinde paylaşarak teknolojinin geçmişten günümüze gelişimini ve etkilerini tartışarak elde ettikleri bulguları rapor hâlinde paylaşır. Öğrenciler, bilgisayar sistemlerinin bileşenlerini donanım ve yazılım olarak sınıflandırmak için bir eşleştirme etkinliği yapabilirler. Heterojen gruplara ayrılan öğrenciler, belirlenen bileşenler hakkında araştırma yaparak bunların görevlerini ve birbirleriyle nasıl etkileşimde bulunduklarını açıklar. Her grup, kendi bileşenine dair örnekler sunarak sınıfta tartışma ortamı oluşturabilir. Öğrenciler bilişim teknolojilerinin beden ve ruh sağlığı üzerindeki etkilerini araştıran bir rapor hazırlayabilir. Bu raporun olumlu ve olumsuz yönleri tartışılarak sonuçları sınıfla paylaşılabilir. Öğrencilere dijital kimlik ve güvenli internet konularını içeren bilgi yarışması düzenlenebilir. Öğrencilerden dijital kimlik ve güvenlik konularını ele alan bir podcast bölümü ya da kısa video hazırlamaları istenebilir. Öğrencilerden grup hâlinde dijital ayak izi, dijital vatandaşlık uygulamaları konulu bir poster hazırlamaları istenebilir. Öğrenciler, güvenli internet kullanımı için bir kılavuz hazırlayabilir. Bu kılavuzda dijital vatandaşlık uygulamalarının etkileri ve kuralları yer alabilir. Öğrencilerden, yapay zekânın farklı alanlardaki kullanımına örnekler araştırmaları istenir. Örneğin tarımda ürün hastalıklarının tespit edilmesi, sulama sistemlerinin verimli yönetilmesi; turizmde ise turistlere rehberlik eden akıllı uygulamalar, dijital müze gezileri, kişiselleştirilmiş tatil önerileri gibi uygulamalar sınıf ortamında paylaşılır. Bu etkinlik, öğrencilerin yapay zekânın ülkemiz için stratejik alanlarda nasıl kullanılabileceğini keşfetmelerini sağlar. Destekleme Öğrencilerin bilişim teknolojilerine dair temel kavramları anlamalarına yardımcı olmak için kavram haritaları oluşturma etkinliği düzenlenebilir. Bu haritalar, öğrencilerin anahtar kavramları ve ilişkilerini görsel olarak anlamalarına yardımcı olacaktır. Öğrencilerden bilişim teknolojilerinin farklı dönemlere ait araçlarını temsil eden kartları kullanarak bir zaman çizelgesi oluşturmaları istenebilir. Dijital vatandaşlıkla ilgili uygulamaları temsil eden resimler, kartlar kullanarak (sosyal medya, online alışveriş, çevrim içi bankacılık, eğitim platformları vb.) bir sınıflandırma panosu oluşturmaları istenebilir. Yapay zekâya ilişkin temel kavramlar ve yapay zekânın kullanım alanlarıyla ilgili anahtar kelimeler kullanılarak bir bulmaca oluşturulabilir. Öğrencilerden bulmacayı çözerken temel kavramları ve kullanım alanlarını açıklamaları istenebilir. Öğrencilerin dijital dünyada karşılaşılabilecek olası tehlikeler ve bu tehlikelere karşı alınacak önlemlerle ilgili bir senaryo verilerek bu senaryoyu canlandırmaları istenebilir. Öğrencilere bilgisayarın temel parçalarını gösteren bir görsel verilerek öğrencilerden bu görseldeki her bir bilgisayar parçasını doğru şekilde eşleştirmeleri istenebilir. ÖĞRETMEN YANSITMALARI Programa yönelik görüş ve önerileriniz için karekodu akıllı cihazınıza okutunuz.",
+          "sourceRefs": [
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 26,
+              "printedPage": "26",
+              "section": "5. SINIF / 1. TEMA / differentiation",
+              "anchor": null
+            },
+            {
+              "sourceId": "source-ab68b04857b89189",
+              "pdfPage": 27,
+              "printedPage": "27",
+              "section": "5. SINIF / 1. TEMA / differentiation",
+              "anchor": null
+            }
+          ]
+        }
+      ],
+      "reviewFlags": []
+    }
+  ]
+}

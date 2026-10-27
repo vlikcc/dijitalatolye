@@ -1,0 +1,12 @@
+{
+  "prompt": "Sourced texture, not generated. ambientCG Paper001 flat Color map: Paper001_1K-JPG_Color.jpg, https://ambientcg.com/view?id=Paper001 . Author ambientCG / Lennart Demes. CC0-1.0: https://docs.ambientcg.com/license/ . Encoded as WebP quality 92. CSS desaturates, normalizes fine fibres and composites at 5 percent opacity.",
+  "createdAt": "2026-10-26T22:21:45.107Z",
+  "source": "https://ambientcg.com/view?id=Paper001",
+  "sourceFile": "Paper001_1K-JPG_Color.jpg",
+  "download": "https://ambientcg.com/get?file=Paper001_1K-JPG.zip",
+  "author": "ambientCG / Lennart Demes",
+  "license": "CC0-1.0",
+  "licenseUrl": "https://docs.ambientcg.com/license/",
+  "processing": "Original flat colour map encoded as WebP quality 92, no generative edits. CSS desaturates / boosts fine fibre contrast and composites at 5% opacity.",
+  "generated": false
+}
